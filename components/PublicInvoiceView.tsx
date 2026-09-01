@@ -89,10 +89,24 @@ const PublicInvoiceView: React.FC<{ invoiceId: string }> = ({ invoiceId }) => {
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await fetch(`/api/invoices/${invoiceId}`);
-        if (!response.ok) throw new Error('Invoice not found');
-        const data = await response.json();
-        setInvoice(data);
+        const response = await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}`).catch(() => null);
+        if (response && response.ok) {
+          const data = await response.json();
+          setInvoice(data);
+          return;
+        }
+        
+        // Fallback to local storage
+        const local = localStorage.getItem('kh_dream_invoices');
+        if (local) {
+          const list = JSON.parse(local);
+          const found = list.find((i: any) => String(i.id) === String(invoiceId) || String(i.invoiceNumber) === String(invoiceId));
+          if (found) {
+            setInvoice(found);
+            return;
+          }
+        }
+        throw new Error('Invoice not found');
       } catch (err: any) {
         setError(err.message);
       } finally {
