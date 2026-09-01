@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import rawCmsData from '../data/cms_data.json';
+
+export const APP_CACHE_VERSION = "2026.09.01.v9";
 
 export type UserRole = 'Admin' | 'Manager' | 'Staff';
 
@@ -986,9 +989,9 @@ export const DEFAULT_DATA: CMSData = {
     footerOverlayColor: "rgba(9, 9, 11, 0.9)",
     footerCtaTitle: "Ready to explore the Kingdom? Let's plan your journey together.",
     footerCtaButtonText: "Get a Free Consultation",
-    themeColor: "#2563eb",
-    secondaryColor: "#111827",
-    accentColor: "#3b82f6",
+    themeColor: (rawCmsData as any).general?.themeColor || "#f00000",
+    secondaryColor: (rawCmsData as any).general?.secondaryColor || "#111827",
+    accentColor: (rawCmsData as any).general?.accentColor || "#EF4444",
     serviceBarColor: "rgba(255, 255, 255, 0.8)",
     shadowColor: "rgba(0, 0, 0, 0.1)",
     heroTitleLastWordColor: "linear-gradient(to right, #34d399, #14b8a6, #34d399)",
@@ -1800,16 +1803,24 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const [data, setData] = useState<CMSData>(() => {
-    // Check localStorage cache first for instantaneous first paint
+    // Check localStorage cache first, auto-refresh if code version changed
     try {
-      const local = typeof window !== 'undefined' ? localStorage.getItem('kh_dream_cms_v6') : null;
-      if (local) {
-        return healData(JSON.parse(local));
+      if (typeof window !== 'undefined') {
+        const cachedVer = localStorage.getItem('kh_dream_cms_cache_ver');
+        const local = localStorage.getItem('kh_dream_cms_v6');
+        if (cachedVer === APP_CACHE_VERSION && local) {
+          return healData(JSON.parse(local));
+        } else {
+          // Version updated: seamlessly load the latest fresh defaults
+          localStorage.setItem('kh_dream_cms_cache_ver', APP_CACHE_VERSION);
+          localStorage.setItem('kh_dream_cms_v6', JSON.stringify(DEFAULT_DATA));
+          return healData(DEFAULT_DATA);
+        }
       }
     } catch (e) {
       console.warn("CMSContext: Error reading initial local cache", e);
     }
-    return DEFAULT_DATA;
+    return healData(DEFAULT_DATA);
   });
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoaded, setIsLoaded] = useState(true);
@@ -2132,6 +2143,14 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       
       if (!response.ok) {
+        if (response.status === 404) {
+          // Static host (e.g. GitHub Pages): save locally
+          localStorage.setItem('kh_dream_cms_v6', JSON.stringify(dataToSave));
+          localStorage.setItem('kh_dream_cms_cache_ver', APP_CACHE_VERSION);
+          setData(dataToSave);
+          return true;
+        }
+
         let errorMessage = `Server responded with ${response.status}`;
         let errorData: any = {};
         
@@ -2165,6 +2184,7 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       
       localStorage.setItem('kh_dream_cms_v6', JSON.stringify(dataToSave));
+      localStorage.setItem('kh_dream_cms_cache_ver', APP_CACHE_VERSION);
       if (currentUser) {
         const updatedUser = dataToSave.users.find(u => u.id === currentUser?.id);
         if (updatedUser) handleSetCurrentUser(updatedUser);

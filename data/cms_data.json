@@ -4,7 +4,6 @@
     "whatsappHotels": "966537681618",
     "whatsappVisas": "966537681618",
     "whatsappBusiness": "966537681618",
-    "whatsappGreeting": "Hello! Welcome to KH Dream Travels & Tourism. How can we help you plan your journey?",
     "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
     "notificationSoundUrl": "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
     "notificationSoundEnabled": false,
@@ -13,6 +12,7 @@
     "twitter": "khdreamservices",
     "linkedin": "khdreamservices",
     "tiktok": "khdreamservices",
+    "youtube": "khdreamservices",
     "heroVideo": "https://rr5---sn-4g5lzned.googlevideo.com/videoplayback?expire=1777760107&ei=CyP2adG6Areq8uMPnOKfeA&ip=105.111.47.247&id=o-ACRh3z3Ktr_kFvcMNYqtVjwajpctLMrtfhOhsF2PtvyE&itag=136&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=294&bui=AbKmrwoHZdkISFRiv19yIWrosXrtgI9PcNa7Vzkdyuyl9lFgUSLtXIkG2PxQqz_Yjt07Pm9uXOJ_Qjbu&vprv=1&svpuc=1&mime=video%2Fmp4&rqh=1&gir=yes&clen=20245976&dur=85.880&lmt=1727424174213792&keepalive=yes&fexp=51565115,51565681&c=ANDROID_VR&txp=6209224&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cmime%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AHEqNM4wRQIgYswStSF1ES53CDrJaiktNVIgF18ONexhcWmaUEzY_h8CIQDxvax8Lo5BbPMkkIKsO9IqfeLJQwkgH6nmJpdDcRtpYA%3D%3D&rm=sn-5abxgpxuxaxjvh-caws7s,sn-4g5eyd7z&rrc=79,104,191&req_id=7c958f41b4cca3ee&rms=rdu,au&ipbypass=yes&redirect_counter=3&cm2rm=sn-25gks7z&cms_redirect=yes&cmsv=e&met=1777739823,&mh=1f&mip=2001:16a2:c092:9517:e1e3:989a:d5f2:95e&mm=34&mn=sn-4g5lzned&ms=ltu&mt=1777739559&mv=m&mvi=5&pl=48&lsparams=cps,ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRQIhAI9fj6RCsBSJ2rT99rqYb3f5fdH2wZ-Qh3ixqXcFx-NvAiBq9i3VeElqK7wEJ1GOH46uRmRIOrvfhxrBcgQk48lBnA%3D%3D",
     "heroVideoOverlayColor": "#020617",
     "heroVideoOverlayOpacity": 85,
@@ -37,6 +37,8 @@
     "blogViewAllText": "View all stories",
     "newsletterButtonText": "Subscribe",
     "heroBadgeText": "17 Years of Excellence",
+    "iqamaButtonText": "Iqama Inquiry",
+    "iqamaButtonLink": "/iqama-inquiry",
     "sectionTitles": {
       "packages": {
         "title": "Our Premium Packages",
@@ -176,7 +178,12 @@
       "advancedSeo": ""
     },
     "fontFamily": "Poppins",
+    "englishFontFamily": "Inter",
+    "arabicFontFamily": "Cairo",
+    "banglaFontFamily": "Hind Siliguri",
     "customFontUrl": "",
+    "customFontBase64": "",
+    "customLanguageName": "",
     "youtubeIds": [
       "ScMzIvxBSi4"
     ],
@@ -192,6 +199,17 @@
     "footerPartnerLogos": [
       "https://i.ibb.co/v6mY9X9/Vision-2030-Logo.png",
       "https://i.ibb.co/X0pY9X9/Invest-Saudi.png"
+    ],
+    "footerPartnersTitle": "Licensed By",
+    "promoSliderDuration": 60,
+    "scrollingPartners": [
+      {
+        "id": "1777135113359",
+        "name": "",
+        "type": "",
+        "color": "text-slate-900 dark:text-white",
+        "logoUrl": "https://i.ibb.co/v6mY9X9/Vision-2030-Logo.png"
+      }
     ],
     "footerPopups": {
       "about": "KH Dream Services Limited is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors. Our mission is to bridge the gap between global ambitions and local opportunities.",
@@ -216,8 +234,53 @@
       "subject": "Welcome to KH Dream Services Limited - Your Account Details",
       "body": "<h1>Welcome to KH Dream Services Limited</h1><p>Hello {fullName},</p><p>Your account has been created. Here are your login details:</p><p><strong>Username:</strong> {username}</p><p><strong>Password:</strong> {password}</p><p>You can log in at: {loginUrl}</p><p>Best regards,<br/>KH Dream Services Limited Team</p>"
     },
+    "loginOtpEmailTemplate": {
+      "subject": "[KH Dream] Login Verification Code",
+      "body": "<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #f1f5f9; border-radius: 16px; background: #ffffff; color: #1e293b;\">\n  <div style=\"text-align: center; margin-bottom: 30px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px;\">\n    <h2 style=\"color: #c99c33; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;\">KH Dream</h2>\n    <p style=\"color: #64748b; font-size: 13px; margin: 5px 0 0 0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;\">One-Time Security Verification Gate</p>\n  </div>\n  <p style=\"font-size: 14px; line-height: 1.6; color: #334155; text-align: center;\">\n    A login request was initiated for your administrator account on the KH Dream Travels & Tourism system.\n  </p>\n  <div style=\"background: #f8fafc; border: 1px dashed #e2e8f0; border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;\">\n    <p style=\"font-size: 13px; color: #475569; margin: 0 0 15px 0; font-weight: 600;\">\n      Enter this 6-digit OTP code to authorize logon (Expires in 5 mins):\n    </p>\n    <div style=\"display: inline-block; background: #ffffff; border: 2px solid #c99c33; color: #0f172a; font-size: 30px; font-weight: 900; letter-spacing: 0.18em; padding: 12px 30px; border-radius: 12px; font-family: monospace; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);\">\n      {otpCode}\n    </div>\n  </div>\n  <p style=\"font-size: 12px; line-height: 1.6; color: #64748b; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 20px; margin-top: 25px;\">\n    This notification was dispatched for email: {email} (IP: {ip}).\n    <br/>\n    If you did not request this OTP clearance, please ignore this email and update your password immediately.\n  </p>\n</div>"
+    },
+    "forgotPasswordEmailTemplate": {
+      "subject": "Secure Password Reset - KH Dream Services",
+      "body": "<div style=\"font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #f1f5f9; border-radius: 16px; background: #ffffff; color: #1e293b;\">\n  <div style=\"text-align: center; margin-bottom: 30px; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px;\">\n    <h2 style=\"color: #DC2626; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;\">KH Dream</h2>\n    <p style=\"color: #64748b; font-size: 13px; margin: 5px 0 0 0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;\">Secure Password Reset</p>\n  </div>\n  <p>Hello <strong>{fullName}</strong>,</p>\n  <p>A password reset was requested for your account on the KH Dream Services Admin Panel.</p>\n  <div style=\"text-align: center; margin: 40px 0;\">\n    <a href=\"{resetUrl}\" style=\"background: #DC2626; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);\">RESET PASSWORD</a>\n  </div>\n  <p style=\"color: #666; font-size: 14px;\">This secure link will expire in 1 hour for your protection.</p>\n  <p style=\"color: #666; font-size: 14px;\">If the button above doesn't work, copy and paste this URL into your browser:</p>\n  <p style=\"word-break: break-all; color: #DC2626; font-size: 12px; background: #f9f9f9; padding: 10px; border-radius: 4px;\">{resetUrl}</p>\n  <div style=\"margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;\">\n    <p style=\"margin: 0; font-size: 13px;\"><strong>Username:</strong> {username}</p>\n    <p style=\"margin: 5px 0 0 0; font-size: 11px; color: #999;\">Security Protocol: Token-Based Authentication</p>\n  </div>\n</div>"
+    },
+    "broadcastEmailTemplate": {
+      "subject": "Important Announcement - KH Dream",
+      "body": "<div style=\"font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; color: #333;\">\n  <div style=\"background: #1e3a8a; padding: 25px; text-align: center; border-radius: 12px 12px 0 0;\">\n    <h1 style=\"color: white; margin: 0; font-size: 24px; font-family: 'Helvetica Neue', Arial; font-weight: bold;\">Dream Services Announcement</h1>\n  </div>\n  <div style=\"padding: 30px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; min-height: 200px; line-height: 1.6;\">\n    {broadcastContent}\n  </div>\n  <div style=\"background: #fafafa; padding: 20px; text-align: center; border-radius: 0 0 12px 12px; font-size: 11px; border-top: 1px solid #f3f4f6;\">\n    <p style=\"margin: 0; color: #9ca3af;\">KH Dream Travels & Tourism, Saudi Arabia.</p>\n  </div>\n</div>"
+    },
+    "officesBgImageUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+    "officesIconUrl": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
     "bgUrl": "",
     "footerBgColor": "#09090b",
+    "companyName": "KH Dream Services Limited",
+    "phone": "+966 053 768 1618",
+    "email": "info@khdreamservices.com",
+    "siteName": "KH Dream Services",
+    "sectionBackgrounds": {
+      "services": {
+        "type": "image",
+        "color": "transparent",
+        "image": ""
+      },
+      "destinations": {
+        "type": "image",
+        "color": "transparent",
+        "image": "",
+        "imageOpacity": 0.21,
+        "patternOpacity": 0.22,
+        "enabledLayers": [
+          "image",
+          "pattern",
+          "color"
+        ],
+        "pattern": "none"
+      }
+    },
+    "security": {
+      "maintenanceMode": false,
+      "allowedIPs": [],
+      "twoFactorRequired": false,
+      "passwordPolicy": "strong"
+    },
+    "whatsappGreeting": "Hello! Welcome to KH Dream Travels & Tourism. How can we help you plan your journey?",
     "whatsappFlights": "966537681618",
     "features": [
       {
@@ -240,46 +303,14 @@
         "description": "We welcome time flexibility of traveling for our customer.",
         "iconName": "RefreshCcw"
       }
-    ],
-    "companyName": "KH Dream Services Limited",
-    "phone": "+966 053 768 1618",
-    "email": "info@khdreamservices.com",
-    "siteName": "KH Dream Services",
-    "security": {
-      "maintenanceMode": false,
-      "allowedIPs": [],
-      "twoFactorRequired": false,
-      "passwordPolicy": "strong"
-    },
-    "sectionBackgrounds": {
-      "services": {
-        "type": "image",
-        "color": "transparent",
-        "image": ""
-      },
-      "destinations": {
-        "type": "image",
-        "color": "transparent",
-        "image": "",
-        "imageOpacity": 0.21,
-        "patternOpacity": 0.22,
-        "enabledLayers": [
-          "image",
-          "pattern",
-          "color"
-        ],
-        "pattern": "none"
-      }
-    },
-    "scrollingPartners": [
-      {
-        "id": "1777135113359",
-        "name": "",
-        "type": "",
-        "color": "text-slate-900 dark:text-white",
-        "logoUrl": "https://i.ibb.co/v6mY9X9/Vision-2030-Logo.png"
-      }
     ]
+  },
+  "locationSettings": {
+    "backgroundLogoUrl": "https://png.pngtree.com/png-vector/20250322/ourmid/pngtree-location-icon-3d-png-image_15851928.png",
+    "backgroundLogoOpacity": 1,
+    "backgroundLogoSize": 280,
+    "backgroundLogoTop": 40,
+    "backgroundLogoRight": 40
   },
   "footer": {
     "aboutText": "KH Dream Services Limited is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors.",
@@ -412,7 +443,7 @@
       "id": "1",
       "name": "KH Dream Services",
       "arabicName": "كي اتش دريم للخدمات",
-      "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+      "logoUrl": "/uploads/1788282542740-453338856.png",
       "address": "King Fahd Road, Al Olaya District, Riyadh, KSA",
       "vatId": "300000000000003",
       "invoicePrefix": "KHD",
@@ -465,7 +496,7 @@
         "landing-pages",
         "navbar"
       ],
-      "password": "$2b$10$nwEYwk9RUVu8oAEcDzaEvOHH9mWGknRIrtbgRyblKag.yxtlxCeSu"
+      "password": "$2b$10$.uzNce75NqZIkZyWI5n0XOJbjmJO1KvFodhOl2Qrr2kzB68lQfVoa"
     },
     {
       "id": "user-admin",
@@ -565,6 +596,15 @@
   "subdomainRedirects": [],
   "subscribers": [],
   "newsletterSubscribers": [],
+  "couponSettings": {
+    "code": "DREAMTOUR10",
+    "amount": "100",
+    "type": "fixed",
+    "active": true,
+    "minimumSpend": "500",
+    "expiryDays": 30
+  },
+  "claimedCoupons": [],
   "reviews": [
     {
       "id": "1",
@@ -588,19 +628,105 @@
       "date": "3 weeks ago"
     }
   ],
+  "faqs": [
+    {
+      "id": "1",
+      "question": "What services do you offer?",
+      "answer": "We offer a wide range of services including visa assistance, global hotel bookings, and business setup consultancy."
+    },
+    {
+      "id": "2",
+      "question": "How can I contact support?",
+      "answer": "You can contact us via WhatsApp, email, or through our contact form on the website."
+    }
+  ],
+  "messages": [
+    {
+      "id": "welcome-msg",
+      "senderId": "system",
+      "senderName": "Dream Studio",
+      "recipientId": "admin",
+      "subject": "Welcome to the Internal Mail System",
+      "content": "Welcome to your new internal messaging system. You can communicate with other staff members and administrators securely here without using any 3rd party services.",
+      "timestamp": "2026-09-01T17:07:33.311Z",
+      "read": false,
+      "type": "internal"
+    }
+  ],
+  "features": {
+    "sectionTitle": "Why Choose Us",
+    "sectionSubtitle": "We provide specialized solutions for global mobility and business expansion.",
+    "items": [
+      {
+        "iconName": "Smile",
+        "title": "Customer Delight",
+        "description": "We deliver the best service and experience for our customer."
+      },
+      {
+        "iconName": "Mountain",
+        "title": "Authentic Adventure",
+        "description": "We deliver the real adventure experience for our customer."
+      },
+      {
+        "iconName": "Flag",
+        "title": "Expert Guides",
+        "description": "We deliver only expert tour guides for our customer."
+      },
+      {
+        "iconName": "RefreshCcw",
+        "title": "Time Flexibility",
+        "description": "We welcome time flexibility of traveling for our customer."
+      }
+    ]
+  },
   "branding": {
     "elevatingTitle": "Elevating Your Global Ambitions",
-    "elevatingSubtitle": "We don't just provide services; we craft pathways for your success in Saudi Arabia and beyond. From seamless travel to complex business setups."
+    "elevatingSubtitle": "We don't just provide services; we craft pathways for your success in Saudi Arabia and beyond. From seamless travel to complex business setups.",
+    "elevatingTitleSize": "text-2xl md:text-5xl",
+    "elevatingSubtitleSize": "text-sm md:text-lg",
+    "elevatingFeatures": [
+      {
+        "icon": "ShieldCheck",
+        "title": "Secure Process",
+        "desc": "Enterprise-grade data protection for all your documents."
+      },
+      {
+        "icon": "Clock",
+        "title": "Rapid Execution",
+        "desc": "Optimized workflows ensuring the fastest turnaround times."
+      },
+      {
+        "icon": "Zap",
+        "title": "Expert Guidance",
+        "desc": "Direct access to seasoned consultants and legal experts."
+      },
+      {
+        "icon": "Globe",
+        "title": "Global Reach",
+        "desc": "Extensive network covering over 50+ countries worldwide."
+      }
+    ]
   },
   "stats": {
     "successfulVisas": "15,000+",
     "businessSetups": "2,500+",
     "globalPartners": "120+",
-    "globalReach": "45+"
+    "globalReach": "45+",
+    "successfulVisasLabel": "Successful Visas",
+    "successfulVisasDesc": "Enterprise-grade data protection for all your documents.",
+    "businessSetupsLabel": "Business Setups",
+    "businessSetupsDesc": "Optimized workflows ensuring the fastest turnaround times.",
+    "globalPartnersLabel": "Global Partners",
+    "globalPartnersDesc": "Direct access to seasoned consultants and legal experts.",
+    "globalReachLabel": "Global Reach",
+    "globalReachDesc": "Extensive network covering over 50+ countries worldwide."
   },
   "successStories": {
     "youtubePlaylistId": "PLuD6-F_996_L_pI_v9_p_p_p_p_p_p_p",
     "youtubePlaylistUrl": "https://www.youtube.com/playlist?list=PLuD6-F_996_L_pI_v9_p_p_p_p_p_p_p",
+    "videoUrls": [
+      "https://www.youtube.com/watch?v=ScMzIvxBSi4"
+    ],
     "milestones": [
       {
         "id": "1",
@@ -842,6 +968,7 @@
       }
     }
   ],
+  "customPopups": [],
   "floatingCardItems": [
     {
       "id": "1",
@@ -906,75 +1033,27 @@
   ],
   "homeBlocks": [],
   "homeSections": [],
-  "visibility": {
-    "hero": true,
-    "search": true,
-    "services": true,
-    "destinations": true,
-    "blog": true,
-    "successStories": true,
-    "reviews": true,
-    "offices": true,
-    "whyChooseUs": true,
-    "stats": true,
-    "team": true,
-    "partners": true,
-    "homeBlocks": true,
-    "footer": true,
-    "promoSlider": true,
-    "whySaudiArabia": true
-  },
-  "homeSettings": {},
-  "identifiedUser": {
-    "id": "1",
-    "username": "admin",
-    "fullName": "System Administrator",
-    "email": "admin@khdreamservices.com",
-    "role": "Admin",
-    "profilePic": "",
-    "permissions": [
-      "wall",
-      "invoices",
-      "sadad-invoices",
-      "catalogue",
-      "reviews",
-      "promo",
-      "hero",
-      "service-cards",
-      "subscribers",
-      "general",
-      "services",
-      "footer-popups",
-      "team",
-      "users",
-      "landing-pages",
-      "navbar"
-    ]
-  },
-  "locationSettings": {
-    "backgroundLogoUrl": "https://png.pngtree.com/png-vector/20250322/ourmid/pngtree-location-icon-3d-png-image_15851928.png",
-    "backgroundLogoOpacity": 1,
-    "backgroundLogoSize": 280,
-    "backgroundLogoTop": 40,
-    "backgroundLogoRight": 40
-  },
-  "faqs": [
-    {
-      "id": "1",
-      "question": "What services do you offer?",
-      "answer": "We offer a wide range of services including visa assistance, global hotel bookings, and business setup consultancy."
-    },
-    {
-      "id": "2",
-      "question": "How can I contact support?",
-      "answer": "You can contact us via WhatsApp, email, or through our contact form on the website."
-    }
+  "homeSectionsOrder": [
+    "search",
+    "stats",
+    "services",
+    "destinations",
+    "whySaudiArabia",
+    "blog",
+    "successStories",
+    "features",
+    "reviews",
+    "team",
+    "partners"
   ],
   "whySaudiArabia": {
+    "badge": "The Future is Here",
     "title": "Why <span class=\"text-primary\">Saudi Arabia?</span>",
     "description": "Saudi Arabia is rapidly emerging as the premier destination for business, thanks to its strategic initiatives and forward-thinking reforms. The Kingdom's Vision 2030 plan is transforming the economic landscape, fostering a business-friendly environment with reduced bureaucratic hurdles and enhanced infrastructure. With a strategic location at the crossroads of major international trade routes, Saudi Arabia offers unparalleled access to global markets. Additionally, the country's robust economy, rich natural resources, and commitment to innovation make it a magnet for investment. The introduction of 100% foreign ownership policies further enhances its appeal, providing unprecedented opportunities for international entrepreneurs to thrive. Choose Saudi Arabia for its dynamic market, strategic advantages, and progressive economic vision.",
+    "extraDescription": "Under Vision 2030, the Kingdom is opening its doors to the world, offering unprecedented opportunities for investors, entrepreneurs, and explorers alike.",
     "mainImageUrl": "https://images.unsplash.com/photo-1549413247-49594e9f75a6?auto=format&fit=crop&q=80&w=2000",
     "secondaryImageUrl": "https://images.unsplash.com/photo-1586724230021-4c3d3967bc94?auto=format&fit=crop&q=80&w=1200",
+    "tertiaryImageUrl": "https://images.unsplash.com/photo-1623869032733-1456170ce046?auto=format&fit=crop&q=80&w=800",
     "features": [
       {
         "id": "1",
@@ -1012,7 +1091,49 @@
         "description": "Recent changes in investment laws allow for 100% foreign ownership in various sectors, giving businesses full control over their operations.",
         "icon": "Flag"
       }
+    ],
+    "stats": [
+      {
+        "id": "1",
+        "label": "Economic Growth",
+        "value": "7.6",
+        "suffix": "%"
+      },
+      {
+        "id": "2",
+        "label": "Investment Projects",
+        "value": "450",
+        "suffix": "+"
+      },
+      {
+        "id": "3",
+        "label": "New Hubs",
+        "value": "12",
+        "suffix": ""
+      }
     ]
+  },
+  "visibility": {
+    "hero": true,
+    "search": true,
+    "services": true,
+    "destinations": true,
+    "blog": true,
+    "successStories": true,
+    "reviews": true,
+    "offices": true,
+    "whyChooseUs": true,
+    "whySaudiArabia": true,
+    "stats": true,
+    "team": true,
+    "partners": true,
+    "homeBlocks": true,
+    "footer": true,
+    "promoSlider": true,
+    "iqamaButton": true,
+    "serviceVisa": true,
+    "serviceHotel": true,
+    "serviceBusiness": true
   },
   "businessServices": [
     {
@@ -1042,5 +1163,378 @@
       "sortOrder": 3,
       "subcategories": []
     }
-  ]
+  ],
+  "bioHub": {
+    "companyName": "KH Dream Services",
+    "tagline": "Your Gateway to Saudi Arabia & Luxury Travel Solutions",
+    "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+    "coverUrl": "https://images.unsplash.com/photo-1540959733332-eab4deceeaf7?auto=format&fit=crop&w=1200",
+    "primaryColor": "#3b82f6",
+    "secondaryColor": "#1e293b",
+    "backgroundColor": "linear-gradient(to bottom, #0f172a, #1e293b, #0f172a)",
+    "textColor": "#f8fafc",
+    "glassEffect": true,
+    "whatsappNumber": "966537681618",
+    "phoneNumber": "966537681618",
+    "emailAddress": "info@khdreamservices.com",
+    "googleMapsEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3622.756778401344!2d46.6713214!3d24.7135893!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f131!3m3!1m2!1s0x3e2f0389de70e705%3A0x67dbad959550ca25!2sOlaya%20District%2C%20Riyadh%20Saudi%20Arabia!5e0!3m2!1sen!2s!4v1700000000000",
+    "businessHours": "9:00 AM - 6:00 PM (Sat - Thu)",
+    "bgOpacity": 50,
+    "cardThemeMode": "dark",
+    "cardOpacity": 50,
+    "cardBlur": 12,
+    "alertShow": true,
+    "alertTitle": "Emergency Alert Desk",
+    "alertContent": "Hotlines are fully operational 24/7 for immediate visa issues, passport logistics, or emergency travel & flight modifications. Contact the branch emergency desks below.",
+    "alertColor": "red",
+    "seo": {
+      "metaTitle": "KH Dream Services - Link-in-Bio & Business Hub",
+      "metaDescription": "Contact, locations, price list, FAQs, and social media connectivity for KH Dream Services.",
+      "ogImage": "https://i.ibb.co/pjjqSnRF/Logo-23D.png"
+    },
+    "socials": [
+      {
+        "id": "s1",
+        "platform": "Facebook",
+        "label": "Official Facebook Page",
+        "url": "https://facebook.com/khdreamservices",
+        "iconName": "Facebook",
+        "enabled": true,
+        "order": 0
+      },
+      {
+        "id": "s2",
+        "platform": "Instagram",
+        "label": "Exclusive Instashots",
+        "url": "https://instagram.com/khdreamservices",
+        "iconName": "Instagram",
+        "enabled": true,
+        "order": 1
+      },
+      {
+        "id": "s3",
+        "platform": "TikTok",
+        "label": "Watch Vlog on TikTok",
+        "url": "https://tiktok.com/@khdreamservices",
+        "iconName": "Video",
+        "enabled": true,
+        "order": 2
+      },
+      {
+        "id": "s4",
+        "platform": "WhatsApp",
+        "label": "Direct Support WhatsApp",
+        "url": "https://wa.me/966537681618",
+        "iconName": "MessageCircle",
+        "enabled": true,
+        "order": 3
+      },
+      {
+        "id": "s5",
+        "platform": "YouTube",
+        "label": "Subscribe YouTube Channel",
+        "url": "https://youtube.com",
+        "iconName": "Youtube",
+        "enabled": true,
+        "order": 4
+      }
+    ],
+    "branches": [
+      {
+        "id": "b1",
+        "name": "Riyadh Head Office",
+        "manager": "Kazi Shofi",
+        "phone": "966537681618",
+        "whatsapp": "966537681618",
+        "email": "riyadh@khdreamservices.com",
+        "address": "Olaya District, King Fahd Road, Riyadh, Saudi Arabia",
+        "locationUrl": "https://maps.google.com/?q=Olaya,Riyadh,Saudi+Arabia",
+        "workingHours": "9:00 AM - 6:00 PM (Sat - Thu)",
+        "imageUrl": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=600",
+        "views": 42
+      },
+      {
+        "id": "b2",
+        "name": "Dhaka Executive Office",
+        "manager": "Hasan Ahmed",
+        "phone": "8801700000000",
+        "whatsapp": "8801700000001",
+        "email": "dhaka@khdreamservices.com",
+        "address": "Gulshan-2, Dhaka, Bangladesh",
+        "locationUrl": "https://maps.google.com/?q=Gulshan-2,Dhaka,Bangladesh",
+        "workingHours": "10:00 AM - 7:00 PM (Sun - Thu)",
+        "imageUrl": "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&w=600",
+        "views": 24
+      }
+    ],
+    "services": [
+      {
+        "id": "srv1",
+        "name": "Saudi Business Setup Consultancy",
+        "description": "End-to-end commercial trade licensing, office setup, & sponsorship clearance inside the Kingdom of Saudi Arabia.",
+        "price": "Starting $2,500",
+        "category": "Corporate",
+        "featured": true,
+        "imageUrl": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600",
+        "enabled": true
+      },
+      {
+        "id": "srv2",
+        "name": "Premium Umrah Exclusive Package",
+        "description": "VIP group and individual reservations with 5-star hotel towers close to Makkah/Madinah Haram, including private land transfers.",
+        "price": "Request Quote",
+        "category": "Tourism",
+        "featured": true,
+        "imageUrl": "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=600",
+        "enabled": true
+      },
+      {
+        "id": "srv3",
+        "name": "General Residency & Visa Advisory",
+        "description": "Expert consultation for Saudi Premium Residency (KSA Gold Visa), investor, family visit visas, and document legalizations.",
+        "price": "$1,500 / Prep",
+        "category": "Visas",
+        "featured": false,
+        "imageUrl": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600",
+        "enabled": true
+      }
+    ],
+    "faqs": [
+      {
+        "id": "f1",
+        "question": "How long does it take to register a foreign company in Saudi Arabia?",
+        "answer": "Normally, setting up a company and registering with MISA takes between 2 to 4 weeks, depending on the commercial license type and ministry clearances.",
+        "order": 0
+      },
+      {
+        "id": "f2",
+        "question": "Can you arrange custom family visit and tourist packages?",
+        "answer": "Yes! Our team crafts custom tourism solutions, arranging premium accommodation, luxury land transportation, tour guides, and fast visa approvals.",
+        "order": 1
+      }
+    ],
+    "testimonials": [
+      {
+        "id": "t1",
+        "name": "Sulaiman Al-Harbi",
+        "rating": 5,
+        "text": "Excellent and highly reliable business services in Riyadh. They handled our commercial registration in record time.",
+        "date": "April 2026",
+        "enabled": true
+      },
+      {
+        "id": "t2",
+        "name": "Anisur Rahman",
+        "rating": 5,
+        "text": "The premium Umrah package was an absolute dream. Everything was perfectly organized from landing to departures.",
+        "date": "March 2026",
+        "enabled": true
+      }
+    ],
+    "analytics": {
+      "visitorsCount": 0,
+      "qrScansCount": 0,
+      "clicksCount": {},
+      "buttonClicks": {
+        "whatsapp": 0,
+        "call": 0,
+        "saveContact": 0,
+        "share": 0
+      }
+    }
+  },
+  "companyProfile": {
+    "companyName": "KH Dream Services Limited",
+    "tagline": "Your Visionary Partner in Saudi Business Formation & Luxury Global Travel",
+    "foundedYear": "2009",
+    "ceoName": "S.M. Rakibul Hasan",
+    "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+    "coverUrl": "https://images.unsplash.com/photo-1627856013091-fed6e4e30025?auto=format&fit=crop&q=80&w=1200",
+    "phone": "966537681618",
+    "email": "info@khdreamservices.com",
+    "website": "https://khdreamservices.com",
+    "address": "Olaya District, King Fahd Road, Riyadh, Saudi Arabia",
+    "barcodeValue": "KHD-PROFILE-2026",
+    "qrCodeUrl": "https://khdreamservices.com/company-profile",
+    "primaryColor": "#0b1b3d",
+    "secondaryColor": "#c5a880",
+    "backgroundColor": "#faf9f6",
+    "textColor": "#1e293b",
+    "videoUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+    "sections": [
+      {
+        "id": "sec_history",
+        "title": "Company History & Vision",
+        "subtitle": "Strategic Bridgeholders of Global Ambitions",
+        "content": "Founded in 2009, KH Dream Services Limited has evolved from a boutique administrative agency into Saudi Arabia's preeminent full-service corporate advisory and luxury travel gateway. Over 17 years of operational excellence, we have designed customized compliance-assured frameworks that empower foreign conglomerates, multi-family offices, and global startups to register, operate, and scale seamlessly in the GCC region. We combine deep institutional knowledge of local administrative codes with world-class travel speed.",
+        "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=800",
+        "shapeType": "diagonal-slice"
+      },
+      {
+        "id": "sec_ceo",
+        "title": "CEO Message",
+        "subtitle": "Corporate Vision under Vision 2030",
+        "content": "Under Vision 2030, Saudi Arabia is experiencing an unprecedented era of economic expansion. Our mission is to pave a seamless, compliance-assured gateway for entrepreneurs and enterprises to establish their presence and thrive in the Kingdom. We combine localized legal intelligence with premium global concierge services, ensuring your travel and corporate setup are executed with absolute discretion and excellence. We do not simply process applications; we secure your legacy in the Kingdom.",
+        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600",
+        "shapeType": "hexagon"
+      },
+      {
+        "id": "sec_mission_vision",
+        "title": "Our Core Pillars",
+        "subtitle": "Mission & Absolute Value Delivery",
+        "content": "We commit to speed, absolute compliance, and tailored luxury operations. Whether securing complex foreign investment permits or managing pristine VIP Umrah transfers, we believe in long-term partnerships built on trust, discretion, and executive-level performance.",
+        "image": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&q=80&w=800",
+        "shapeType": "rounded-blob"
+      }
+    ],
+    "stats": [
+      {
+        "id": "st1",
+        "value": "17+",
+        "label": "Years Excellence",
+        "icon": "Clock"
+      },
+      {
+        "id": "st2",
+        "value": "2.5K+",
+        "label": "Business Setups",
+        "icon": "Briefcase"
+      },
+      {
+        "id": "st3",
+        "value": "15K+",
+        "label": "Successful Visas",
+        "icon": "FileText"
+      },
+      {
+        "id": "st4",
+        "value": "99.9%",
+        "label": "Approval Rate",
+        "icon": "Award"
+      }
+    ],
+    "locations": [
+      {
+        "id": "loc1",
+        "name": "Riyadh Head Office",
+        "address": "Olaya District, King Fahd Road, Riyadh, Saudi Arabia",
+        "phone": "966537681618",
+        "email": "riyadh@khdreamservices.com",
+        "workingHours": "9:00 AM - 6:00 PM (Sat - Thu)"
+      },
+      {
+        "id": "loc2",
+        "name": "Dhaka Executive Branch",
+        "address": "Gulshan-2, Dhaka, Bangladesh",
+        "phone": "8801700000000",
+        "email": "dhaka@khdreamservices.com",
+        "workingHours": "10:00 AM - 7:00 PM (Sun - Thu)"
+      }
+    ],
+    "partners": [
+      {
+        "id": "p1",
+        "name": "MISA (Ministry of Investment)",
+        "logoUrl": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=120"
+      },
+      {
+        "id": "p2",
+        "name": "Sagia Approved Partners",
+        "logoUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=120"
+      }
+    ],
+    "branchCities": "Riyadh - Jeddah - Dhaka",
+    "aboutText": "KH Dream Services Limited is a premier corporate advisory institution specializing in high-friction government licensing, commercial registration, and customized corporate operations under Saudi Vision 2030. Over the past 17 years, we have designed customized frameworks that empower foreign conglomerates, multi-family offices, and global startups to register, operate, and scale seamlessly in the GCC region. Our strength lies in deep institutional knowledge of local administrative codes combined with world-class service speed.",
+    "missionTitle": "MISSION CORE",
+    "missionSubtitle": "Turnkey Portals",
+    "missionText": "Speed and absolute compliance for setups and premium VIP transfers.",
+    "visionTitle": "VISION BENCHMARK",
+    "visionSubtitle": "Gold Standard",
+    "visionText": "To be the foremost advisory of choice for global family offices.",
+    "relationshipTitle": "Relationship Stewardship",
+    "relationshipSubtitle": "Proactive Stewardship",
+    "relationshipText": "At KH Dream Services, relationship stewardship is our absolute core promise. We believe client relations should be proactive rather than responsive. Every corporate contract is paired with a dedicated bilingual Relationship Director (bilingual in English & Arabic) who serves as an active compliance guardian. We establish custom real-time messaging tunnels, schedule bi-weekly operational check-ins, and handle all renewal cycles, ministry correspondence, and regulatory inquiries seamlessly. This ensures you can focus purely on business growth while we safeguard your regulatory health.",
+    "relationshipImage": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=400",
+    "relationshipCheckText": "Active Compliance Monitoring & Zero Penalty Guarantee",
+    "service1Title": "Saudi Business Setup & FDI Permitting",
+    "service1Subtitle": "KSA INVESTMENT INCUBATOR",
+    "service1Text": "We handle the complete corporate lifecycle of foreign entities entering Saudi Arabia. We bypass bureaucratic complexity by directly interfacing with the Ministry of Investment (MISA) and Ministry of Commerce to secure foreign investment permits, commercial registrations (CR), tax registrations, and Chamber of Commerce approvals. We deliver compliance-assured speed.",
+    "service1Bullets": [
+      "MISA Foreign Licensing",
+      "CR Establishment Setup",
+      "Bank Introductions",
+      "ZATCA Filing Systems"
+    ],
+    "service1Image": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=400",
+    "service2Title": "Worldwide Visit Visa Solutions",
+    "service2Subtitle": "GLOBAL IMMIGRATION DESK",
+    "service2Text": "We operate a specialized global visa desk providing structured, turn-key processing for personal, corporate, and investor travel. Our team handles complete dossier preparation, consular pre-checks, secure appointment scheduling, and biometrics organization for travel all across the world.",
+    "service2Bullets": [
+      "Schengen Pathways",
+      "UK & US Business Permits",
+      "Canada Tourist Routes",
+      "GCC Transit Permits"
+    ],
+    "service2Image": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=400",
+    "caseStudiesTitle": "Business Setup Success Stories",
+    "caseStudiesText": "Compelling case studies demonstrating how our dual expertise in MISA licensing and premium executive logistics delivers unmatched turnaround speed and operational safety in the Kingdom.",
+    "caseStudy1Tag": "TECH FINTECH // LONDON",
+    "caseStudy1Title": "TechFlow FinTech (London)",
+    "caseStudy1Challenge": "Securing 100% foreign-owned financial services licensing under strict compliance standards.",
+    "caseStudy1Outcome": "Turnaround: 8 Working Days // FDI Ingress: $15,000,000",
+    "caseStudy2Tag": "LOGISTICS // FRANKFURT",
+    "caseStudy2Title": "EuroFood Cold Chain",
+    "caseStudy2Challenge": "Coordinating industrial warehouse clearances and customs registers across three major economic hubs.",
+    "caseStudy2Outcome": "Scope: Riyadh, Jeddah, Dammam // SLA: Zero Penalties",
+    "caseStudy3Tag": "HEAVY INDUSTRY",
+    "caseStudy3Title": "SinoManufacture Joint",
+    "caseStudy3Challenge": "Co-structuring a complex steel JV and securing immediate bilateral custom tariff concessions.",
+    "caseStudy3Outcome": "Startup Saving: 18% Logistics Capital // Visa Quota: 120 Engineers",
+    "accreditationsTitle": "Institutional Approvals",
+    "accreditationsSubtitle": "AFFILIATIONS",
+    "accreditations": [
+      {
+        "id": "ac1",
+        "name": "MISA Approved",
+        "code": "MINISTRY OF INVESTMENT"
+      },
+      {
+        "id": "ac2",
+        "name": "Sagia Liaison",
+        "code": "SAGIA LIAISON AUTH"
+      }
+    ],
+    "guaranteeTitle": "Profile Verification Guarantee",
+    "guaranteeText": "All compliance assertions, Ministry authorizations, and visa quotas correspond directly to regulations of Riyadh Chamber & Ministry of Investment.",
+    "footerNote": "All corporate credentials are legally verified under the active laws of Saudi Arabia."
+  },
+  "homeSettings": {},
+  "identifiedUser": {
+    "id": "1",
+    "username": "admin",
+    "fullName": "System Administrator",
+    "email": "admin@khdreamservices.com",
+    "role": "Admin",
+    "profilePic": "",
+    "permissions": [
+      "wall",
+      "invoices",
+      "sadad-invoices",
+      "catalogue",
+      "reviews",
+      "promo",
+      "hero",
+      "service-cards",
+      "subscribers",
+      "general",
+      "services",
+      "footer-popups",
+      "team",
+      "users",
+      "landing-pages",
+      "navbar"
+    ]
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwicGVybWlzc2lvbnMiOlsid2FsbCIsImludm9pY2VzIiwic2FkYWQtaW52b2ljZXMiLCJjYXRhbG9ndWUiLCJyZXZpZXdzIiwicHJvbW8iLCJoZXJvIiwic2VydmljZS1jYXJkcyIsInN1YnNjcmliZXJzIiwiZ2VuZXJhbCIsInNlcnZpY2VzIiwiZm9vdGVyLXBvcHVwcyIsInRlYW0iLCJ1c2VycyIsImxhbmRpbmctcGFnZXMiLCJuYXZiYXIiXSwiaWF0IjoxNzg4MjgyNDEwLCJleHAiOjE3ODgzMDcxOTl9.lvhunRfApp5jKcoORh5xGqYFm1wrgKJ_i4nXsHpjlgg",
+  "deletedMessageIds": []
 }

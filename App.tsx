@@ -1204,20 +1204,20 @@ const AppContent: React.FC = () => {
         }
 
         :root {
-          --primary-color: ${data.general?.themeColor || '#2563eb'};
+          --primary-color: ${data.general?.themeColor || '#f00000'};
           --primary-rgb: ${(() => {
-            const color = data.general?.themeColor || '#2563eb';
+            const color = data.general?.themeColor || '#f00000';
             let hex = color.replace('#', '');
             if (hex.length === 3) {
               hex = hex.split('').map(c => c + c).join('');
             }
-            const r = parseInt(hex.substring(0, 2), 16) || 37;
-            const g = parseInt(hex.substring(2, 4), 16) || 99;
-            const b = parseInt(hex.substring(4, 6), 16) || 235;
+            const r = parseInt(hex.substring(0, 2), 16) || 240;
+            const g = parseInt(hex.substring(2, 4), 16) || 0;
+            const b = parseInt(hex.substring(4, 6), 16) || 0;
             return `${r}, ${g}, ${b}`;
           })()};
           --secondary-color: ${data.general?.secondaryColor || '#020617'};
-          --accent-color: ${data.general?.accentColor || '#3b82f6'};
+          --accent-color: ${data.general?.accentColor || '#EF4444'};
           --color-primary: var(--primary-color);
           --color-secondary: var(--secondary-color);
           --color-accent: var(--accent-color);
@@ -1249,9 +1249,9 @@ const AppContent: React.FC = () => {
         }
 
         .dark {
-          --primary-color: ${data.general?.themeColor || '#2563eb'};
+          --primary-color: ${data.general?.themeColor || '#f00000'};
           --secondary-color: #020617;
-          --accent-color: #60a5fa;
+          --accent-color: ${data.general?.accentColor || '#EF4444'};
           --color-primary: var(--primary-color);
           --color-secondary: var(--secondary-color);
           --color-accent: var(--accent-color);
