@@ -1,0 +1,52 @@
+[
+  {
+    "id": "d91d81a7b916a60d",
+    "timestamp": "2026-06-24T21:59:31.091Z",
+    "event": "INVALID_SESSION",
+    "ip": "127.0.0.1",
+    "ua": "N/A",
+    "path": "/api/cms",
+    "status": "INFO",
+    "error": "jwt malformed"
+  },
+  {
+    "id": "ab89b0662f9b48d9",
+    "timestamp": "2026-06-24T16:46:48.145Z",
+    "event": "INVALID_SESSION",
+    "ip": "127.0.0.1",
+    "ua": "N/A",
+    "path": "/api/cms",
+    "status": "INFO",
+    "error": "jwt malformed"
+  },
+  {
+    "id": "610c576d9b4cdbae",
+    "timestamp": "2026-06-24T16:46:19.932Z",
+    "event": "INVALID_SESSION",
+    "ip": "127.0.0.1",
+    "ua": "N/A",
+    "path": "/api/cms",
+    "status": "INFO",
+    "error": "invalid signature"
+  },
+  {
+    "id": "b7394b42d342fe69",
+    "timestamp": "2026-06-24T16:46:13.231Z",
+    "event": "INVALID_SESSION",
+    "ip": "127.0.0.1",
+    "ua": "N/A",
+    "path": "/api/cms",
+    "status": "INFO",
+    "error": "jwt malformed"
+  },
+  {
+    "id": "334ec45f0d450bdc",
+    "timestamp": "2026-06-24T15:50:23.788Z",
+    "event": "INVALID_SESSION",
+    "ip": "127.0.0.1",
+    "ua": "N/A",
+    "path": "/api/cms",
+    "status": "INFO",
+    "error": "jwt malformed"
+  }
+]

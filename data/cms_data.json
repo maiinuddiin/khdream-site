@@ -1,0 +1,1046 @@
+{
+  "general": {
+    "whatsapp": "966537681618",
+    "whatsappHotels": "966537681618",
+    "whatsappVisas": "966537681618",
+    "whatsappBusiness": "966537681618",
+    "whatsappGreeting": "Hello! Welcome to KH Dream Travels & Tourism. How can we help you plan your journey?",
+    "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+    "notificationSoundUrl": "https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3",
+    "notificationSoundEnabled": false,
+    "facebook": "khdreamservices",
+    "instagram": "khdreamservices",
+    "twitter": "khdreamservices",
+    "linkedin": "khdreamservices",
+    "tiktok": "khdreamservices",
+    "heroVideo": "https://rr5---sn-4g5lzned.googlevideo.com/videoplayback?expire=1777760107&ei=CyP2adG6Areq8uMPnOKfeA&ip=105.111.47.247&id=o-ACRh3z3Ktr_kFvcMNYqtVjwajpctLMrtfhOhsF2PtvyE&itag=136&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=294&bui=AbKmrwoHZdkISFRiv19yIWrosXrtgI9PcNa7Vzkdyuyl9lFgUSLtXIkG2PxQqz_Yjt07Pm9uXOJ_Qjbu&vprv=1&svpuc=1&mime=video%2Fmp4&rqh=1&gir=yes&clen=20245976&dur=85.880&lmt=1727424174213792&keepalive=yes&fexp=51565115,51565681&c=ANDROID_VR&txp=6209224&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cvprv%2Csvpuc%2Cmime%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AHEqNM4wRQIgYswStSF1ES53CDrJaiktNVIgF18ONexhcWmaUEzY_h8CIQDxvax8Lo5BbPMkkIKsO9IqfeLJQwkgH6nmJpdDcRtpYA%3D%3D&rm=sn-5abxgpxuxaxjvh-caws7s,sn-4g5eyd7z&rrc=79,104,191&req_id=7c958f41b4cca3ee&rms=rdu,au&ipbypass=yes&redirect_counter=3&cm2rm=sn-25gks7z&cms_redirect=yes&cmsv=e&met=1777739823,&mh=1f&mip=2001:16a2:c092:9517:e1e3:989a:d5f2:95e&mm=34&mn=sn-4g5lzned&ms=ltu&mt=1777739559&mv=m&mvi=5&pl=48&lsparams=cps,ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRQIhAI9fj6RCsBSJ2rT99rqYb3f5fdH2wZ-Qh3ixqXcFx-NvAiBq9i3VeElqK7wEJ1GOH46uRmRIOrvfhxrBcgQk48lBnA%3D%3D",
+    "heroVideoOverlayColor": "#020617",
+    "heroVideoOverlayOpacity": 85,
+    "footerBgUrl": "https://images.unsplash.com/photo-1549413247-49594e9f75a6?auto=format&fit=crop&q=80&w=2000",
+    "footerOverlayColor": "rgba(9, 9, 11, 0.9)",
+    "footerCtaTitle": "Ready to explore the Kingdom? Let's plan your journey together.",
+    "footerCtaButtonText": "Get a Free Consultation",
+    "themeColor": "#f00000",
+    "secondaryColor": "#ffffff",
+    "accentColor": "#EF4444",
+    "serviceBarColor": "rgba(255, 255, 255, 0.8)",
+    "shadowColor": "rgba(0, 0, 0, 0.1)",
+    "heroTitleLastWordColor": "linear-gradient(to right, #34d399, #14b8a6, #34d399)",
+    "heroButtonText": "Explore Now",
+    "hotelSearchButtonText": "WhatsApp",
+    "visaSearchButtonText": "Check Requirements",
+    "businessSetupButtonText": "Consult Experts",
+    "packageBookButtonText": "এখনি বুক করুন",
+    "destinationExploreText": "Explore Destination",
+    "destinationBookButtonText": "Book This Package Now",
+    "blogReadGuideText": "Read Guide",
+    "blogViewAllText": "View all stories",
+    "newsletterButtonText": "Subscribe",
+    "heroBadgeText": "17 Years of Excellence",
+    "sectionTitles": {
+      "packages": {
+        "title": "Our Premium Packages",
+        "subtitle": "Handpicked experiences for your journey",
+        "titleSize": "text-2xl md:text-5xl",
+        "subtitleSize": "text-base md:text-lg"
+      },
+      "destinations": {
+        "title": "Top Destinations for your next trip",
+        "subtitle": "Explore the world with us",
+        "titleSize": "text-2xl md:text-5xl",
+        "subtitleSize": "text-base md:text-lg"
+      },
+      "blog": {
+        "title": "Recommended Travel Stories",
+        "subtitle": "Insights and tips from our experts",
+        "titleSize": "text-2xl md:text-5xl",
+        "subtitleSize": "text-base md:text-lg"
+      },
+      "blogPage": {
+        "title": "Travel <span class=\"text-primary\">Blog</span>",
+        "subtitle": "Wanderlust Chronicles & Global Adventures",
+        "titleSize": "text-3xl md:text-5xl",
+        "subtitleSize": "text-[10px] md:text-xs"
+      },
+      "hotDeals": {
+        "title": "Exclusive <span class=\"text-primary\">Travel Deals</span>",
+        "subtitle": "Limited Time Offers & Flash Sales",
+        "titleSize": "text-3xl md:text-5xl",
+        "subtitleSize": "text-[10px] md:text-xs"
+      },
+      "successStories": {
+        "title": "Success Stories",
+        "subtitle": "What our clients say about us",
+        "titleSize": "text-2xl md:text-5xl",
+        "subtitleSize": "text-base md:text-lg"
+      },
+      "team": {
+        "title": "Our Professional Team",
+        "subtitle": "Meet the experts behind your dreams",
+        "titleSize": "text-2xl md:text-5xl",
+        "subtitleSize": "text-base md:text-lg"
+      },
+      "partners": {
+        "title": "Our Global Partners",
+        "subtitle": "Working together to serve you better",
+        "titleSize": "text-2xl md:text-5xl",
+        "subtitleSize": "text-base md:text-lg"
+      }
+    },
+    "teamFooterText": "<p>+ more % amazing peoples</p>",
+    "faviconUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+    "buttonSettings": {
+      "hero": {
+        "text": "Explore Packages",
+        "type": "link",
+        "link": "#packages",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "hotelSearch": {
+        "text": "Search Hotels",
+        "type": "whatsapp",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "visaSearch": {
+        "text": "Apply Now",
+        "type": "whatsapp",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "businessSetup": {
+        "text": "Get Started",
+        "type": "whatsapp",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "packageBook": {
+        "text": "Book Now",
+        "type": "whatsapp",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "destinationExplore": {
+        "text": "Explore",
+        "type": "link",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "destinationBook": {
+        "text": "Book Trip",
+        "type": "whatsapp",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "blogReadGuide": {
+        "text": "Read Guide",
+        "type": "link",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "blogViewAll": {
+        "text": "View All Posts",
+        "type": "link",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "newsletter": {
+        "text": "Subscribe",
+        "type": "link",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      },
+      "footerCta": {
+        "text": "Contact Us",
+        "type": "whatsapp",
+        "link": "",
+        "whatsapp": "",
+        "phone": ""
+      }
+    },
+    "seo": {
+      "metaTitle": "KH Dream Services | Luxury Travel & Business in KSA",
+      "metaDescription": "Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors.",
+      "metaKeywords": "travel, business, saudi arabia, visa, hotels, consultancy",
+      "ogImage": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+      "advancedSeo": ""
+    },
+    "fontFamily": "Poppins",
+    "customFontUrl": "",
+    "youtubeIds": [
+      "ScMzIvxBSi4"
+    ],
+    "facebookVideoUrls": [
+      "https://www.facebook.com/khdreamservices/videos/1083431666611299/"
+    ],
+    "whatsappBooking": "966537681618",
+    "serviceIcons": {
+      "hotels": "https://cdn-icons-png.flaticon.com/512/2983/2983973.png",
+      "visas": "https://cdn-icons-png.flaticon.com/512/826/826070.png",
+      "business": "https://cdn-icons-png.flaticon.com/512/1063/1063376.png"
+    },
+    "footerPartnerLogos": [
+      "https://i.ibb.co/v6mY9X9/Vision-2030-Logo.png",
+      "https://i.ibb.co/X0pY9X9/Invest-Saudi.png"
+    ],
+    "footerPopups": {
+      "about": "KH Dream Services Limited is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors. Our mission is to bridge the gap between global ambitions and local opportunities.",
+      "services": "We offer a comprehensive suite of services including: \n- Global Hotel Bookings\n- Visa Concierge Services\n- Business Setup & Legal Consultancy\n- Luxury Travel Management\n- Corporate Travel Solutions",
+      "contact": "Get in touch with us:\nEmail: info@khdreamservices.com\nPhone: +966 053 768 1618\nAddress: King Fahd Road, Al Olaya District, Riyadh, KSA",
+      "privacy": "Your privacy is important to us. We collect and use your data only to provide and improve our services. We do not share your personal information with third parties except as required by law or to fulfill your requests."
+    },
+    "fonts": {
+      "header": "Montserrat",
+      "body": "Inter",
+      "accent": "Space Grotesk"
+    },
+    "smtpConfig": {
+      "host": "khdreamservices.com",
+      "port": 465,
+      "secure": true,
+      "user": "support@khdreamservices.com",
+      "pass": "",
+      "from": "KH Dream Services <support@khdreamservices.com>"
+    },
+    "welcomeEmailTemplate": {
+      "subject": "Welcome to KH Dream Services Limited - Your Account Details",
+      "body": "<h1>Welcome to KH Dream Services Limited</h1><p>Hello {fullName},</p><p>Your account has been created. Here are your login details:</p><p><strong>Username:</strong> {username}</p><p><strong>Password:</strong> {password}</p><p>You can log in at: {loginUrl}</p><p>Best regards,<br/>KH Dream Services Limited Team</p>"
+    },
+    "bgUrl": "",
+    "footerBgColor": "#09090b",
+    "whatsappFlights": "966537681618",
+    "features": [
+      {
+        "title": "Customer Delight",
+        "description": "We deliver the best service and experience for our customer.",
+        "iconName": "Smile"
+      },
+      {
+        "title": "Authentic Adventure",
+        "description": "We deliver the real adventure experience for our customer.",
+        "iconName": "Mountain"
+      },
+      {
+        "title": "Expert Guides",
+        "description": "We deliver only expert tour guides for our customer.",
+        "iconName": "Flag"
+      },
+      {
+        "title": "Time Flexibility",
+        "description": "We welcome time flexibility of traveling for our customer.",
+        "iconName": "RefreshCcw"
+      }
+    ],
+    "companyName": "KH Dream Services Limited",
+    "phone": "+966 053 768 1618",
+    "email": "info@khdreamservices.com",
+    "siteName": "KH Dream Services",
+    "security": {
+      "maintenanceMode": false,
+      "allowedIPs": [],
+      "twoFactorRequired": false,
+      "passwordPolicy": "strong"
+    },
+    "sectionBackgrounds": {
+      "services": {
+        "type": "image",
+        "color": "transparent",
+        "image": ""
+      },
+      "destinations": {
+        "type": "image",
+        "color": "transparent",
+        "image": "",
+        "imageOpacity": 0.21,
+        "patternOpacity": 0.22,
+        "enabledLayers": [
+          "image",
+          "pattern",
+          "color"
+        ],
+        "pattern": "none"
+      }
+    },
+    "scrollingPartners": [
+      {
+        "id": "1777135113359",
+        "name": "",
+        "type": "",
+        "color": "text-slate-900 dark:text-white",
+        "logoUrl": "https://i.ibb.co/v6mY9X9/Vision-2030-Logo.png"
+      }
+    ]
+  },
+  "footer": {
+    "aboutText": "KH Dream Services Limited is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors.",
+    "copyright": "© 2026 KH Dream Services Limited. All rights reserved.",
+    "links": [
+      {
+        "label": "About Us",
+        "url": "#"
+      },
+      {
+        "label": "Services",
+        "url": "#"
+      },
+      {
+        "label": "Contact",
+        "url": "#"
+      },
+      {
+        "label": "Privacy Policy",
+        "url": "#"
+      }
+    ],
+    "socials": [
+      {
+        "platform": "Facebook",
+        "url": "https://facebook.com",
+        "iconUrl": "https://cdn-icons-png.flaticon.com/512/733/733547.png"
+      },
+      {
+        "platform": "Instagram",
+        "url": "https://instagram.com",
+        "iconUrl": "https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
+      },
+      {
+        "platform": "LinkedIn",
+        "url": "https://linkedin.com",
+        "iconUrl": "https://cdn-icons-png.flaticon.com/512/174/174857.png"
+      }
+    ]
+  },
+  "hero": [
+    {
+      "title": "Your Next Adventure",
+      "subtitle": "Experience the thrill of a lifetime with our curated travel packages. From mountain peaks to coral reefs, your next journey starts here.",
+      "bgUrl": "https://images.unsplash.com/photo-1544013585-446b17208b08?q=80&w=1200&auto=format&fit=crop"
+    }
+  ],
+  "promoSlider": [
+    {
+      "id": "1",
+      "title": "Exclusive Umrah Packages",
+      "subtitle": "Premium Spiritual Journey",
+      "img": "https://images.unsplash.com/photo-1591604129939-f1efa4d8f7ec?auto=format&fit=crop&q=80&w=800",
+      "link": "#",
+      "active": true
+    },
+    {
+      "id": "2",
+      "title": "Executive Business Travel",
+      "subtitle": "Luxury Concierge",
+      "img": "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&q=80&w=800",
+      "link": "#",
+      "active": true
+    }
+  ],
+  "catalogue": [
+    {
+      "id": "1",
+      "title": "Elite Escape Riyadh",
+      "label": "Premium Travel",
+      "img": "https://picsum.photos/seed/778/800/1000",
+      "link": "#"
+    }
+  ],
+  "team": [
+    {
+      "id": "1",
+      "name": "S.M. Rakibul Hasan",
+      "role": "Chief Executive Officer",
+      "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop",
+      "link": "#"
+    },
+    {
+      "id": "1777744236939",
+      "name": "New Member",
+      "role": "Specialist",
+      "image": ""
+    },
+    {
+      "id": "1777744237551",
+      "name": "New Member",
+      "role": "Specialist",
+      "image": ""
+    },
+    {
+      "id": "1777744237925",
+      "name": "New Member",
+      "role": "Specialist",
+      "image": ""
+    },
+    {
+      "id": "1777744238089",
+      "name": "New Member",
+      "role": "Specialist",
+      "image": ""
+    }
+  ],
+  "offices": [
+    {
+      "id": "1",
+      "name": "KH Dream Services",
+      "city": "Riyadh",
+      "address": "King Fahd Road, Al Olaya District",
+      "phone": "+966 11 000 0000",
+      "hours": "9 AM - 6 PM",
+      "mapUrl": "https://maps.app.goo.gl/2n82PcGfgrWYU45d8"
+    },
+    {
+      "id": "2",
+      "name": "Sky Search Travels",
+      "city": "Jeddah",
+      "address": "Prince Sultan Road, Al Rawdah",
+      "phone": "+966 12 000 0000",
+      "hours": "9 AM - 6 PM",
+      "mapUrl": "https://maps.app.goo.gl/2n82PcGfgrWYU45d8"
+    }
+  ],
+  "businessProfiles": [
+    {
+      "id": "1",
+      "name": "KH Dream Services",
+      "arabicName": "كي اتش دريم للخدمات",
+      "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+      "address": "King Fahd Road, Al Olaya District, Riyadh, KSA",
+      "vatId": "300000000000003",
+      "invoicePrefix": "KHD",
+      "nextInvoiceNumber": 1001
+    },
+    {
+      "id": "2",
+      "name": "Sky Search Travels",
+      "arabicName": "سكاي سيرش للسياحة",
+      "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+      "address": "Prince Sultan Road, Al Rawdah, Jeddah, KSA",
+      "vatId": "300000000000004",
+      "invoicePrefix": "SST",
+      "nextInvoiceNumber": 1001
+    },
+    {
+      "id": "3",
+      "name": "KH Dream Services Limited",
+      "arabicName": "كي اتش دريم للخدمات المحدودة",
+      "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
+      "address": "Al Olaya District, Riyadh, KSA",
+      "vatId": "300000000000005",
+      "invoicePrefix": "KHD",
+      "nextInvoiceNumber": 1001
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "fullName": "System Administrator",
+      "email": "admin@khdreamservices.com",
+      "role": "Admin",
+      "profilePic": "",
+      "permissions": [
+        "wall",
+        "invoices",
+        "sadad-invoices",
+        "catalogue",
+        "reviews",
+        "promo",
+        "hero",
+        "service-cards",
+        "subscribers",
+        "general",
+        "services",
+        "footer-popups",
+        "team",
+        "users",
+        "landing-pages",
+        "navbar"
+      ],
+      "password": "$2b$10$nwEYwk9RUVu8oAEcDzaEvOHH9mWGknRIrtbgRyblKag.yxtlxCeSu"
+    },
+    {
+      "id": "user-admin",
+      "username": "maiinuddiin",
+      "fullName": "Main Uddin",
+      "email": "maiinuddiin@gmail.com",
+      "role": "Admin",
+      "profilePic": "",
+      "permissions": [
+        "wall",
+        "invoices",
+        "sadad-invoices",
+        "catalogue",
+        "reviews",
+        "promo",
+        "hero",
+        "service-cards",
+        "subscribers",
+        "general",
+        "services",
+        "footer-popups",
+        "team",
+        "users",
+        "landing-pages",
+        "navbar",
+        "broadcast",
+        "system-config",
+        "notifications",
+        "subdomains",
+        "floating-cards",
+        "home-blocks",
+        "security",
+        "partners",
+        "faqs"
+      ],
+      "password": "password123"
+    },
+    {
+      "id": "1776445103385",
+      "username": "miraz02",
+      "fullName": "New User",
+      "email": "user@example.com",
+      "role": "Manager",
+      "profilePic": "",
+      "parentId": "1",
+      "permissions": [
+        "wall",
+        "invoices"
+      ],
+      "password": "$2b$10$eZx..si1T3JqfV3pFN6Lc.na3fvsn6vjVRUjfqcFrRaROSoGcZX9G"
+    },
+    {
+      "id": "1776446470784",
+      "username": "newuser02",
+      "fullName": "New User",
+      "email": "user@example.com",
+      "role": "Staff",
+      "profilePic": "",
+      "parentId": "1776445103385",
+      "permissions": [],
+      "password": "$2b$10$pzJYrXH/rVd5CF4GUqu8Quq2Nbt6GEKoF54PSgOHkNIbnTKBiUN4y"
+    }
+  ],
+  "blogPosts": [
+    {
+      "id": "1774377582328",
+      "title": "New Story",
+      "subtitle": "The Journey Begins",
+      "content": "",
+      "authorId": "1",
+      "authorName": "System Administrator",
+      "date": "3/24/2026",
+      "images": []
+    },
+    {
+      "id": "1774377582498",
+      "title": "New Story",
+      "subtitle": "The Journey Begins",
+      "content": "",
+      "authorId": "1",
+      "authorName": "System Administrator",
+      "date": "3/24/2026",
+      "images": []
+    },
+    {
+      "id": "1774377582670",
+      "title": "New Story",
+      "subtitle": "The Journey Begins",
+      "content": "",
+      "authorId": "1",
+      "authorName": "System Administrator",
+      "date": "3/24/2026",
+      "images": []
+    }
+  ],
+  "hotDeals": [],
+  "subdomainRedirects": [],
+  "subscribers": [],
+  "newsletterSubscribers": [],
+  "reviews": [
+    {
+      "id": "1",
+      "name": "Ahmed Al-Fahad",
+      "rating": 5,
+      "text": "Exceptional service! They handled my business setup in Riyadh with zero friction. Highly recommended for corporate services.",
+      "date": "2 days ago"
+    },
+    {
+      "id": "2",
+      "name": "Sarah Jenkins",
+      "rating": 5,
+      "text": "The luxury travel arrangements were beyond my expectations. Every detail was curated perfectly. Truly a bespoke experience.",
+      "date": "1 week ago"
+    },
+    {
+      "id": "3",
+      "name": "Mohammed Khan",
+      "rating": 5,
+      "text": "Fastest visa processing I've ever experienced. Their team is professional and very responsive on WhatsApp.",
+      "date": "3 weeks ago"
+    }
+  ],
+  "branding": {
+    "elevatingTitle": "Elevating Your Global Ambitions",
+    "elevatingSubtitle": "We don't just provide services; we craft pathways for your success in Saudi Arabia and beyond. From seamless travel to complex business setups."
+  },
+  "stats": {
+    "successfulVisas": "15,000+",
+    "businessSetups": "2,500+",
+    "globalPartners": "120+",
+    "globalReach": "45+"
+  },
+  "successStories": {
+    "youtubePlaylistId": "PLuD6-F_996_L_pI_v9_p_p_p_p_p_p_p",
+    "youtubePlaylistUrl": "https://www.youtube.com/playlist?list=PLuD6-F_996_L_pI_v9_p_p_p_p_p_p_p",
+    "milestones": [
+      {
+        "id": "1",
+        "title": "Global Clients",
+        "value": "50,000+",
+        "icon": "Users"
+      },
+      {
+        "id": "2",
+        "title": "Countries Served",
+        "value": "120+",
+        "icon": "Globe"
+      },
+      {
+        "id": "3",
+        "title": "Success Rate",
+        "value": "99.9%",
+        "icon": "Zap"
+      }
+    ]
+  },
+  "visaOptions": {
+    "nationalities": [
+      "Saudi Arabia",
+      "Bangladesh",
+      "United Kingdom",
+      "USA",
+      "India"
+    ],
+    "residencies": [
+      "Saudi Arabia",
+      "UAE",
+      "Qatar",
+      "Kuwait",
+      "Oman"
+    ],
+    "destinations": [
+      "United Kingdom",
+      "USA",
+      "Schengen Area",
+      "Turkey",
+      "Canada"
+    ],
+    "requirements": {}
+  },
+  "businessOptions": {
+    "licenseTypes": [
+      "Commercial",
+      "Industrial",
+      "Professional",
+      "Service"
+    ],
+    "industryTypes": [
+      "Technology",
+      "Manufacturing",
+      "Retail",
+      "Healthcare"
+    ],
+    "requirements": {}
+  },
+  "notifications": {
+    "topBar": {
+      "enabled": false,
+      "text": "Special Offer: Get 20% off on all Visa services this month!",
+      "texts": [
+        "Special Offer: Get 20% off on all Visa services this month!",
+        "Emergency Notification: System upgrade on Sunday at 2:00 AM UTC.",
+        "Breaking News: New tourist guidelines announced for Saudi Arabia!"
+      ],
+      "link": "/services",
+      "bgColor": "#DC2626",
+      "textColor": "#ffffff"
+    },
+    "popup": {
+      "enabled": false,
+      "title": "Special Announcement",
+      "description": "We are excited to announce our new office in Dubai! Visit us for exclusive travel deals.",
+      "imageUrl": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1200",
+      "link": "/contact",
+      "buttonText": "Learn More"
+    }
+  },
+  "serviceCards": [
+    {
+      "id": "1",
+      "title": "বড় হজ",
+      "description": "Premium Hajj Package",
+      "iconUrl": "https://cdn-icons-png.flaticon.com/512/3135/3135706.png",
+      "imageUrl": "https://images.unsplash.com/photo-1565019053020-13340a51936d?auto=format&fit=crop&q=80&w=800",
+      "link": "#",
+      "features": [
+        "মক্কা ও মদিনায় আরামদায়ক আবাসন",
+        "অভিজ্ঞ ও বাংলাভাষী গাইডের তত্ত্বাবধান",
+        "ভিআইপি শীতাতপ নিয়ন্ত্রিত পরিবহন ব্যবস্থা",
+        "যেকোনো জরুরি প্রয়োজনে ২৪/৭ সাপোর্ট"
+      ]
+    },
+    {
+      "id": "2",
+      "title": "১৪ দিনের গ্রুপ উমরাহ",
+      "description": "Group Umrah Package",
+      "iconUrl": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "imageUrl": "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&q=80&w=800",
+      "link": "#",
+      "features": [
+        "মক্কা ও মদিনায় মানসম্মত আবাসন",
+        "ধর্মপ্রাণ মুসলিমদের সাথে উমরাহ পালনের সুযোগ",
+        "পবিত্র স্থানসমূহ পরিদর্শনে বিশেষ জিয়ারত ট্যুর",
+        "সম্পূর্ণ সফরে তিন বেলা হালাল ও সুস্বাদু খাবার"
+      ]
+    },
+    {
+      "id": "3",
+      "title": "৮৫ দিনের ফ্যামিলি উমরাহ",
+      "description": "Family Umrah Package",
+      "iconUrl": "https://cdn-icons-png.flaticon.com/512/3135/3135768.png",
+      "imageUrl": "https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&q=80&w=800",
+      "link": "#",
+      "features": [
+        "পরিবারের জন্য আরামদায়ক আবাসন",
+        "পরিবার-বান্ধব পরিবেশ",
+        "শিশুদের জন্য বিশেষ সুবিধা ও কার্যক্রম",
+        "আপনার সুবিধামত নমনীয় ঘোরার সময়সূচি",
+        "পবিত্র স্থানসমূহ সম্পর্কে জানতে শিক্ষামূলক গাইড"
+      ]
+    }
+  ],
+  "landingPages": [
+    {
+      "id": "1774524529794",
+      "slug": "services",
+      "title": "Business Services",
+      "blocks": [
+        {
+          "id": "1775503132831",
+          "type": "hero",
+          "content": {
+            "title": "Hero Title",
+            "subtitle": "Hero Subtitle",
+            "bgUrl": "",
+            "buttonText": "",
+            "link": "",
+            "buttonType": "link",
+            "whatsapp": "",
+            "phone": ""
+          },
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "w": 4,
+            "h": 1
+          }
+        },
+        {
+          "id": "1775503143573",
+          "type": "button",
+          "content": {
+            "text": "Click Me",
+            "link": "",
+            "type": "link",
+            "whatsapp": "",
+            "phone": "",
+            "alignment": "center"
+          },
+          "layout": {
+            "x": 0,
+            "y": 1,
+            "w": 2,
+            "h": 1
+          }
+        }
+      ],
+      "isPublished": true,
+      "createdAt": "2026-03-26T11:28:49.794Z",
+      "sections": [
+        {
+          "id": "section-1777055217012",
+          "title": "New Section",
+          "order": 0,
+          "settings": {
+            "backgroundColor": "#ffffff",
+            "paddingTop": "4rem",
+            "paddingBottom": "4rem",
+            "fullWidth": false,
+            "containerWidth": "max-w-7xl",
+            "glassEffect": true,
+            "backgroundType": "pattern",
+            "backgroundPattern": "none",
+            "backgroundPatternOpacity": 0,
+            "backgroundConfig": {
+              "color": "transparent",
+              "enabledLayers": []
+            }
+          },
+          "blocks": [
+            {
+              "id": "block-1777055221711",
+              "type": "cta",
+              "content": {
+                "title": "Call to Action",
+                "buttonText": "Click Here",
+                "link": "",
+                "buttonType": "link",
+                "whatsapp": "",
+                "phone": ""
+              },
+              "layout": {
+                "x": 0,
+                "y": 0,
+                "w": 12,
+                "h": 7
+              },
+              "styles": {
+                "backgroundColor": "#d1d1d1"
+              },
+              "animation": {
+                "type": "slideUp",
+                "once": true
+              }
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "glassEffect": true,
+        "fullWidth": true,
+        "backgroundColor": "#8c8c8c",
+        "navbarSettings": {
+          "theme": "auto",
+          "links": [
+            {
+              "id": "1776193105543",
+              "label": "New Link",
+              "url": "/",
+              "order": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "floatingCardItems": [
+    {
+      "id": "1",
+      "active": true,
+      "name": "Special Offer: 20% off Saudi Visas",
+      "buttonText": "Grab Offer",
+      "buttonLink": "https://wa.me/966537681618?text=I%20want%20the%2020%25%20visa%20offer",
+      "logoUrl": "https://cdn-icons-png.flaticon.com/512/3233/3233010.png"
+    },
+    {
+      "id": "2",
+      "active": true,
+      "name": "Luxury Hotel Deals in Riyadh",
+      "buttonText": "View Deals",
+      "buttonLink": "https://wa.me/966537681618?text=Show%20me%20Riyadh%20hotel%20deals",
+      "logoUrl": "https://cdn-icons-png.flaticon.com/512/2983/2983973.png"
+    }
+  ],
+  "navbarLinks": [
+    {
+      "id": "1",
+      "label": "Home",
+      "url": "/",
+      "order": 0
+    },
+    {
+      "id": "3",
+      "label": "Destinations",
+      "url": "/destinations",
+      "order": 1
+    },
+    {
+      "id": "2",
+      "label": "Tours",
+      "url": "/tours",
+      "order": 2
+    },
+    {
+      "id": "7",
+      "label": "Business Services",
+      "url": "/business-services",
+      "order": 3
+    },
+    {
+      "id": "4",
+      "label": "About",
+      "url": "/about",
+      "order": 4
+    },
+    {
+      "id": "5",
+      "label": "Blog",
+      "url": "/blog",
+      "order": 5
+    },
+    {
+      "id": "6",
+      "label": "Contact",
+      "url": "/contact",
+      "order": 6
+    }
+  ],
+  "homeBlocks": [],
+  "homeSections": [],
+  "visibility": {
+    "hero": true,
+    "search": true,
+    "services": true,
+    "destinations": true,
+    "blog": true,
+    "successStories": true,
+    "reviews": true,
+    "offices": true,
+    "whyChooseUs": true,
+    "stats": true,
+    "team": true,
+    "partners": true,
+    "homeBlocks": true,
+    "footer": true,
+    "promoSlider": true,
+    "whySaudiArabia": true
+  },
+  "homeSettings": {},
+  "identifiedUser": {
+    "id": "1",
+    "username": "admin",
+    "fullName": "System Administrator",
+    "email": "admin@khdreamservices.com",
+    "role": "Admin",
+    "profilePic": "",
+    "permissions": [
+      "wall",
+      "invoices",
+      "sadad-invoices",
+      "catalogue",
+      "reviews",
+      "promo",
+      "hero",
+      "service-cards",
+      "subscribers",
+      "general",
+      "services",
+      "footer-popups",
+      "team",
+      "users",
+      "landing-pages",
+      "navbar"
+    ]
+  },
+  "locationSettings": {
+    "backgroundLogoUrl": "https://png.pngtree.com/png-vector/20250322/ourmid/pngtree-location-icon-3d-png-image_15851928.png",
+    "backgroundLogoOpacity": 1,
+    "backgroundLogoSize": 280,
+    "backgroundLogoTop": 40,
+    "backgroundLogoRight": 40
+  },
+  "faqs": [
+    {
+      "id": "1",
+      "question": "What services do you offer?",
+      "answer": "We offer a wide range of services including visa assistance, global hotel bookings, and business setup consultancy."
+    },
+    {
+      "id": "2",
+      "question": "How can I contact support?",
+      "answer": "You can contact us via WhatsApp, email, or through our contact form on the website."
+    }
+  ],
+  "whySaudiArabia": {
+    "title": "Why <span class=\"text-primary\">Saudi Arabia?</span>",
+    "description": "Saudi Arabia is rapidly emerging as the premier destination for business, thanks to its strategic initiatives and forward-thinking reforms. The Kingdom's Vision 2030 plan is transforming the economic landscape, fostering a business-friendly environment with reduced bureaucratic hurdles and enhanced infrastructure. With a strategic location at the crossroads of major international trade routes, Saudi Arabia offers unparalleled access to global markets. Additionally, the country's robust economy, rich natural resources, and commitment to innovation make it a magnet for investment. The introduction of 100% foreign ownership policies further enhances its appeal, providing unprecedented opportunities for international entrepreneurs to thrive. Choose Saudi Arabia for its dynamic market, strategic advantages, and progressive economic vision.",
+    "mainImageUrl": "https://images.unsplash.com/photo-1549413247-49594e9f75a6?auto=format&fit=crop&q=80&w=2000",
+    "secondaryImageUrl": "https://images.unsplash.com/photo-1586724230021-4c3d3967bc94?auto=format&fit=crop&q=80&w=1200",
+    "features": [
+      {
+        "id": "1",
+        "title": "Vision 2030",
+        "description": "The ambitious Vision 2030 reform plan is driving massive economic diversification and development across various sectors, creating numerous opportunities for foreign and local investors.",
+        "icon": "Hourglass"
+      },
+      {
+        "id": "2",
+        "title": "Ease of Doing Business",
+        "description": "Saudi Arabia has introduced major regulatory reforms to streamline business setup processes, attract foreign investment, and improve the overall ease of doing business in the Kingdom.",
+        "icon": "Building2"
+      },
+      {
+        "id": "3",
+        "title": "Strategic Location",
+        "description": "Located at the crossroads of three continents (Asia, Africa, and Europe), Saudi Arabia provides excellent access to international markets, making it a prime hub for global business expansion.",
+        "icon": "MapPin"
+      },
+      {
+        "id": "4",
+        "title": "Economic Stability",
+        "description": "As the largest economy in the Middle East and with robust financial reserves, Saudi Arabia offers a stable and secure environment for long-term investment.",
+        "icon": "CreditCard"
+      },
+      {
+        "id": "5",
+        "title": "Growing Sectors",
+        "description": "Key industries like technology, healthcare, real estate, and tourism are experiencing rapid growth, fueled by government initiatives and private sector investments.",
+        "icon": "TrendingUp"
+      },
+      {
+        "id": "6",
+        "title": "100% Foreign Ownership",
+        "description": "Recent changes in investment laws allow for 100% foreign ownership in various sectors, giving businesses full control over their operations.",
+        "icon": "Flag"
+      }
+    ]
+  },
+  "businessServices": [
+    {
+      "id": "cat_sbc",
+      "name": "Saudi Business Center",
+      "logoUrl": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80",
+      "description": "Explore 33 services offered by Saudi Business Center. We provide comprehensive business starting point assistance.",
+      "status": "active",
+      "sortOrder": 1,
+      "subcategories": []
+    },
+    {
+      "id": "cat_hcis",
+      "name": "HCIS",
+      "logoUrl": "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=400&q=80",
+      "description": "High Commission for Industrial Security (HCIS) licensing and approvals for industrial projects.",
+      "status": "active",
+      "sortOrder": 2,
+      "subcategories": []
+    },
+    {
+      "id": "cat_misa",
+      "name": "Ministry of Investment (MISA)",
+      "logoUrl": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=400&q=80",
+      "description": "Foreign investment licenses, branch establishment, and MISA portal management.",
+      "status": "active",
+      "sortOrder": 3,
+      "subcategories": []
+    }
+  ]
+}
