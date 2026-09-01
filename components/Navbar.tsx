@@ -227,37 +227,33 @@ will-change-transform"
         </div>
 
         {/* Right: Actions */}
-        <div className="flex-none flex items-center gap-3">
-          {data.visibility?.iqamaButton !== false && (
-            <button 
-              onClick={() => {
-                const targetLink = data.general?.iqamaButtonLink || '/iqama-inquiry';
-                if (targetLink.startsWith('http') || targetLink.startsWith('https://') || targetLink.startsWith('tel:') || targetLink.startsWith('mailto:')) {
-                  window.open(targetLink, '_blank');
-                } else {
-                  window.history.pushState({}, '', targetLink);
-                  window.dispatchEvent(new PopStateEvent('popstate'));
-                }
-              }}
-              className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10px] font-black tracking-widest transition-all duration-200 bg-teal-500/10 hover:bg-teal-500 border border-teal-500/35 text-teal-600 dark:text-teal-400 hover:text-white dark:hover:text-white shadow-3xs cursor-pointer uppercase"
-            >
-              <Shield size={12} />
-              <span>{data.general?.iqamaButtonText || 'Iqama Inquiry'}</span>
-            </button>
-          )}
-
-          {currentUser && (
+        <div className="flex-none flex items-center gap-2 sm:gap-3">
+          {currentUser ? (
             <button 
               onClick={onAdminClick}
               className={cn(
-                "hidden md:flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all duration-200 uppercase cursor-pointer",
+                "hidden md:flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10.5px] font-black tracking-widest transition-all duration-200 uppercase cursor-pointer",
                 isSolid 
-                  ? "bg-slate-900 text-white dark:bg-white dark:text-zinc-950 hover:bg-slate-800 dark:hover:bg-zinc-100" 
+                  ? "bg-slate-900 text-white dark:bg-white dark:text-zinc-950 hover:bg-slate-800 dark:hover:bg-zinc-100 shadow-sm" 
                   : "bg-white/10 text-white border border-white/20 hover:bg-white hover:text-slate-900 backdrop-blur-md"
               )}
             >
               <LayoutDashboard size={13} />
               <span>Dashboard</span>
+            </button>
+          ) : (
+            <button 
+              onClick={onLoginClick || onAdminClick}
+              className={cn(
+                "hidden md:flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10.5px] font-black tracking-widest transition-all duration-200 uppercase cursor-pointer",
+                isSolid 
+                  ? "bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white border border-slate-200/80 dark:border-white/10" 
+                  : "bg-white/10 text-white border border-white/20 hover:bg-white hover:text-slate-900 backdrop-blur-md"
+              )}
+              title="Staff / Admin Login"
+            >
+              <LogIn size={13} />
+              <span>Login</span>
             </button>
           )}
 
@@ -266,7 +262,7 @@ will-change-transform"
             className={cn(
               "p-2 rounded-xl transition-all duration-200 cursor-pointer",
               isSolid 
-                ? "bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300 hover:bg-slate-205 dark:hover:bg-zinc-700/80" 
+                ? "bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700/80" 
                 : "bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-md"
             )}
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
@@ -330,29 +326,42 @@ will-change-transform"
               </div>
 
               <div className="space-y-4">
-                {data.visibility?.iqamaButton !== false && (
+                {currentUser ? (
                   <motion.button
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     onClick={() => {
-                      const targetLink = data.general?.iqamaButtonLink || '/iqama-inquiry';
-                      if (targetLink.startsWith('http') || targetLink.startsWith('https://') || targetLink.startsWith('tel:') || targetLink.startsWith('mailto:')) {
-                        window.open(targetLink, '_blank');
-                      } else {
-                        window.history.pushState({}, '', targetLink);
-                        window.dispatchEvent(new PopStateEvent('popstate'));
-                      }
+                      onAdminClick?.();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-teal-950/20 border border-teal-500/30 text-teal-400 font-bold shadow-[0_0_15px_rgba(20,184,166,0.3)] animate-pulse"
+                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-zinc-950 font-bold shadow-lg"
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center text-teal-400">
-                        <Shield size={16} />
+                      <div className="w-8 h-8 rounded-lg bg-white/20 dark:bg-zinc-900/20 flex items-center justify-center">
+                        <LayoutDashboard size={16} />
                       </div>
-                      <span className="text-xs tracking-[0.2em] text-teal-300 uppercase">{data.general?.iqamaButtonText || 'Iqama Inquiry'}</span>
+                      <span className="text-xs tracking-[0.2em] uppercase">Admin Dashboard</span>
                     </div>
-                    <ChevronRight size={14} className="text-teal-400" />
+                    <ChevronRight size={14} />
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      if (onLoginClick) onLoginClick();
+                      else onAdminClick?.();
+                    }}
+                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.05] border border-slate-200/80 dark:border-white/10 text-slate-900 dark:text-white font-bold"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <LogIn size={16} />
+                      </div>
+                      <span className="text-xs tracking-[0.2em] uppercase">Staff / Admin Login</span>
+                    </div>
+                    <ChevronRight size={14} className="text-slate-400" />
                   </motion.button>
                 )}
 
