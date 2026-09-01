@@ -1492,8 +1492,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
   const fetchInvoices = async () => {
     setIsLoadingInvoices(true);
     try {
-      // Add cache busting to ensure we get fresh data
-      const res = await fetch(`/api/invoices?t=${Date.now()}`, { credentials: 'include' }).catch(() => null);
+      const token = localStorage.getItem('kh_admin_token') || '';
+      // Add cache busting and auth token to ensure we get fresh data from server database
+      const res = await fetch(`/api/invoices?t=${Date.now()}`, { 
+        headers: token ? { 'x-admin-token': token } : {},
+        credentials: 'include' 
+      }).catch(() => null);
       if (res && res.ok) {
         const data = await res.json();
         setInvoices(data);

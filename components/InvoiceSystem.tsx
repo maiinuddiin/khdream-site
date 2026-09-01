@@ -177,7 +177,7 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
       return;
     }
     setIsSaving(true);
-    const resolvedId = invoiceId || `inv-${Date.now()}`;
+    const resolvedId = invoiceId || `INV-${Date.now()}`;
     const invoicePayload = {
       id: resolvedId,
       invoiceNumber,
