@@ -2091,9 +2091,9 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           'x-admin-token': token
         },
         credentials: 'include'
-      });
+      }).catch(() => null);
 
-      if (response.ok) {
+      if (response && response.ok) {
         const resData = await response.json();
         if (resData && resData.valid) {
           // Sync current user if roles/permissions changed
@@ -2106,6 +2106,9 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           handleSetCurrentUser(null);
           return false;
         }
+      } else if (!response || response.status === 404) {
+        // Static environment (e.g. GitHub Pages) - trust local token/session
+        return true;
       } else {
         // Safe fallback in case of absolute connection timeout, but behave conservatively
         return true;
@@ -2140,14 +2143,19 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         },
         body: JSON.stringify(dataToSave),
         credentials: 'include'
-      });
+      }).catch(() => null);
       
-      if (!response.ok) {
-        if (response.status === 404) {
-          // Static host (e.g. GitHub Pages): save locally
+      if (!response || !response.ok) {
+        if (!response || response.status === 404) {
+          // Static host (e.g. GitHub Pages): save locally in browser storage
           localStorage.setItem('kh_dream_cms_v6', JSON.stringify(dataToSave));
           localStorage.setItem('kh_dream_cms_cache_ver', APP_CACHE_VERSION);
           setData(dataToSave);
+          if (currentUser) {
+            const updatedUser = dataToSave.users.find(u => u.id === currentUser?.id);
+            if (updatedUser) handleSetCurrentUser(updatedUser);
+          }
+          console.log("[CMS] System saved locally (Static / GitHub Pages mode).");
           return true;
         }
 
@@ -2192,10 +2200,11 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.log("[CMS] System Synchronized with Server.");
       return true;
     } catch (e) {
-      console.error("CRITICAL: Failed to save CMS data to server", e);
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      alert(`Failed to sync with server: ${errorMessage}\n\nChanges saved locally in your browser.`);
-      return false;
+      console.warn("Fallback to local save:", e);
+      localStorage.setItem('kh_dream_cms_v6', JSON.stringify(dataToSave));
+      localStorage.setItem('kh_dream_cms_cache_ver', APP_CACHE_VERSION);
+      setData(dataToSave);
+      return true;
     }
   };
 

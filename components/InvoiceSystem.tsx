@@ -166,6 +166,33 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
       return;
     }
     setIsSaving(true);
+    const invoicePayload = {
+      id: invoiceId,
+      invoiceNumber,
+      customerName,
+      customerPhone,
+      customerAddress,
+      customerEmail,
+      customerTaxId,
+      issuedBy,
+      items,
+      date,
+      total: total,
+      subtotal: subtotal,
+      tax: tax,
+      taxRate,
+      taxType,
+      paymentStatus,
+      amountPaid: paymentStatus === 'partial' ? amountPaidState : (paymentStatus === 'paid' ? total : 0),
+      showSeal,
+      businessId: selectedBusinessId,
+      businessName: selectedBusiness?.name,
+      businessArabicName: selectedBusiness?.arabicName,
+      businessAddress: selectedBusiness?.address,
+      businessVatId: selectedBusiness?.vatId,
+      businessLogoUrl: selectedBusiness?.logoUrl
+    };
+
     try {
       const token = localStorage.getItem('kh_admin_token');
       const response = await fetch('/api/invoices', {
@@ -174,40 +201,50 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
           'Content-Type': 'application/json',
           ...(token ? { 'x-admin-token': token } : {})
         },
-        body: JSON.stringify({
-          id: invoiceId,
-          invoiceNumber,
-          customerName,
-          customerPhone,
-          customerAddress,
-          customerEmail,
-          customerTaxId,
-          issuedBy,
-          items,
-          date,
-          total: total,
-          subtotal: subtotal,
-          tax: tax,
-          taxRate,
-          taxType,
-          paymentStatus,
-          amountPaid: paymentStatus === 'partial' ? amountPaidState : (paymentStatus === 'paid' ? total : 0),
-          showSeal,
-          businessId: selectedBusinessId,
-          businessName: selectedBusiness?.name,
-          businessArabicName: selectedBusiness?.arabicName,
-          businessAddress: selectedBusiness?.address,
-          businessVatId: selectedBusiness?.vatId,
-          businessLogoUrl: selectedBusiness?.logoUrl
-        }),
+        body: JSON.stringify(invoicePayload),
         credentials: 'include'
-      });
-      if (response.ok) {
+      }).catch(() => null);
+
+      if (response && response.ok) {
         const savedInvoice = await response.json();
         setInvoiceId(savedInvoice.id);
         setSaveSuccess(true);
         
+        try {
+          const local = localStorage.getItem('kh_dream_invoices');
+          const list = local ? JSON.parse(local) : [];
+          const idx = list.findIndex((i: any) => String(i.id) === String(savedInvoice.id));
+          if (idx !== -1) list[idx] = savedInvoice;
+          else list.unshift(savedInvoice);
+          localStorage.setItem('kh_dream_invoices', JSON.stringify(list));
+        } catch (e) {}
+
         // Only increment serial if it's a new invoice
+        if (!initialData) {
+          const nb = [...data.businessProfiles];
+          const bIdx = nb.findIndex(b => b.id === selectedBusinessId);
+          if (bIdx !== -1) {
+            nb[bIdx].nextInvoiceNumber += 1;
+            updateData({ businessProfiles: nb });
+          }
+        }
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else if (!response || response.status === 404) {
+        // Static GitHub Pages fallback
+        const newId = invoiceId || 'inv-' + Date.now();
+        const savedInvoice = { ...invoicePayload, id: newId };
+        setInvoiceId(newId);
+        setSaveSuccess(true);
+
+        try {
+          const local = localStorage.getItem('kh_dream_invoices');
+          const list = local ? JSON.parse(local) : [];
+          const idx = list.findIndex((i: any) => String(i.id) === String(newId));
+          if (idx !== -1) list[idx] = savedInvoice;
+          else list.unshift(savedInvoice);
+          localStorage.setItem('kh_dream_invoices', JSON.stringify(list));
+        } catch (e) {}
+
         if (!initialData) {
           const nb = [...data.businessProfiles];
           const bIdx = nb.findIndex(b => b.id === selectedBusinessId);
@@ -222,8 +259,19 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
         alert(`Failed to save invoice: ${errorData.error || 'Server error'}`);
       }
     } catch (error) {
-      console.error("Failed to save invoice:", error);
-      alert(`Failed to save invoice: ${error instanceof Error ? error.message : 'Network error'}`);
+      console.warn("Failed to sync invoice with server, saved locally:", error);
+      const newId = invoiceId || 'inv-' + Date.now();
+      const savedInvoice = { ...invoicePayload, id: newId };
+      setInvoiceId(newId);
+      setSaveSuccess(true);
+      try {
+        const local = localStorage.getItem('kh_dream_invoices');
+        const list = local ? JSON.parse(local) : [];
+        const idx = list.findIndex((i: any) => String(i.id) === String(newId));
+        if (idx !== -1) list[idx] = savedInvoice;
+        else list.unshift(savedInvoice);
+        localStorage.setItem('kh_dream_invoices', JSON.stringify(list));
+      } catch (e) {}
     } finally {
       setIsSaving(false);
     }

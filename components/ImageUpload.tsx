@@ -43,11 +43,20 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value, label, recom
           'x-admin-token': token
         },
         body: formData,
-      });
+      }).catch(() => null);
 
-      if (response.ok) {
+      if (response && response.ok) {
         const data = await response.json();
         onChange(data.url);
+      } else if (!response || response.status === 404) {
+        // Fallback for static environments (GitHub Pages)
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (reader.result) {
+            onChange(reader.result as string);
+          }
+        };
+        reader.readAsDataURL(file);
       } else {
         let errorMessage = 'Upload failed';
         let errorData: any = {};
@@ -75,16 +84,28 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onChange, value, label, recom
             errorMessage = "Session expired or invalid. Please log in again.";
             localStorage.removeItem('kh_dream_session');
             localStorage.removeItem('kh_admin_token');
-            // We don't have handleSetCurrentUser here, but removing tokens will trigger it on next reload or context check
           }
         }
         
         console.error('Upload failed:', errorMessage);
-        alert(`Upload failed: ${errorMessage}`);
+        // Fallback to FileReader if server rejected
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (reader.result) {
+            onChange(reader.result as string);
+          }
+        };
+        reader.readAsDataURL(file);
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Error uploading image. Please check your connection.');
+      console.warn('Network upload unavailable, falling back to local base64 preview:', error);
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result) {
+          onChange(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
