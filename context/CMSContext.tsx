@@ -1800,11 +1800,19 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const [data, setData] = useState<CMSData>(() => {
-    // Start with fresh DEFAULT_DATA to guarantee we pull live from the server rather than local caching
+    // Check localStorage cache first for instantaneous first paint
+    try {
+      const local = typeof window !== 'undefined' ? localStorage.getItem('kh_dream_cms_v6') : null;
+      if (local) {
+        return healData(JSON.parse(local));
+      }
+    } catch (e) {
+      console.warn("CMSContext: Error reading initial local cache", e);
+    }
     return DEFAULT_DATA;
   });
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -1812,15 +1820,13 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let fetchAttempts = 0;
 
     const fetchCMSData = async () => {
-      console.log(`CMSContext: Starting fetchCMSData (Attempt ${fetchAttempts + 1})...`);
       fetchAttempts++;
       
       const timeoutId = setTimeout(() => {
-        if (active && fetchAttempts === 1) {
-          console.warn("CMSContext: First fetch taking longer than 10s...");
+        if (active) {
           setIsLoaded(true);
         }
-      }, 10000);
+      }, 3000);
 
       try {
         const token = localStorage.getItem('kh_admin_token');
@@ -1845,7 +1851,9 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             if (active) setIsLoaded(true);
             return;
           }
-          throw new Error(`HTTP error! status: ${response.status}`);
+          // On static hosts like GitHub Pages where /api/cms doesn't exist (404)
+          if (active) setIsLoaded(true);
+          return;
         }
 
         const serverData = await response.json();
@@ -1891,26 +1899,22 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             setIsLoaded(true);
           }
         } else {
-          throw new Error("Invalid or empty data received from database server.");
+          if (active) setIsLoaded(true);
         }
       } catch (e) {
-        console.error("CMSContext: Failed to fetch CMS data on attempt " + fetchAttempts, e);
+        // Fallback for static hosting / network errors
+        if (active) setIsLoaded(true);
         
-        // Load fallback cache immediately in case it fails permanently
         const local = localStorage.getItem('kh_dream_cms_v6');
-        if (local && !isLoaded) {
+        if (local) {
           try {
             setData(healData(JSON.parse(local)));
           } catch (err) { console.error("CMSContext: Local fallback failed", err); }
         }
 
-        // If active and we haven't succeeded yet, retry to recover from server build/boot phase!
-        if (active && fetchAttempts < 15) {
-          const delay = fetchAttempts < 4 ? 2000 : 5000;
-          console.log(`CMSContext: Scheduling automatic database reconnection retry in ${delay}ms...`);
-          retryTimeout = setTimeout(fetchCMSData, delay);
-        } else {
-          if (active) setIsLoaded(true);
+        // Silent background retry in case server was starting up
+        if (active && fetchAttempts < 3) {
+          retryTimeout = setTimeout(fetchCMSData, 5000);
         }
       } finally {
         clearTimeout(timeoutId);

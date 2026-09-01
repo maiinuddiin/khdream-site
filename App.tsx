@@ -253,22 +253,34 @@ const AppContent: React.FC = () => {
   }, []);
   
   const [view, setView] = useState<'landing' | 'admin' | 'blog' | 'deals' | 'invoice' | 'public-invoice' | 'destinations' | 'hot-deals' | 'iqama' | 'bio' | 'business-services' | 'company-profile'>(() => {
-    const path = window.location.pathname.replace(/\/+$/, '') || '/';
+    const rawPath = window.location.pathname.replace(/\/+$/, '') || '/';
+    const hash = window.location.hash.replace(/^#\/?/, '/');
     const currentHostname = window.location.hostname;
     const params = new URLSearchParams(window.location.search);
     
-    console.log(`[ROUTING] Initializing view. Path: "${path}", Hostname: "${currentHostname}"`);
-    
     if (params.get('inv')) return 'public-invoice';
     if (currentHostname.startsWith('admin.') || currentHostname.includes('.admin.')) return 'admin';
-    if (path === '/admin') return 'admin';
-    if (path === '/blog' || path.startsWith('/blog/')) return 'blog';
-    if (path === '/destinations' || path.startsWith('/destinations/')) return 'destinations';
-    if (path === '/hot-deals') return 'hot-deals';
-    if (path === '/invoice') return 'invoice';
-    if (path === '/iqama-inquiry') return 'iqama';
-    if (path === '/bio' || path === '/profile' || path === '/hub' || path === '/help') return 'bio';
-    if (path === '/business-services' || path === '/services') return 'business-services';
+    
+    const resolveViewFromPath = (p: string) => {
+      if (p === '/admin' || p.startsWith('/admin/')) return 'admin';
+      if (p === '/blog' || p.startsWith('/blog/')) return 'blog';
+      if (p === '/destinations' || p.startsWith('/destinations/')) return 'destinations';
+      if (p === '/hot-deals' || p.startsWith('/hot-deals/')) return 'hot-deals';
+      if (p === '/invoice' || p.startsWith('/invoice/')) return 'invoice';
+      if (p === '/iqama-inquiry' || p.startsWith('/iqama-inquiry/')) return 'iqama';
+      if (p === '/bio' || p === '/profile' || p === '/hub' || p === '/help') return 'bio';
+      if (p === '/company-profile') return 'company-profile';
+      if (p === '/business-services' || p === '/services') return 'business-services';
+      return null;
+    };
+
+    if (hash) {
+      const v = resolveViewFromPath(hash);
+      if (v) return v;
+    }
+    const pv = resolveViewFromPath(rawPath);
+    if (pv) return pv;
+
     return 'landing';
   });
 
@@ -276,41 +288,44 @@ const AppContent: React.FC = () => {
     const handlePopState = () => {
       setPathname(window.location.pathname);
     };
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '/');
+      if (hash) setPathname(hash);
+    };
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
   useEffect(() => {
-    const path = pathname.replace(/\/+$/, '') || '/';
+    const rawPath = pathname.replace(/\/+$/, '') || '/';
+    const hash = typeof window !== 'undefined' ? window.location.hash.replace(/^#\/?/, '/') : '';
+    const path = hash || rawPath;
     const currentHostname = window.location.hostname;
     const isAdminSubdomain = currentHostname.startsWith('admin.') || currentHostname.includes('.admin.');
 
     if (isAdminSubdomain) {
       if (view !== 'admin') {
-        console.log("[ROUTING] Enforcing admin view for admin subdomain.");
         setView('admin');
       }
       return;
     }
-
-    console.log(`[ROUTING] Pathname change detected: "${path}". Current view: ${view}`);
     
-    if (path === '/admin') {
-      if (view !== 'admin') {
-        console.log("[ROUTING] Switching to admin view based on path");
-        setView('admin');
-      }
+    if (path === '/admin' || path.startsWith('/admin/')) {
+      if (view !== 'admin') setView('admin');
     }
     else if (path === '/blog' || path.startsWith('/blog/')) setView('blog');
     else if (path === '/destinations' || path.startsWith('/destinations/')) setView('destinations');
-    else if (path === '/hot-deals') setView('hot-deals');
-    else if (path === '/invoice') setView('invoice');
-    else if (path === '/iqama-inquiry') setView('iqama');
+    else if (path === '/hot-deals' || path.startsWith('/hot-deals/')) setView('hot-deals');
+    else if (path === '/invoice' || path.startsWith('/invoice/')) setView('invoice');
+    else if (path === '/iqama-inquiry' || path.startsWith('/iqama-inquiry/')) setView('iqama');
     else if (path === '/bio' || path === '/profile' || path === '/hub' || path === '/help') setView('bio');
     else if (path === '/company-profile') setView('company-profile');
     else if (path === '/business-services' || path === '/services') setView('business-services');
-    else if (path === '/') {
-      console.log("[ROUTING] Switching to landing view for root path");
+    else if (path === '/' || path === '/index.html') {
       setView('landing');
     }
     else if (data?.landingPages?.some(p => `/${p.slug}` === path)) {
@@ -1009,7 +1024,13 @@ const AppContent: React.FC = () => {
     };
   }, []);
 
-  const isHomePage = pathname === '/' || pathname === '/index.html';
+  const isHomePage = 
+    pathname === '/' || 
+    pathname === '/index.html' || 
+    pathname === '' ||
+    view !== 'landing' ||
+    (!data.landingPages?.some(p => `/${p.slug}` === pathname) && 
+     !['/admin', '/blog', '/destinations', '/hot-deals', '/invoice', '/iqama-inquiry', '/bio', '/profile', '/hub', '/help', '/company-profile', '/business-services', '/services'].some(r => pathname === r || pathname.startsWith(r + '/')));
   const landingPage = data.landingPages?.find(p => `/${p.slug}` === pathname);
   const isAdmin = view === 'admin' || !!currentUser;
 
