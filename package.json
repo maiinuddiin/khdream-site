@@ -7,6 +7,8 @@
     "dev": "tsx server.ts",
     "start": "node dist/server.cjs",
     "build": "vite build && npx esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs && npx esbuild server.ts --bundle --platform=node --format=esm --packages=external --sourcemap --outfile=dist/server.js",
+    "build:gh-pages": "vite build",
+    "deploy": "vite build && gh-pages -d dist --dotfiles",
     "preview": "vite preview",
     "lint": "tsc --noEmit"
   },
@@ -72,6 +74,7 @@
     "@types/imapflow": "^1.0.23",
     "@types/mailparser": "^3.4.6",
     "@types/node": "^22.14.0",
-    "esbuild": "^0.27.5"
+    "esbuild": "^0.27.5",
+    "gh-pages": "^6.3.0"
   }
 }
