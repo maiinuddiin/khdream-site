@@ -14,6 +14,20 @@ import InvoiceSystem from './InvoiceSystem';
 import SadadInvoice from './SadadInvoice';
 import ImageUpload from './ImageUpload';
 import Mailbox from './Mailbox';
+import { GitHubSyncModal } from './GitHubSyncModal';
+import { 
+  downloadInvoiceJsonFile, 
+  downloadAllInvoicesBackup, 
+  saveInvoiceToGitHub, 
+  deleteInvoiceFromGitHub, 
+  isGitHubConfigured, 
+  fetchInvoicesFromGitHub,
+  getGitHubConfig,
+  downloadCMSDataJsonFile,
+  saveCMSDataToGitHub,
+  fetchCMSDataFromGitHub 
+} from '../lib/githubSync';
+import { Github, CloudUpload } from 'lucide-react';
 import { getYouTubeId, getVimeoId } from '../lib/utils';
 
 interface AdminPanelProps {
@@ -516,7 +530,7 @@ const HeaderSettingsEditor: React.FC<{
 );
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) => {
-  const { data, updateData, saveChanges, resetToDefaults, currentUser, setCurrentUser, logout, checkSessionActive } = useCMS();
+  const { data, updateData, saveChanges, resetToDefaults, currentUser, setCurrentUser, logout, checkSessionActive, lastSyncReport } = useCMS();
   const canWriteBlog = currentUser?.role === 'Admin' || currentUser?.permissions?.includes('blog') || currentUser?.permissions?.includes('wall');
 
   const [isDirty, setIsDirty] = useState(false);
@@ -534,6 +548,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
   const [invoices, setInvoices] = useState<any[]>([]);
   const [isLoadingInvoices, setIsLoadingInvoices] = useState(false);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [showGitHubSyncModal, setShowGitHubSyncModal] = useState(false);
+  const [gitHubModalTab, setGitHubModalTab] = useState<'cms' | 'invoices' | 'settings'>('cms');
+  const [publishFeedback, setPublishFeedback] = useState<{
+    show: boolean;
+    type: 'success' | 'warning' | 'error';
+    title: string;
+    message: string;
+  } | null>(null);
   const [isCreatingSadadInvoice, setIsCreatingSadadInvoice] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<any | null>(null);
   const [editingSadadInvoice, setEditingSadadInvoice] = useState<any | null>(null);
@@ -1029,6 +1051,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
         // Reset dirty state
         setIsDirty(false);
 
+        // Notify user of sync status
+        if (isGitHubConfigured()) {
+          setPublishFeedback({
+            show: true,
+            type: 'success',
+            title: 'Published & Committed to GitHub Host',
+            message: 'All settings have been published and committed directly to data/cms_data.json in your GitHub repository host!'
+          });
+        } else {
+          setPublishFeedback({
+            show: true,
+            type: 'warning',
+            title: 'Saved in Browser Cache Only',
+            message: 'Your settings are saved in this browser. To persist settings to data/cms_data.json on your GitHub host, click "Connect GitHub Host".'
+          });
+        }
+
         // Send welcome emails to new users automatically
         if (newUsers.length > 0) {
           for (const user of newUsers) {
@@ -1504,13 +1543,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
         localStorage.setItem('kh_dream_invoices', JSON.stringify(data));
       } else {
         const local = localStorage.getItem('kh_dream_invoices');
+        let combined: any[] = [];
         if (local) {
           try {
-            setInvoices(JSON.parse(local));
+            combined = JSON.parse(local);
           } catch (e) {
-            setInvoices([]);
+            combined = [];
           }
         }
+        
+        // Also check if GitHub repository sync is enabled to load from data/invoices/ on GitHub
+        if (isGitHubConfigured()) {
+          try {
+            const ghRes = await fetchInvoicesFromGitHub();
+            if (ghRes.invoices && ghRes.invoices.length > 0) {
+              const map = new Map();
+              combined.forEach(i => map.set(String(i.id), i));
+              ghRes.invoices.forEach((i: any) => map.set(String(i.id), i));
+              combined = Array.from(map.values());
+              localStorage.setItem('kh_dream_invoices', JSON.stringify(combined));
+            }
+          } catch (e) {}
+        }
+        setInvoices(combined);
       }
     } catch (err) {
       console.error("Failed to fetch invoices:", err);
@@ -1543,7 +1598,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
 
     try {
       const token = localStorage.getItem('kh_admin_token');
-      const res = await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}`, {
+      await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}`, {
         method: 'DELETE',
         headers: { 
           'Cache-Control': 'no-cache',
@@ -1552,31 +1607,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
         credentials: 'include'
       }).catch(() => null);
 
-      if (res && res.ok) {
-        console.log(`[CLIENT] Server confirmed deletion of ${invoiceId}`);
-        setInvoices(prev => {
-          const next = prev.filter(inv => String(inv.id) !== invoiceId);
-          localStorage.setItem('kh_dream_invoices', JSON.stringify(next));
-          return next;
-        });
-        setInvoiceToDelete(null);
-      } else if (!res || res.status === 404) {
-        // Static GitHub Pages fallback
-        setInvoices(prev => {
-          const next = prev.filter(inv => String(inv.id) !== invoiceId);
-          localStorage.setItem('kh_dream_invoices', JSON.stringify(next));
-          return next;
-        });
-        setInvoiceToDelete(null);
-      } else {
-        const result = await res.json().catch(() => ({}));
-        console.error(`[CLIENT] Server failed to delete ${invoiceId}:`, result.error);
-        alert(`Server Error: ${result.error || 'Failed to delete invoice'}`);
-        fetchInvoices();
-        setInvoiceToDelete(null);
+      if (isGitHubConfigured()) {
+        await deleteInvoiceFromGitHub(invoiceId).catch(() => null);
       }
+
+      setInvoices(prev => {
+        const next = prev.filter(inv => String(inv.id) !== invoiceId);
+        localStorage.setItem('kh_dream_invoices', JSON.stringify(next));
+        return next;
+      });
+      setInvoiceToDelete(null);
     } catch (err) {
       console.warn(`[CLIENT] Local fallback deleting ${invoiceId}:`, err);
+      if (isGitHubConfigured()) {
+        deleteInvoiceFromGitHub(invoiceId).catch(() => null);
+      }
       setInvoices(prev => {
         const next = prev.filter(inv => String(inv.id) !== invoiceId);
         localStorage.setItem('kh_dream_invoices', JSON.stringify(next));
@@ -1764,6 +1809,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
         { id: 'users', label: 'Administrative Users', icon: ShieldCheck, show: currentUser?.role === 'Admin' || currentUser?.role === 'Manager' },
         { id: 'security', label: 'Security Firewall', icon: ShieldAlert, show: currentUser?.role === 'Admin' },
         { id: 'visitor-stats', label: 'Visitor Analytics', icon: BarChart3, show: currentUser?.role === 'Admin' },
+        { id: 'github-sync', label: 'GitHub Host & CMS Sync', icon: Github, show: currentUser?.role === 'Admin' },
       ]
     }
   ];
@@ -1861,6 +1907,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
                   <button
                     key={tab.id}
                     onClick={() => {
+                      if (tab.id === 'github-sync') {
+                        setGitHubModalTab('cms');
+                        setShowGitHubSyncModal(true);
+                        if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                        return;
+                      }
                       setActiveTab(tab.id as any);
                       if (window.innerWidth < 1024) setIsSidebarOpen(false);
                     }}
@@ -1976,6 +2028,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
                         <button
                           key={tab.id}
                           onClick={() => {
+                            if (tab.id === 'github-sync') {
+                              setGitHubModalTab('cms');
+                              setShowGitHubSyncModal(true);
+                              if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                              return;
+                            }
                             setActiveTab(tab.id as any);
                             if (window.innerWidth < 1024) setIsSidebarOpen(false);
                           }}
@@ -2038,6 +2096,31 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
           </div>
           
           <div className="flex items-center space-x-2 md:space-x-3">
+            {/* GitHub Host & CMS Sync Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setGitHubModalTab('cms');
+                setShowGitHubSyncModal(true);
+              }}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer active:scale-90 flex items-center justify-center border gap-1.5 text-[9px] font-black uppercase tracking-wider ${
+                isGitHubConfigured() 
+                  ? 'text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/80 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
+                  : 'text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800/80 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40'
+              }`}
+              title={isGitHubConfigured() ? "GitHub Host: Synced to data/cms_data.json" : "GitHub Host: Cache Only (Click to connect repository)"}
+            >
+              <Github size={14} className={isGitHubConfigured() ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"} />
+              <span className="hidden sm:inline">
+                {isGitHubConfigured() ? "GitHub Synced" : "Connect GitHub Host"}
+              </span>
+              {isGitHubConfigured() ? (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              ) : (
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              )}
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -2146,6 +2229,53 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
         {/* Scrollable Content Area */}
         <main className="flex-1 overflow-y-auto p-6 lg:p-10 no-scrollbar">
           <div className="max-w-5xl mx-auto space-y-8">
+          
+            {/* Sync / Publish Feedback Banner */}
+            <AnimatePresence>
+              {publishFeedback?.show && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`p-4 rounded-2xl border flex items-center justify-between gap-3 shadow-md ${
+                    publishFeedback.type === 'success'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                      : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    {publishFeedback.type === 'success' ? (
+                      <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    ) : (
+                      <AlertCircle size={20} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                    )}
+                    <div>
+                      <h4 className="text-xs font-black uppercase tracking-wider">{publishFeedback.title}</h4>
+                      <p className="text-[11px] font-medium opacity-90">{publishFeedback.message}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {publishFeedback.type === 'warning' && (
+                      <button
+                        onClick={() => {
+                          setGitHubModalTab('settings');
+                          setShowGitHubSyncModal(true);
+                        }}
+                        className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors"
+                      >
+                        Connect GitHub Host
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setPublishFeedback(null)}
+                      className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-lg"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           
           {activeTab === 'wall' && (
             <div className="space-y-8 animate-in slide-in-from-bottom-8">
@@ -14540,7 +14670,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
             <div className="space-y-6 animate-in slide-in-from-bottom-8">
               <div className="flex justify-between items-center mb-4">
                 <div />
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3">
+                  <button 
+                    onClick={() => setShowGitHubSyncModal(true)}
+                    className="px-4 py-3 bg-slate-900 text-white dark:bg-zinc-800 dark:text-zinc-200 hover:bg-black dark:hover:bg-zinc-700 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 transition-all relative shadow-xs"
+                    title="Configure GitHub repository host sync for data/invoices/ folder"
+                  >
+                    <Github size={15} />
+                    <span className="hidden sm:inline">GitHub Host Sync</span>
+                    {isGitHubConfigured() && (
+                      <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse inline-block" />
+                    )}
+                  </button>
+                  <button 
+                    onClick={() => downloadAllInvoicesBackup(invoices)}
+                    className="p-3 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:text-primary rounded-xl transition-all"
+                    title="Export All Invoices (.json)"
+                  >
+                    <Download size={16} />
+                  </button>
                   <button 
                     onClick={fetchInvoices}
                     disabled={isLoadingInvoices}
@@ -14993,6 +15141,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
                                     <button 
                                       onClick={(e) => {
                                         e.stopPropagation();
+                                        downloadInvoiceJsonFile(inv);
+                                      }}
+                                      className="text-slate-400 hover:text-emerald-600 transition-all p-2 rounded-xl hover:bg-emerald-500/10" 
+                                      title="Download JSON file for data/invoices/ folder (invoice_INV-...json)"
+                                    >
+                                      <FileText size={15} />
+                                    </button>
+
+                                    {isGitHubConfigured() && (
+                                      <button 
+                                        onClick={async (e) => {
+                                          e.stopPropagation();
+                                          const res = await saveInvoiceToGitHub(inv);
+                                          if (res.success) {
+                                            alert(`Committed invoice_${inv.id}.json directly to data/invoices/ in your GitHub repository!`);
+                                          } else {
+                                            alert(`GitHub error: ${res.error}`);
+                                          }
+                                        }}
+                                        className="text-slate-400 hover:text-indigo-600 transition-all p-2 rounded-xl hover:bg-indigo-500/10" 
+                                        title="Commit directly to data/invoices/ on GitHub"
+                                      >
+                                        <CloudUpload size={15} />
+                                      </button>
+                                    )}
+
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
                                         window.open(`/?inv=${encodeURIComponent(inv.id)}`, '_blank');
                                       }}
                                       className="text-slate-400 hover:text-primary transition-all p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800" 
@@ -15037,6 +15214,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
 
         </div>
       </main>
+
+      {/* GitHub Sync Modal */}
+      <GitHubSyncModal 
+        isOpen={showGitHubSyncModal}
+        onClose={() => setShowGitHubSyncModal(false)}
+        localInvoices={invoices}
+        onInvoicesUpdated={() => fetchInvoices()}
+        currentCMSData={draftData || data}
+        onCMSDataUpdated={(newData) => {
+          setDraftData(newData);
+          updateData(newData);
+        }}
+        initialTab={gitHubModalTab}
+      />
 
       {/* Generic Delete Confirmation Modals */}
       <DeleteConfirmationModal 

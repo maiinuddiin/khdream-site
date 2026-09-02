@@ -597,17 +597,19 @@ async function startServer() {
     contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.youtube.com", "https://s.ytimg.com", "https://connect.facebook.net", "https://*.google.com", "https://*.gstatic.com"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://*.gstatic.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.youtube.com", "https://s.ytimg.com", "https://connect.facebook.net", "https://*.google.com", "https://*.gstatic.com", "https://cdn.quilljs.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://*.gstatic.com", "https://cdn.quilljs.com"],
         imgSrc: ["'self'", "data:", "https:", "http:", "blob:", "https://picsum.photos", "https://*.googlevideo.com", "https://*.ytimg.com", "https://*.googleusercontent.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-        connectSrc: ["'self'", "https://api.github.com", "https://www.facebook.com", "https://*.google-analytics.com", "https://*.googleapis.com"],
+        connectSrc: ["'self'", "https://api.github.com", "https://raw.githubusercontent.com", "https://www.facebook.com", "https://*.google-analytics.com", "https://*.googleapis.com"],
         frameSrc: ["'self'", "https://www.youtube.com", "https://player.vimeo.com", "https://www.facebook.com", "https://web.facebook.com", "https://*.google.com"],
         mediaSrc: ["'self'", "blob:", "data:", "https:", "http:", "https://*.googlevideo.com"],
         frameAncestors: ["*"],
       },
     } : false,
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false,
     frameguard: false,
     noSniff: true,
     xssFilter: true,
@@ -623,6 +625,8 @@ async function startServer() {
     const isSandboxHost = host.includes('ai.studio') || host.includes('run.app') || host.includes('localhost');
     if (process.env.NODE_ENV === 'production' && !isSandboxHost) {
       res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    } else {
+      res.removeHeader('X-Frame-Options');
     }
     
     res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -4594,6 +4598,7 @@ ${recipientName}`;
       // Explicitly handle index.html for dev mode fallback
       app.get(/^(?!\/api).*$/, async (req, res, next) => {
         if (req.url.startsWith('/uploads')) return next();
+        if (path.extname(req.path)) return next();
         try {
           const url = req.originalUrl;
           const indexPath = path.join(process.cwd(), "index.html");

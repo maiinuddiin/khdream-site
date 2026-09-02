@@ -1509,32 +1509,5 @@
     "footerNote": "All corporate credentials are legally verified under the active laws of Saudi Arabia."
   },
   "homeSettings": {},
-  "identifiedUser": {
-    "id": "1",
-    "username": "admin",
-    "fullName": "System Administrator",
-    "email": "admin@khdreamservices.com",
-    "role": "Admin",
-    "profilePic": "",
-    "permissions": [
-      "wall",
-      "invoices",
-      "sadad-invoices",
-      "catalogue",
-      "reviews",
-      "promo",
-      "hero",
-      "service-cards",
-      "subscribers",
-      "general",
-      "services",
-      "footer-popups",
-      "team",
-      "users",
-      "landing-pages",
-      "navbar"
-    ]
-  },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwicGVybWlzc2lvbnMiOlsid2FsbCIsImludm9pY2VzIiwic2FkYWQtaW52b2ljZXMiLCJjYXRhbG9ndWUiLCJyZXZpZXdzIiwicHJvbW8iLCJoZXJvIiwic2VydmljZS1jYXJkcyIsInN1YnNjcmliZXJzIiwiZ2VuZXJhbCIsInNlcnZpY2VzIiwiZm9vdGVyLXBvcHVwcyIsInRlYW0iLCJ1c2VycyIsImxhbmRpbmctcGFnZXMiLCJuYXZiYXIiXSwiaWF0IjoxNzg4MjgyNDEwLCJleHAiOjE3ODgzMDcxOTl9.lvhunRfApp5jKcoORh5xGqYFm1wrgKJ_i4nXsHpjlgg",
   "deletedMessageIds": []
 }

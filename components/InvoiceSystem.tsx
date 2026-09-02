@@ -6,6 +6,7 @@ import { Printer, Plus, Trash2, Download, ArrowLeft, ShieldCheck, FileText, Chec
 import { useCMS } from '../context/CMSContext';
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
+import { saveInvoiceToGitHub, downloadInvoiceJsonFile, isGitHubConfigured, getGitHubConfig } from '../lib/githubSync';
 
 interface InvoiceItem {
   id: string;
@@ -41,6 +42,7 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
   const [paymentStatus, setPaymentStatus] = useState<'paid' | 'due' | 'partial'>(initialData?.paymentStatus || 'paid');
   const [amountPaidState, setAmountPaidState] = useState<number>(initialData?.amountPaid || 0);
   const [showSeal, setShowSeal] = useState<boolean>(initialData?.showSeal ?? true);
+  const [syncMessage, setSyncMessage] = useState<{ text: string; type: 'success' | 'info' | 'warn' } | null>(null);
 
   const workspaceRef = useRef<HTMLDivElement>(null);
   const [previewScale, setPreviewScale] = useState(1);
@@ -218,7 +220,9 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
       }).catch(() => null);
 
       let savedInvoice = invoicePayload;
+      let hostSaved = false;
       if (response && response.ok) {
+        hostSaved = true;
         try {
           const resData = await response.json();
           if (resData && resData.id) {
@@ -230,6 +234,35 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
       setInvoiceId(savedInvoice.id || resolvedId);
       setSaveSuccess(true);
       
+      // Check if GitHub Sync is configured to commit directly to data/invoices/ on GitHub
+      if (isGitHubConfigured()) {
+        try {
+          const ghRes = await saveInvoiceToGitHub(savedInvoice);
+          if (ghRes.success) {
+            setSyncMessage({ 
+              text: hostSaved 
+                ? "Saved to host disk and committed to data/invoices/ in your GitHub repository!" 
+                : "Committed invoice directly to data/invoices/ in your GitHub repository!", 
+              type: 'success' 
+            });
+          } else {
+            setSyncMessage({ 
+              text: `Saved locally. GitHub sync error: ${ghRes.error}`, 
+              type: 'warn' 
+            });
+          }
+        } catch (err: any) {
+          setSyncMessage({ text: `Saved locally. GitHub sync failed: ${err.message}`, type: 'warn' });
+        }
+      } else if (hostSaved) {
+        setSyncMessage({ text: "Saved to host server filesystem (data/invoices/)", type: 'success' });
+      } else {
+        setSyncMessage({ 
+          text: "Saved in browser cache. Download the JSON file below to put in data/invoices/, or configure GitHub Sync in the Admin Panel.", 
+          type: 'info' 
+        });
+      }
+
       // Always persist to local cache for instant offline retrieval
       try {
         const local = localStorage.getItem('kh_dream_invoices');
@@ -250,10 +283,28 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
         }
       }
       setTimeout(() => setSaveSuccess(false), 3000);
+      setTimeout(() => setSyncMessage(null), 6000);
     } catch (error) {
       console.warn("Saved invoice locally:", error);
       setInvoiceId(resolvedId);
       setSaveSuccess(true);
+      
+      if (isGitHubConfigured()) {
+        try {
+          const ghRes = await saveInvoiceToGitHub(invoicePayload);
+          if (ghRes.success) {
+            setSyncMessage({ text: "Committed invoice directly to data/invoices/ on GitHub!", type: 'success' });
+          } else {
+            setSyncMessage({ text: `Saved locally. GitHub error: ${ghRes.error}`, type: 'warn' });
+          }
+        } catch (e) {}
+      } else {
+        setSyncMessage({ 
+          text: "Saved in browser cache. Click 'JSON File' to download for your data/invoices/ folder.", 
+          type: 'info' 
+        });
+      }
+
       try {
         const local = localStorage.getItem('kh_dream_invoices');
         const list = local ? JSON.parse(local) : [];
@@ -263,6 +314,7 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
         localStorage.setItem('kh_dream_invoices', JSON.stringify(list));
       } catch (e) {}
       setTimeout(() => setSaveSuccess(false), 3000);
+      setTimeout(() => setSyncMessage(null), 6000);
     } finally {
       setIsSaving(false);
     }
@@ -338,6 +390,37 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
   // Validation URL for QR Code - points to the frontend with a query param
   const validationUrl = `${window.location.origin}?inv=${invoiceNumber}`;
 
+  const handleDownloadJSON = () => {
+    const resolvedId = invoiceId || `INV-${Date.now()}`;
+    const invoicePayload = {
+      id: resolvedId,
+      invoiceNumber: invoiceNumber || resolvedId,
+      customerName: customerName || "Customer",
+      customerPhone,
+      customerAddress,
+      customerEmail,
+      customerTaxId,
+      issuedBy,
+      items,
+      date,
+      total: total,
+      subtotal: subtotal,
+      tax: tax,
+      taxRate,
+      taxType,
+      paymentStatus,
+      amountPaid: paymentStatus === 'partial' ? amountPaidState : (paymentStatus === 'paid' ? total : 0),
+      showSeal,
+      businessId: selectedBusinessId,
+      businessName: selectedBusiness?.name,
+      businessArabicName: selectedBusiness?.arabicName,
+      businessAddress: selectedBusiness?.address,
+      businessVatId: selectedBusiness?.vatId,
+      businessLogoUrl: selectedBusiness?.logoUrl
+    };
+    downloadInvoiceJsonFile(invoicePayload);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-[1550px] mx-auto">
@@ -347,6 +430,28 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
             <p className="text-[10px] font-black uppercase tracking-widest">{error}</p>
           </div>
         )}
+
+        {syncMessage && (
+          <div className={`mb-6 p-4 rounded-xl border flex items-center justify-between text-xs font-semibold shadow-xs transition-all ${
+            syncMessage.type === 'success' 
+              ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
+              : syncMessage.type === 'warn'
+              ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300'
+              : 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 text-indigo-800 dark:text-indigo-300'
+          }`}>
+            <div className="flex items-center gap-3">
+              <CheckCircle2 size={18} className="shrink-0" />
+              <span>{syncMessage.text}</span>
+            </div>
+            <button 
+              onClick={() => setSyncMessage(null)} 
+              className="text-[10px] font-bold uppercase opacity-75 hover:opacity-100 px-2 py-1 rounded bg-black/5 dark:bg-white/5"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-8">
           <button 
             onClick={onBack}
@@ -355,7 +460,16 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
             <ArrowLeft size={16} />
             <span>Return to Terminal</span>
           </button>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            <button 
+              type="button"
+              onClick={handleDownloadJSON}
+              className="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 px-4 py-2.5 rounded text-[10px] font-black uppercase tracking-widest transition-all border border-slate-200 dark:border-zinc-700"
+              title="Download raw JSON file for your data/invoices/ folder (invoice_<id>.json)"
+            >
+              <FileText size={16} />
+              <span>JSON File</span>
+            </button>
             {!isReadOnly && (
               <button 
                 onClick={saveToServer}

@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import rawCmsData from '../data/cms_data.json';
+import { 
+  isGitHubConfigured, 
+  saveCMSDataToGitHub, 
+  fetchCMSDataFromGitHub,
+  getGitHubConfig 
+} from '../lib/githubSync';
 
 export const APP_CACHE_VERSION = "2026.09.01.v9";
 
@@ -1716,6 +1722,7 @@ interface CMSContextType {
   setCurrentUser: (user: User | null) => void;
   logout: () => void;
   checkSessionActive: () => Promise<boolean>;
+  lastSyncReport?: { type: 'server' | 'github' | 'local'; timestamp: number; message: string } | null;
 }
 
 const CMSContext = createContext<CMSContextType | undefined>(undefined);
@@ -1824,6 +1831,7 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoaded, setIsLoaded] = useState(true);
+  const [lastSyncReport, setLastSyncReport] = useState<{ type: 'server' | 'github' | 'local'; timestamp: number; message: string } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -1837,7 +1845,7 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (active) {
           setIsLoaded(true);
         }
-      }, 3000);
+      }, 1500);
 
       try {
         const token = localStorage.getItem('kh_admin_token');
@@ -1863,6 +1871,53 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return;
           }
           // On static hosts like GitHub Pages where /api/cms doesn't exist (404)
+          // 1. Try loading directly from GitHub repository host if configured
+          const ghCfg = getGitHubConfig();
+          if (ghCfg.owner && ghCfg.repo) {
+            try {
+              const ghRes = await fetchCMSDataFromGitHub();
+              if (ghRes && ghRes.data) {
+                console.log("[CMSContext] Successfully loaded live data/cms_data.json from GitHub host repository!");
+                if (active) {
+                  const healed = healData(ghRes.data);
+                  setData(healed);
+                  localStorage.setItem('kh_dream_cms_v6', JSON.stringify(healed));
+                  setIsLoaded(true);
+                  return;
+                }
+              }
+            } catch (err) {
+              console.warn("[CMSContext] Could not fetch data/cms_data.json from GitHub:", err);
+            }
+          }
+
+          // 2. Try loading static bundled ./data/cms_data.json
+          try {
+            const staticRes = await fetch(`./data/cms_data.json?t=${Date.now()}`).catch(() => null);
+            if (staticRes && staticRes.ok) {
+              const staticJson = await staticRes.json();
+              if (staticJson && typeof staticJson === 'object') {
+                if (active) {
+                  const healed = healData(staticJson);
+                  setData(healed);
+                  localStorage.setItem('kh_dream_cms_v6', JSON.stringify(healed));
+                  setIsLoaded(true);
+                  return;
+                }
+              }
+            }
+          } catch (e) {}
+
+          // 3. Fallback to localStorage cache
+          const local = localStorage.getItem('kh_dream_cms_v6');
+          if (local) {
+            try {
+              if (active) setData(healData(JSON.parse(local)));
+            } catch (err) {
+              console.error("CMSContext: Local fallback failed", err);
+            }
+          }
+
           if (active) setIsLoaded(true);
           return;
         }
@@ -2134,6 +2189,20 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       throw new Error("Your session has expired or is invalid. Please log in again to save your changes.");
     }
 
+    // Always persist to local cache immediately
+    localStorage.setItem('kh_dream_cms_v6', JSON.stringify(dataToSave));
+    localStorage.setItem('kh_dream_cms_cache_ver', APP_CACHE_VERSION);
+    setData(dataToSave);
+    if (currentUser) {
+      const updatedUser = dataToSave.users.find(u => u.id === currentUser?.id);
+      if (updatedUser) handleSetCurrentUser(updatedUser);
+    }
+
+    let serverSaved = false;
+    let ghSaved = false;
+    let ghError: string | null = null;
+
+    // 1. Attempt Node.js backend save
     try {
       const response = await fetch('/api/cms', {
         method: 'POST',
@@ -2144,68 +2213,66 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         body: JSON.stringify(dataToSave),
         credentials: 'include'
       }).catch(() => null);
-      
-      if (!response || !response.ok) {
-        if (!response || response.status === 404) {
-          // Static host (e.g. GitHub Pages): save locally in browser storage
-          localStorage.setItem('kh_dream_cms_v6', JSON.stringify(dataToSave));
-          localStorage.setItem('kh_dream_cms_cache_ver', APP_CACHE_VERSION);
-          setData(dataToSave);
-          if (currentUser) {
-            const updatedUser = dataToSave.users.find(u => u.id === currentUser?.id);
-            if (updatedUser) handleSetCurrentUser(updatedUser);
-          }
-          console.log("[CMS] System saved locally (Static / GitHub Pages mode).");
-          return true;
-        }
 
-        let errorMessage = `Server responded with ${response.status}`;
-        let errorData: any = {};
-        
-        try {
-          const text = await response.text();
-          try {
-            errorData = JSON.parse(text);
-            errorMessage = errorData.error || errorMessage;
-          } catch (e) {
-            errorMessage = text.slice(0, 100) || errorMessage;
-          }
-        } catch (e) {
-          // Fallback if reading text fails
+      if (response && response.ok) {
+        serverSaved = true;
+        console.log("[CMS] System Synchronized with Backend Server.");
+      } else if (response && (response.status === 401 || response.status === 403)) {
+        let text = await response.text().catch(() => '');
+        if (text.includes('expired') || text.includes('authorized')) {
+          handleSetCurrentUser(null);
+          throw new Error("Your session has expired or is invalid. Please log in again to save your changes.");
         }
-        
-        // Handle session expiration or unauthorized access
-        if (response.status === 401 || response.status === 403) {
-          const isExpired = errorData.code === 'SESSION_EXPIRED' || 
-                           errorMessage.toLowerCase().includes('expired') ||
-                           errorMessage.toLowerCase().includes('authorized') ||
-                           errorMessage.toLowerCase().includes('session');
-          
-          if (isExpired) {
-            console.warn("CMSContext: Session invalidation detected. Clearing local session.");
-            handleSetCurrentUser(null); // This clears localStorage too
-            throw new Error("Your session has expired or is invalid. Please log in again to save your changes.");
-          }
-        }
-        
-        throw new Error(errorMessage);
       }
-      
-      localStorage.setItem('kh_dream_cms_v6', JSON.stringify(dataToSave));
-      localStorage.setItem('kh_dream_cms_cache_ver', APP_CACHE_VERSION);
-      if (currentUser) {
-        const updatedUser = dataToSave.users.find(u => u.id === currentUser?.id);
-        if (updatedUser) handleSetCurrentUser(updatedUser);
-      }
-      console.log("[CMS] System Synchronized with Server.");
-      return true;
-    } catch (e) {
-      console.warn("Fallback to local save:", e);
-      localStorage.setItem('kh_dream_cms_v6', JSON.stringify(dataToSave));
-      localStorage.setItem('kh_dream_cms_cache_ver', APP_CACHE_VERSION);
-      setData(dataToSave);
-      return true;
+    } catch (e: any) {
+      if (e.message?.includes('session')) throw e;
+      console.warn("[CMS] Backend server save unavailable or static host:", e);
     }
+
+    // 2. Commit to GitHub host repository if GitHub Host Sync is configured
+    if (isGitHubConfigured()) {
+      try {
+        console.log("[CMS] Committing updated data/cms_data.json to GitHub repository host...");
+        const ghResult = await saveCMSDataToGitHub(dataToSave);
+        if (ghResult.success) {
+          ghSaved = true;
+          console.log("[CMS] Successfully committed data/cms_data.json to GitHub repository host!", ghResult.commitUrl);
+        } else {
+          ghError = ghResult.error || 'Failed to commit to GitHub';
+          console.warn("[CMS] GitHub commit warning:", ghResult.error);
+        }
+      } catch (err: any) {
+        ghError = err.message || 'GitHub connection error';
+        console.warn("[CMS] GitHub commit error:", err);
+      }
+    }
+
+    // Set informative sync report
+    if (ghSaved) {
+      setLastSyncReport({
+        type: 'github',
+        timestamp: Date.now(),
+        message: serverSaved 
+          ? 'Saved to backend server & committed directly to data/cms_data.json on GitHub host!'
+          : 'Committed directly to data/cms_data.json in your GitHub repository host!'
+      });
+    } else if (serverSaved) {
+      setLastSyncReport({
+        type: 'server',
+        timestamp: Date.now(),
+        message: 'Saved to backend server (data/cms_data.json).'
+      });
+    } else {
+      setLastSyncReport({
+        type: 'local',
+        timestamp: Date.now(),
+        message: ghError 
+          ? `Saved to browser cache only. GitHub host commit failed: ${ghError}`
+          : 'Saved to browser cache only. Connect GitHub Host Sync to persist settings to your GitHub repository.'
+      });
+    }
+
+    return true;
   };
 
   const resetToDefaults = () => {
@@ -2217,7 +2284,7 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   return (
-    <CMSContext.Provider value={{ data, updateData, saveChanges, resetToDefaults, isLoaded, currentUser, setCurrentUser: handleSetCurrentUser, logout, checkSessionActive }}>
+    <CMSContext.Provider value={{ data, updateData, saveChanges, resetToDefaults, isLoaded, currentUser, setCurrentUser: handleSetCurrentUser, logout, checkSessionActive, lastSyncReport }}>
       {children}
     </CMSContext.Provider>
   );

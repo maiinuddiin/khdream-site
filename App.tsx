@@ -94,9 +94,9 @@ const GeometricBackground: React.FC<{ data: CMSData }> = memo(({ data }) => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(29,78,216,0.1),transparent_50%),radial-gradient(circle_at_bottom_left,rgba(17,24,39,0.5),transparent_80%)]" />
       </div>
       
-      {data.general.bgUrl && (
+      {data?.general?.bgUrl && (
         <div className="absolute inset-0 opacity-10 dark:opacity-[0.04] mix-blend-overlay">
-          <img src={data.general.bgUrl || null} referrerPolicy="no-referrer" className="w-full h-full object-cover" alt="" />
+          <img src={data.general.bgUrl} referrerPolicy="no-referrer" className="w-full h-full object-cover" alt="" />
         </div>
       )}
 
@@ -355,13 +355,13 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinTimeElapsed(true);
-    }, view === 'admin' ? 200 : 800);
+    }, view === 'admin' ? 100 : 250);
     return () => clearTimeout(timer);
   }, [view]);
 
   useEffect(() => {
     const hostname = window.location.hostname;
-    const mappings = data.general.domainMappings || {};
+    const mappings = data?.general?.domainMappings || {};
     
     // Check for custom domain mapping
     const mappedId = mappings[hostname];
@@ -371,7 +371,7 @@ const AppContent: React.FC = () => {
         setMappedLandingPage(page);
       }
     }
-  }, [data.general.domainMappings, data.landingPages]);
+  }, [data?.general?.domainMappings, data.landingPages]);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -1168,7 +1168,7 @@ const AppContent: React.FC = () => {
           opacity: 1;
         }
 
-        ${data.general.customFontUrl ? (data.general.customFontUrl.includes('fonts.googleapis.com') ? `
+        ${data?.general?.customFontUrl ? (data.general.customFontUrl.includes('fonts.googleapis.com') ? `
           @import url('${data.general.customFontUrl}');
         ` : `
           @font-face {
@@ -1178,7 +1178,7 @@ const AppContent: React.FC = () => {
           }
         `) : ''}
 
-        ${data.general.customFontBase64 ? `
+        ${data?.general?.customFontBase64 ? `
           @font-face {
             font-family: 'CustomLanguageFont';
             src: url('data:font/ttf;base64,${data.general.customFontBase64}') format('truetype');

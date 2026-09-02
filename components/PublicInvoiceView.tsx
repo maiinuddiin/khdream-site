@@ -4,6 +4,7 @@ import { ShieldCheck, Loader2, AlertCircle, Download, Printer, FileDown } from '
 import jsPDF from 'jspdf';
 import { toPng } from 'html-to-image';
 import { useReactToPrint } from 'react-to-print';
+import { getGitHubConfig } from '../lib/githubSync';
 
 interface InvoiceData {
   id: string;
@@ -106,6 +107,31 @@ const PublicInvoiceView: React.FC<{ invoiceId: string }> = ({ invoiceId }) => {
             return;
           }
         }
+
+        // Static host fallback: check bundled dist/data/invoices/
+        const staticRes = await fetch(`./data/invoices/invoice_${encodeURIComponent(invoiceId)}.json`).catch(() => null);
+        if (staticRes && staticRes.ok) {
+          const staticData = await staticRes.json().catch(() => null);
+          if (staticData) {
+            setInvoice(staticData);
+            return;
+          }
+        }
+
+        // GitHub Repository raw fetch fallback (allows viewing committed invoices even on GitHub Pages)
+        const ghCfg = getGitHubConfig();
+        if (ghCfg.owner && ghCfg.repo) {
+          const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(ghCfg.owner)}/${encodeURIComponent(ghCfg.repo)}/${encodeURIComponent(ghCfg.branch || 'main')}/data/invoices/invoice_${encodeURIComponent(invoiceId)}.json`;
+          const ghRes = await fetch(rawUrl).catch(() => null);
+          if (ghRes && ghRes.ok) {
+            const ghData = await ghRes.json().catch(() => null);
+            if (ghData) {
+              setInvoice(ghData);
+              return;
+            }
+          }
+        }
+
         throw new Error('Invoice not found');
       } catch (err: any) {
         setError(err.message);
