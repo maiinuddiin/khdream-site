@@ -1,0 +1,35 @@
+{
+  "id": "INV-1783366228693",
+  "invoiceNumber": "KHDAZ-1100",
+  "customerName": "Emoroz",
+  "customerPhone": "0577985278",
+  "customerAddress": "AL AZIZIYAH",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "DAC-RUH SINGLE FLIGHT (BS)",
+      "quantity": 1,
+      "price": 1550
+    }
+  ],
+  "date": "2026-07-06",
+  "total": 1550,
+  "subtotal": 1550,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 1550,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-07-06T19:30:28.693Z",
+  "createdAt": "2026-07-06T19:30:28.693Z"
+}

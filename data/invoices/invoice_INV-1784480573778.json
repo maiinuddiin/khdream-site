@@ -1,0 +1,35 @@
+{
+  "id": "INV-1784480573778",
+  "invoiceNumber": "KHDAZ-1105",
+  "customerName": "RAKIB MIAH",
+  "customerPhone": "0557930679",
+  "customerAddress": "",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "KAWSER HAMID",
+  "items": [
+    {
+      "id": "1",
+      "description": "investor license (Trading)",
+      "quantity": 1,
+      "price": 18000
+    }
+  ],
+  "date": "2026-07-19",
+  "total": 18000,
+  "subtotal": 18000,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "partial",
+  "amountPaid": 5000,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-07-19T17:02:53.779Z",
+  "createdAt": "2026-07-19T17:02:53.779Z"
+}

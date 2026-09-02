@@ -1,0 +1,35 @@
+{
+  "id": "INV-1782156279605",
+  "invoiceNumber": "KHDAZ-1091",
+  "customerName": "Jaheer Usan Mohamed Hidayathullah",
+  "customerPhone": "053 819 0209",
+  "customerAddress": "",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "RUH-MAA-RUH ROUND TRIP",
+      "quantity": 1,
+      "price": 2600
+    }
+  ],
+  "date": "2026-06-22",
+  "total": 2600,
+  "subtotal": 2600,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 2600,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-06-22T19:24:39.606Z",
+  "createdAt": "2026-06-22T19:24:39.606Z"
+}

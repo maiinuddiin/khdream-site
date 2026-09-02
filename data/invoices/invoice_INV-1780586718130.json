@@ -1,0 +1,35 @@
+{
+  "id": "INV-1780586718130",
+  "invoiceNumber": "KHD3-1002",
+  "customerName": "AHMED ALI ABDULLAH ABDULLAH",
+  "customerPhone": "576061806",
+  "customerAddress": "Al Aziziyah",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "Air Ticket",
+      "quantity": 1,
+      "price": 450
+    }
+  ],
+  "date": "2026-06-04",
+  "total": 450,
+  "subtotal": 450,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 450,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LTD - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Opposite Saptco Bus Stand, Al Aziziyah, Riyadh - 14512",
+  "businessVatId": "",
+  "businessLogoUrl": "/uploads/1779264174442-913374366.png",
+  "updatedAt": "2026-06-04T15:25:18.130Z",
+  "createdAt": "2026-06-04T15:25:18.130Z"
+}

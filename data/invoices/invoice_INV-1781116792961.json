@@ -1,0 +1,35 @@
+{
+  "id": "INV-1781116792961",
+  "invoiceNumber": "KHDO-1012",
+  "customerName": "Mohammad Abul Kashem",
+  "customerPhone": "",
+  "customerAddress": "",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "MED-DAC-MED ROUND TRIP TICKET",
+      "quantity": 1,
+      "price": 2380
+    }
+  ],
+  "date": "2026-06-10",
+  "total": 2380,
+  "subtotal": 2380,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 2380,
+  "showSeal": false,
+  "businessId": "3",
+  "businessName": "KH Dream Services Limited - OLAYA",
+  "businessArabicName": "كي إتش دريم سيرفيسز ليميتد",
+  "businessAddress": "Mousa Complex, Al Olaya, Gate - 7,  Shop No - 30, Ground floor, Riyadh",
+  "businessVatId": "300000000000005",
+  "businessLogoUrl": "/uploads/1781116411443-858135589.png",
+  "updatedAt": "2026-06-10T18:39:52.961Z",
+  "createdAt": "2026-06-10T18:39:52.961Z"
+}

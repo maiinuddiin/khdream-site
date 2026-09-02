@@ -1,0 +1,35 @@
+{
+  "id": "INV-1786300811108",
+  "invoiceNumber": "KHDO-1026",
+  "customerName": "MOKTAR HOSSAIN",
+  "customerPhone": "01705204500",
+  "customerAddress": "",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Aman Hossain",
+  "items": [
+    {
+      "id": "1",
+      "description": "Investor License (Service)",
+      "quantity": 0,
+      "price": 1000
+    }
+  ],
+  "date": "2026-08-09",
+  "total": 0,
+  "subtotal": 0,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 0,
+  "showSeal": true,
+  "businessId": "3",
+  "businessName": "KH Dream Services Limited - OLAYA",
+  "businessArabicName": "كي إتش دريم سيرفيسز ليميتد",
+  "businessAddress": "Mousa Complex, Al Olaya, Gate - 7,  Shop No - 30, Ground floor, Riyadh",
+  "businessVatId": "300000000000005",
+  "businessLogoUrl": "/uploads/1781116411443-858135589.png",
+  "updatedAt": "2026-08-09T18:40:11.108Z",
+  "createdAt": "2026-08-09T18:40:11.108Z"
+}

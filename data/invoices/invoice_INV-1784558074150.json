@@ -1,0 +1,35 @@
+{
+  "id": "INV-1784558074150",
+  "invoiceNumber": "KHDAZ-1108",
+  "customerName": "شركة قمم النقل المحدودة",
+  "customerPhone": "",
+  "customerAddress": "Al Aziziyah",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": " RIYADH - DELHI // SINGLE TRIP // INDIGO - KBFHPW",
+      "quantity": 1,
+      "price": 690
+    }
+  ],
+  "date": "2026-07-20",
+  "total": 690,
+  "subtotal": 690,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 690,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-07-20T14:34:37.573Z",
+  "createdAt": "2026-07-20T14:34:37.573Z"
+}

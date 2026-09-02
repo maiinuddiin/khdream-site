@@ -1,0 +1,35 @@
+{
+  "id": "INV-1781630742610",
+  "invoiceNumber": "KHDo-1014",
+  "customerName": "ADNAN SHABBIR",
+  "customerPhone": "0557472149",
+  "customerAddress": "",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Aman Hossain",
+  "items": [
+    {
+      "id": "1",
+      "description": "Air Ticket",
+      "quantity": 1,
+      "price": 750
+    }
+  ],
+  "date": "2026-06-16",
+  "total": 750,
+  "subtotal": 750,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 750,
+  "showSeal": true,
+  "businessId": "3",
+  "businessName": "KH Dream Services Limited - OLAYA",
+  "businessArabicName": "كي إتش دريم سيرفيسز ليميتد",
+  "businessAddress": "Mousa Complex, Al Olaya, Gate - 7,  Shop No - 30, Ground floor, Riyadh",
+  "businessVatId": "300000000000005",
+  "businessLogoUrl": "/uploads/1781116411443-858135589.png",
+  "updatedAt": "2026-06-16T17:25:42.611Z",
+  "createdAt": "2026-06-16T17:25:42.611Z"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "INV-1781979604085",
+  "invoiceNumber": "KHDO-1016",
+  "customerName": "MD SOBUR ALI",
+  "customerPhone": "",
+  "customerAddress": "",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Aman Hossain",
+  "items": [
+    {
+      "id": "1",
+      "description": "Air Ticket",
+      "quantity": 1,
+      "price": 1680
+    }
+  ],
+  "date": "2026-06-20",
+  "total": 1680,
+  "subtotal": 1680,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 1680,
+  "showSeal": true,
+  "businessId": "3",
+  "businessName": "KH Dream Services Limited - OLAYA",
+  "businessArabicName": "كي إتش دريم سيرفيسز ليميتد",
+  "businessAddress": "Mousa Complex, Al Olaya, Gate - 7,  Shop No - 30, Ground floor, Riyadh",
+  "businessVatId": "300000000000005",
+  "businessLogoUrl": "/uploads/1781116411443-858135589.png",
+  "updatedAt": "2026-06-20T18:20:04.085Z",
+  "createdAt": "2026-06-20T18:20:04.085Z"
+}

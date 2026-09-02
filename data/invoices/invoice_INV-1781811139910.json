@@ -1,0 +1,35 @@
+{
+  "id": "INV-1781811139910",
+  "invoiceNumber": "KHDAZ-1089",
+  "customerName": "Nur islam",
+  "customerPhone": "",
+  "customerAddress": "Al Aziziyah",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "Umra visa",
+      "quantity": 1,
+      "price": 7424
+    }
+  ],
+  "date": "2026-06-18",
+  "total": 7424,
+  "subtotal": 7424,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "partial",
+  "amountPaid": 1500,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-06-18T19:32:19.910Z",
+  "createdAt": "2026-06-18T19:32:19.910Z"
+}

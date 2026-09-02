@@ -1,0 +1,35 @@
+{
+  "id": "INV-1783782370888",
+  "invoiceNumber": "KHDAZ-1102",
+  "customerName": "RUHUL AMIN",
+  "customerPhone": "",
+  "customerAddress": "Riyadh, Saudi Arabia",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "RUH-DAC-RUH ROUND TRIP // BG",
+      "quantity": 1,
+      "price": 2220
+    }
+  ],
+  "date": "2026-07-11",
+  "total": 2220,
+  "subtotal": 2220,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 2220,
+  "showSeal": false,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-07-11T15:06:10.888Z",
+  "createdAt": "2026-07-11T15:06:10.888Z"
+}

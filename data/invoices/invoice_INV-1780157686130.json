@@ -1,0 +1,35 @@
+{
+  "id": "INV-1780157686130",
+  "invoiceNumber": "KHD3-1001",
+  "customerName": "MR ZAKIR HOSSAIN",
+  "customerPhone": "",
+  "customerAddress": "AL AZIZIYAH",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "TICKET REISSUE",
+      "quantity": 1,
+      "price": 753
+    }
+  ],
+  "date": "2026-05-30",
+  "total": 753,
+  "subtotal": 753,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "due",
+  "amountPaid": 0,
+  "showSeal": false,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LTD - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Opposite Saptco Bus Stand, Al Aziziyah, Riyadh - 14512",
+  "businessVatId": "",
+  "businessLogoUrl": "/uploads/1779264174442-913374366.png",
+  "updatedAt": "2026-05-31T10:33:44.412Z",
+  "createdAt": "2026-05-31T10:33:44.412Z"
+}

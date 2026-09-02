@@ -1,0 +1,35 @@
+{
+  "id": "INV-1780262068627",
+  "invoiceNumber": "KHDJ-1001",
+  "customerName": "Mr. MOHAMMAD AYNAL SHEIKH",
+  "customerPhone": "0539606175",
+  "customerAddress": "Jeddah",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "Air Ticket",
+      "quantity": 1,
+      "price": 1020
+    }
+  ],
+  "date": "2026-05-25",
+  "total": 1020,
+  "subtotal": 1020,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "due",
+  "amountPaid": 0,
+  "showSeal": true,
+  "businessId": "1780223025215",
+  "businessName": "KH DREAM SERVICES LTD - JEDDAH",
+  "businessArabicName": "كي إتش دريم سيرفيسز ليمتد",
+  "businessAddress": "",
+  "businessVatId": "",
+  "businessLogoUrl": "/uploads/1780223082434-188360866.png",
+  "updatedAt": "2026-05-31T21:14:28.627Z",
+  "createdAt": "2026-05-31T21:14:28.627Z"
+}

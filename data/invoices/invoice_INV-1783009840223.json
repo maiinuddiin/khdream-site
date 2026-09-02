@@ -1,0 +1,35 @@
+{
+  "id": "INV-1783009840223",
+  "invoiceNumber": "KHDAZ-1098",
+  "customerName": "شركة قمم النقل المحدودة",
+  "customerPhone": "",
+  "customerAddress": "Riyadh",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "RUH-ATQ / INDIGO / ROUND TRIP",
+      "quantity": 2,
+      "price": 1100
+    }
+  ],
+  "date": "2026-07-02",
+  "total": 2200,
+  "subtotal": 2200,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 2200,
+  "showSeal": false,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-07-02T16:30:40.224Z",
+  "createdAt": "2026-07-02T16:30:40.224Z"
+}

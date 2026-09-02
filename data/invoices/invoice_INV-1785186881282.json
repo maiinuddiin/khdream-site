@@ -1,0 +1,35 @@
+{
+  "id": "INV-1785186881282",
+  "invoiceNumber": "KHDAZ-1110",
+  "customerName": "MOKTAR HOSSAIN",
+  "customerPhone": "0571862593",
+  "customerAddress": "JEDDAH",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "KAWSER HAMID",
+  "items": [
+    {
+      "id": "1",
+      "description": "INVESTOR SERVICE LICHENSE ",
+      "quantity": 1,
+      "price": 11000
+    }
+  ],
+  "date": "2026-07-27",
+  "total": 11000,
+  "subtotal": 11000,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "partial",
+  "amountPaid": 3000,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-07-27T21:14:41.282Z",
+  "createdAt": "2026-07-27T21:14:41.282Z"
+}

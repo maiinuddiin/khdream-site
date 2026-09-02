@@ -1,0 +1,35 @@
+{
+  "id": "INV-1781611722811",
+  "invoiceNumber": "KHDAZ-1088",
+  "customerName": "MOHAMMAD CURTAINS TRADING",
+  "customerPhone": "",
+  "customerAddress": "AL AZIZIYAH, RIYADH",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "MD HASAN",
+  "items": [
+    {
+      "id": "1",
+      "description": "INVESTOR DUE PAYMENT",
+      "quantity": 1,
+      "price": 5000
+    }
+  ],
+  "date": "2026-06-16",
+  "total": 5000,
+  "subtotal": 5000,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 5000,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-06-16T12:08:42.811Z",
+  "createdAt": "2026-06-16T12:08:42.811Z"
+}

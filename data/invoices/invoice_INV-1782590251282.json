@@ -1,0 +1,41 @@
+{
+  "id": "INV-1782590251282",
+  "invoiceNumber": "KHDAZ-1093",
+  "customerName": "SAHADAT HOSSAIN",
+  "customerPhone": "",
+  "customerAddress": "AL AZIZIYAH",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "RUH - DAC - RIYADH ROUND TRIP",
+      "quantity": 1,
+      "price": 1650
+    },
+    {
+      "id": "1782590183884",
+      "description": "RUH - DAC - RIYADH ROUND TRIP (EXCESS BAG)",
+      "quantity": 1,
+      "price": 1950
+    }
+  ],
+  "date": "2026-06-27",
+  "total": 3600,
+  "subtotal": 3600,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "partial",
+  "amountPaid": 2300,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-06-27T19:57:32.160Z",
+  "createdAt": "2026-06-27T19:57:32.160Z"
+}

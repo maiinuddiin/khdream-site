@@ -1,0 +1,35 @@
+{
+  "id": "INV-1781194519248",
+  "invoiceNumber": "KHDAZ-1085",
+  "customerName": "MILAN TAMANG",
+  "customerPhone": "966 0508863074",
+  "customerAddress": "Aziziyah, Riyadh, Saudi Arabia",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "RUH-KTM-RUH ROUND TRIP",
+      "quantity": 1,
+      "price": 2600
+    }
+  ],
+  "date": "2026-06-10",
+  "total": 2600,
+  "subtotal": 2600,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 2600,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "kh dream services limited - aziziyah",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-06-11T16:27:59.825Z",
+  "createdAt": "2026-06-11T16:27:59.825Z"
+}

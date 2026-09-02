@@ -1,0 +1,35 @@
+{
+  "id": "INV-1786905760079",
+  "invoiceNumber": "KHDAZ-1116",
+  "customerName": "Mr. YAZID AKREM ABDULKADIR, Mrs. SHAYMA ABDULWASI ABUBEKER",
+  "customerPhone": "",
+  "customerAddress": "Al Aziziyah",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "Origin : ADD to RUH | Round Trip | 2 PAX | Flynas",
+      "quantity": 1,
+      "price": 2650
+    }
+  ],
+  "date": "2026-08-16",
+  "total": 2650,
+  "subtotal": 2650,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 2650,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-08-16T18:42:40.079Z",
+  "createdAt": "2026-08-16T18:42:40.079Z"
+}

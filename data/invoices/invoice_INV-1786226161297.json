@@ -1,0 +1,35 @@
+{
+  "id": "INV-1786226161297",
+  "invoiceNumber": "KHDAZ-1113",
+  "customerName": "SAMIR DAS",
+  "customerPhone": "0543617537",
+  "customerAddress": "RIYADH",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "KAWSER HAMID",
+  "items": [
+    {
+      "id": "1",
+      "description": "INVESTOR SERVICE",
+      "quantity": 1,
+      "price": 5000
+    }
+  ],
+  "date": "2026-08-08",
+  "total": 5000,
+  "subtotal": 5000,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "partial",
+  "amountPaid": 5000,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-08-08T21:56:01.297Z",
+  "createdAt": "2026-08-08T21:56:01.297Z"
+}

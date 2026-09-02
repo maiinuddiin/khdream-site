@@ -1,0 +1,35 @@
+{
+  "id": "INV-1786897943812",
+  "invoiceNumber": "KHDO-1029",
+  "customerName": "ABU BAKAR SIDDIQUE",
+  "customerPhone": "0592261433",
+  "customerAddress": "",
+  "customerEmail": "DQ54693930",
+  "customerTaxId": "",
+  "issuedBy": "SAIF OTHO",
+  "items": [
+    {
+      "id": "1",
+      "description": "EGYPT VISA",
+      "quantity": 1,
+      "price": 1000
+    }
+  ],
+  "date": "2026-08-16",
+  "total": 1000,
+  "subtotal": 1000,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 1000,
+  "showSeal": true,
+  "businessId": "3",
+  "businessName": "KH Dream Services Limited - OLAYA",
+  "businessArabicName": "كي إتش دريم سيرفيسز ليميتد",
+  "businessAddress": "Mousa Complex, Al Olaya, Gate - 7,  Shop No - 30, Ground floor, Riyadh",
+  "businessVatId": "300000000000005",
+  "businessLogoUrl": "/uploads/1781116411443-858135589.png",
+  "updatedAt": "2026-08-16T16:32:23.812Z",
+  "createdAt": "2026-08-16T16:32:23.812Z"
+}

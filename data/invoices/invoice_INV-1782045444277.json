@@ -1,0 +1,35 @@
+{
+  "id": "INV-1782045444277",
+  "invoiceNumber": "KHDO-1017",
+  "customerName": "Shahzad Sandhu",
+  "customerPhone": "0599479216",
+  "customerAddress": "",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Aman Hossain",
+  "items": [
+    {
+      "id": "1",
+      "description": "Investor license",
+      "quantity": 1,
+      "price": 10000
+    }
+  ],
+  "date": "2026-06-21",
+  "total": 10000,
+  "subtotal": 10000,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 10000,
+  "showSeal": true,
+  "businessId": "3",
+  "businessName": "KH Dream Services Limited - OLAYA",
+  "businessArabicName": "كي إتش دريم سيرفيسز ليميتد",
+  "businessAddress": "Mousa Complex, Al Olaya, Gate - 7,  Shop No - 30, Ground floor, Riyadh",
+  "businessVatId": "300000000000005",
+  "businessLogoUrl": "/uploads/1781116411443-858135589.png",
+  "updatedAt": "2026-06-21T12:37:24.278Z",
+  "createdAt": "2026-06-21T12:37:24.278Z"
+}

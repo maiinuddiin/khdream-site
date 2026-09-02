@@ -1,0 +1,35 @@
+{
+  "id": "INV-1786375925901",
+  "invoiceNumber": "KHDO-1027",
+  "customerName": "SAYED HAMZA",
+  "customerPhone": "0538431281",
+  "customerAddress": "",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Aman Hossain",
+  "items": [
+    {
+      "id": "1",
+      "description": "Re-Exit",
+      "quantity": 1,
+      "price": 1580
+    }
+  ],
+  "date": "2026-08-10",
+  "total": 1580,
+  "subtotal": 1580,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 1580,
+  "showSeal": true,
+  "businessId": "3",
+  "businessName": "KH Dream Services Limited - OLAYA",
+  "businessArabicName": "كي إتش دريم سيرفيسز ليميتد",
+  "businessAddress": "Mousa Complex, Al Olaya, Gate - 7,  Shop No - 30, Ground floor, Riyadh",
+  "businessVatId": "300000000000005",
+  "businessLogoUrl": "/uploads/1781116411443-858135589.png",
+  "updatedAt": "2026-08-10T15:32:05.901Z",
+  "createdAt": "2026-08-10T15:32:05.901Z"
+}

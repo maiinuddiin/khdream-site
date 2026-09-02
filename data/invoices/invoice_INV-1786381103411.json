@@ -1,0 +1,35 @@
+{
+  "id": "INV-1786381103411",
+  "invoiceNumber": "KHDAZ-1114",
+  "customerName": "ASIF NAWAZ",
+  "customerPhone": "0532686136",
+  "customerAddress": "MANFUHA",
+  "customerEmail": "JF9615792",
+  "customerTaxId": "",
+  "issuedBy": "Hasan Roni",
+  "items": [
+    {
+      "id": "1",
+      "description": "Air Ticket",
+      "quantity": 1,
+      "price": 700
+    }
+  ],
+  "date": "2026-08-10",
+  "total": 700,
+  "subtotal": 700,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 700,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-08-10T16:58:23.411Z",
+  "createdAt": "2026-08-10T16:58:23.411Z"
+}

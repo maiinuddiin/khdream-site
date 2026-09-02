@@ -1,0 +1,35 @@
+{
+  "id": "INV-1785788235394",
+  "invoiceNumber": "KHDAZ-1112",
+  "customerName": "Mr. Emroz ",
+  "customerPhone": "0577985278",
+  "customerAddress": "",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "Main Uddin",
+  "items": [
+    {
+      "id": "1",
+      "description": "Air Ticket // Dac- Ruh// BS-381",
+      "quantity": 1,
+      "price": 1890
+    }
+  ],
+  "date": "2026-08-03",
+  "total": 1890,
+  "subtotal": 1890,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "paid",
+  "amountPaid": 1890,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LIMITED - AZIZIYAH",
+  "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+  "businessAddress": "Al Aziziyah, Riyadh, KSA - 14512",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1781194310667-236252318.png",
+  "updatedAt": "2026-08-03T20:17:15.394Z",
+  "createdAt": "2026-08-03T20:17:15.394Z"
+}
