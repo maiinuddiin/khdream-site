@@ -193,6 +193,9 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
     setStatusMessage(null);
     try {
       saveGitHubConfig(config);
+      // Trigger server-side pull first
+      await fetch('/api/invoices/sync', { method: 'POST', credentials: 'include' }).catch(() => null);
+
       const res = await fetchInvoicesFromGitHub();
       if (res.error) {
         setStatusMessage({ text: `Connection error: ${res.error}`, type: 'error' });
@@ -207,12 +210,12 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
           localStorage.setItem('kh_dream_invoices', JSON.stringify(merged));
           if (onInvoicesUpdated) onInvoicesUpdated();
           setStatusMessage({ 
-            text: `Connection successful! Synced ${res.invoices.length} invoices from data/invoices/ on GitHub.`, 
+            text: `Sync completed! Successfully synchronized ${res.invoices.length} invoices with data/invoices/ on GitHub.`, 
             type: 'success' 
           });
         } else {
           setStatusMessage({ 
-            text: 'Connected successfully! No invoices currently found in data/invoices/ folder.', 
+            text: 'Connected successfully! No invoices currently found in data/invoices/ folder on GitHub.', 
             type: 'info' 
           });
         }
@@ -503,6 +506,38 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
             {/* TAB 2: INVOICES SYNC */}
             {activeTab === 'invoices' && (
               <div className="space-y-4">
+                {/* Auto Sync Banner */}
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                      </span>
+                      <h4 className="text-xs font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                        Automatic Invoice Push & Pull Active
+                      </h4>
+                    </div>
+                    <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded">
+                      {config.owner}/{config.repo}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-emerald-900/80 dark:text-emerald-300/80 pt-1">
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-emerald-600 font-black">✓</span>
+                      <span><strong>Auto Push:</strong> New & updated invoices are committed to GitHub automatically.</span>
+                    </div>
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-emerald-600 font-black">✓</span>
+                      <span><strong>Auto Pull:</strong> Syncs automatically at startup, every 2 mins, & on tab open.</span>
+                    </div>
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-emerald-600 font-black">✓</span>
+                      <span><strong>Auto Delete:</strong> Deleted invoices are automatically removed from GitHub.</span>
+                    </div>
+                  </div>
+                </div>
+
                 {pushProgress && (
                   <div className="p-4 bg-slate-50 dark:bg-zinc-800/60 rounded-xl border border-slate-200 dark:border-zinc-700 space-y-2">
                     <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-zinc-300">
@@ -544,7 +579,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                       className="px-4 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-900 dark:text-white rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all border border-slate-200 dark:border-zinc-700"
                     >
                       {isTestingInvoices ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                      <span>Pull from GitHub</span>
+                      <span>Force Pull Now</span>
                     </button>
 
                     <button
@@ -635,7 +670,7 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
                         type="password"
                         value={config.token}
                         onChange={(e) => setConfig({ ...config, token: e.target.value.trim() })}
-                        placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                        placeholder="Personal access token"
                         className="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-primary/20 dark:text-white font-mono"
                       />
                       <Key size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />

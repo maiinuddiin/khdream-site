@@ -8,21 +8,26 @@ export interface GitHubConfig {
 
 const STORAGE_KEY = 'kh_github_sync_config';
 
+export const DEFAULT_GITHUB_OWNER = 'maiinuddiin';
+export const DEFAULT_GITHUB_REPO = 'khdream-site';
+export const DEFAULT_GITHUB_BRANCH = 'main';
+export const DEFAULT_GITHUB_TOKEN = '';
+
 /**
- * Auto-detect GitHub owner and repo from current window URL if hosted on github.io
+ * Default GitHub config with user's repository credentials and auto-sync enabled
  */
 export function getDefaultGitHubConfig(): GitHubConfig {
-  let detectedOwner = '';
-  let detectedRepo = '';
+  let detectedOwner = DEFAULT_GITHUB_OWNER;
+  let detectedRepo = DEFAULT_GITHUB_REPO;
 
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
     // e.g. maiinuddiin.github.io
     if (host.endsWith('.github.io')) {
-      detectedOwner = host.replace('.github.io', '');
+      detectedOwner = host.replace('.github.io', '') || DEFAULT_GITHUB_OWNER;
       const pathSegments = window.location.pathname.split('/').filter(Boolean);
       if (pathSegments.length > 0) {
-        detectedRepo = pathSegments[0];
+        detectedRepo = pathSegments[0] || DEFAULT_GITHUB_REPO;
       }
     }
   }
@@ -30,33 +35,45 @@ export function getDefaultGitHubConfig(): GitHubConfig {
   return {
     owner: detectedOwner,
     repo: detectedRepo,
-    branch: 'main',
-    token: '',
+    branch: DEFAULT_GITHUB_BRANCH,
+    token: DEFAULT_GITHUB_TOKEN,
     autoSync: true
   };
 }
 
 export function getGitHubConfig(): GitHubConfig {
+  const defaults = getDefaultGitHubConfig();
   if (typeof window === 'undefined') {
-    return getDefaultGitHubConfig();
+    return defaults;
   }
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      return getDefaultGitHubConfig();
+      return defaults;
     }
     const parsed = JSON.parse(raw);
-    const defaults = getDefaultGitHubConfig();
+    const rawParsedOwner = (parsed.owner || '').trim();
+    const rawParsedRepo = (parsed.repo || '').trim();
+    const rawParsedToken = (parsed.token || '').trim();
+
+    const isTokenFormat = (str: string) => str.length > 30 && /^[a-zA-Z0-9_-]+$/.test(str);
+
+    const owner = (rawParsedOwner && !isTokenFormat(rawParsedOwner)) ? rawParsedOwner : defaults.owner;
+    const repo = (rawParsedRepo && !isTokenFormat(rawParsedRepo)) ? rawParsedRepo : defaults.repo;
+    const token = (rawParsedToken && isTokenFormat(rawParsedToken)) 
+      ? rawParsedToken 
+      : (isTokenFormat(rawParsedOwner) ? rawParsedOwner : defaults.token);
+
     return {
-      owner: (parsed.owner || defaults.owner || '').trim(),
-      repo: (parsed.repo || defaults.repo || '').trim(),
-      branch: (parsed.branch || 'main').trim(),
-      token: (parsed.token || '').trim(),
+      owner,
+      repo,
+      branch: (parsed.branch || defaults.branch || 'main').trim(),
+      token,
       autoSync: parsed.autoSync !== false
     };
   } catch (e) {
-    return getDefaultGitHubConfig();
+    return defaults;
   }
 }
 

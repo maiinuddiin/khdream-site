@@ -7,10 +7,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# node_modules
-node_modules
-dist-ssr
+# Environment & Secrets
+.env
+.env*.local
 *.local
+.dev.env.json
+.dev.pid
+
+# Dependencies & Build
+node_modules
+dist
+dist-ssr
+
+# Temporary scripts & caches
+cms-temp.cjs
+test-*.cjs
 
 # Editor directories and files
 .vscode/*

@@ -3732,13 +3732,267 @@ ${recipientName}`;
     }
   });
 
-  // API Routes
-  app.get("/api/invoices", isInvoiceAuthorized, (req, res) => {
+  // GitHub Sync Configuration for Invoices
+  const rawToken = (process.env.GITHUB_TOKEN || "").trim();
+  const rawOwner = (process.env.GITHUB_OWNER || "").trim();
+  const rawRepo = (process.env.GITHUB_REPO || "").trim();
+  const rawBranch = (process.env.GITHUB_BRANCH || "").trim();
+
+  const isLikelyToken = (val: string) => val.length > 20 && /^[a-zA-Z0-9_-]+$/.test(val);
+
+  const GITHUB_TOKEN = isLikelyToken(rawToken) ? rawToken : "";
+  const GITHUB_OWNER = (rawOwner && !isLikelyToken(rawOwner)) ? rawOwner : "maiinuddiin";
+  const GITHUB_REPO = (rawRepo && !isLikelyToken(rawRepo)) ? rawRepo : "khdream-site";
+  const GITHUB_BRANCH = (rawBranch && !isLikelyToken(rawBranch)) ? rawBranch : "main";
+
+  let lastGitHubInvoicePullTime = 0;
+  let isGitHubInvoicePulling = false;
+
+  async function pullInvoicesFromGitHubServer(): Promise<{ count: number; error?: string }> {
+    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+      return { count: 0, error: "GitHub credentials not configured" };
+    }
+    if (isGitHubInvoicePulling) return { count: 0 };
+    isGitHubInvoicePulling = true;
     try {
       if (!fs.existsSync(INVOICES_DIR)) {
         fs.mkdirSync(INVOICES_DIR, { recursive: true });
-        return res.json([]);
       }
+
+      const listUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/data/invoices?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
+      const listRes = await fetch(listUrl, {
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        }
+      }).catch(err => {
+        console.error("[GITHUB-PULL] Network error:", err.message);
+        return null;
+      });
+
+      if (!listRes || !listRes.ok) {
+        const errText = listRes ? await listRes.text().catch(() => "") : "Network error";
+        console.warn(`[GITHUB-PULL] Could not list GitHub data/invoices (${listRes?.status}):`, errText);
+        return { count: 0, error: `GitHub response status ${listRes?.status}` };
+      }
+
+      const items = await listRes.json();
+      if (!Array.isArray(items)) return { count: 0 };
+
+      const invoiceFiles = items.filter((f: any) => f.name && f.name.startsWith("invoice_") && f.name.endsWith(".json"));
+      let pulledCount = 0;
+
+      for (const item of invoiceFiles) {
+        const localPath = path.join(INVOICES_DIR, item.name);
+        let needDownload = !fs.existsSync(localPath);
+        if (!needDownload && item.size) {
+          try {
+            const stat = fs.statSync(localPath);
+            if (stat.size === 0) needDownload = true;
+          } catch (e) {
+            needDownload = true;
+          }
+        }
+
+        if (needDownload && item.download_url) {
+          try {
+            const dlRes = await fetch(item.download_url);
+            if (dlRes.ok) {
+              const text = await dlRes.text();
+              fs.writeFileSync(localPath, text);
+              pulledCount++;
+            }
+          } catch (dlErr: any) {
+            console.warn(`[GITHUB-PULL] Failed downloading ${item.name}:`, dlErr.message);
+          }
+        }
+      }
+
+      lastGitHubInvoicePullTime = Date.now();
+      if (pulledCount > 0) {
+        console.log(`[GITHUB-PULL] Synced: ${pulledCount} new/updated invoices pulled from GitHub (${invoiceFiles.length} total on repo)`);
+      }
+      return { count: pulledCount };
+    } catch (err: any) {
+      console.error("[GITHUB-PULL] Error during invoice sync:", err.message);
+      return { count: 0, error: err.message };
+    } finally {
+      isGitHubInvoicePulling = false;
+    }
+  }
+
+  async function pushInvoiceToGitHubServer(invoice: any): Promise<{ success: boolean; error?: string }> {
+    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+      return { success: false, error: "GitHub credentials not configured" };
+    }
+    const invoiceId = invoice.id || invoice.invoiceNumber;
+    if (!invoiceId) return { success: false, error: "Missing invoice ID" };
+
+    const safeId = String(invoiceId).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const filePath = `data/invoices/invoice_${safeId}.json`;
+    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/${filePath}`;
+
+    try {
+      let sha: string | undefined = undefined;
+      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, {
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        }
+      }).catch(() => null);
+
+      if (checkRes && checkRes.ok) {
+        const fileData: any = await checkRes.json().catch(() => null);
+        if (fileData && fileData.sha) {
+          sha = fileData.sha;
+        }
+      }
+
+      const payloadStr = JSON.stringify(invoice, null, 2);
+      const base64Content = Buffer.from(payloadStr, "utf-8").toString("base64");
+      const commitMessage = sha
+        ? `Update invoice ${invoice.invoiceNumber || safeId} in data/invoices/ [auto-sync]`
+        : `Add invoice ${invoice.invoiceNumber || safeId} to data/invoices/ [auto-sync]`;
+
+      const putRes = await fetch(apiUrl, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        },
+        body: JSON.stringify({
+          message: commitMessage,
+          content: base64Content,
+          branch: GITHUB_BRANCH,
+          ...(sha ? { sha } : {})
+        })
+      });
+
+      if (!putRes.ok) {
+        const errJson: any = await putRes.json().catch(() => ({}));
+        console.error(`[GITHUB-PUSH] GitHub API rejected invoice ${safeId} (${putRes.status}):`, errJson);
+        return { success: false, error: errJson.message || `Status ${putRes.status}` };
+      }
+
+      console.log(`[GITHUB-PUSH] Successfully pushed invoice ${safeId} to GitHub (${GITHUB_OWNER}/${GITHUB_REPO})`);
+      return { success: true };
+    } catch (err: any) {
+      console.error(`[GITHUB-PUSH] Error pushing invoice ${safeId}:`, err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
+  async function deleteInvoiceFromGitHubServer(invoiceId: string): Promise<{ success: boolean; error?: string }> {
+    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+      return { success: false, error: "GitHub credentials not configured" };
+    }
+    const safeId = String(invoiceId).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const filePath = `data/invoices/invoice_${safeId}.json`;
+    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/${filePath}`;
+
+    try {
+      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, {
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        }
+      }).catch(() => null);
+
+      if (!checkRes || !checkRes.ok) {
+        return { success: true };
+      }
+
+      const fileData: any = await checkRes.json().catch(() => null);
+      if (!fileData || !fileData.sha) {
+        return { success: false, error: "Could not retrieve file SHA" };
+      }
+
+      const delRes = await fetch(apiUrl, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        },
+        body: JSON.stringify({
+          message: `Delete invoice ${safeId} from data/invoices/ [auto-sync]`,
+          sha: fileData.sha,
+          branch: GITHUB_BRANCH
+        })
+      });
+
+      console.log(`[GITHUB-DELETE] Deleted invoice ${safeId} from GitHub repository (${delRes.ok})`);
+      return { success: delRes.ok };
+    } catch (err: any) {
+      console.error(`[GITHUB-DELETE] Error deleting invoice ${safeId} from GitHub:`, err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
+  // Initial pull from GitHub on startup
+  setTimeout(() => {
+    pullInvoicesFromGitHubServer().catch(e => console.warn("[STARTUP-INVOICE-PULL]", e.message));
+  }, 1000);
+
+  // Periodic auto-pull every 2 minutes
+  setInterval(() => {
+    pullInvoicesFromGitHubServer().catch(e => console.warn("[PERIODIC-INVOICE-PULL]", e.message));
+  }, 120000);
+
+  // GitHub Sync Status Endpoint
+  app.get("/api/github/status", (req, res) => {
+    const fileCount = fs.existsSync(INVOICES_DIR) ? fs.readdirSync(INVOICES_DIR).filter(f => f.endsWith(".json")).length : 0;
+    res.json({
+      configured: Boolean(GITHUB_TOKEN && GITHUB_OWNER && GITHUB_REPO),
+      owner: GITHUB_OWNER,
+      repo: GITHUB_REPO,
+      branch: GITHUB_BRANCH,
+      autoSync: true,
+      localInvoicesCount: fileCount,
+      lastSyncTime: lastGitHubInvoicePullTime ? new Date(lastGitHubInvoicePullTime).toISOString() : null
+    });
+  });
+
+  // Manual trigger for bidirectional sync
+  app.post("/api/invoices/sync", isInvoiceAuthorized, async (req, res) => {
+    try {
+      const pullResult = await pullInvoicesFromGitHubServer();
+      const files = fs.existsSync(INVOICES_DIR) ? fs.readdirSync(INVOICES_DIR).filter(f => f.endsWith(".json")) : [];
+      res.json({
+        success: true,
+        pulled: pullResult.count,
+        totalLocal: files.length,
+        error: pullResult.error
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Failed to sync invoices" });
+    }
+  });
+
+  // API Routes
+  app.get("/api/invoices", isInvoiceAuthorized, async (req, res) => {
+    try {
+      if (!fs.existsSync(INVOICES_DIR)) {
+        fs.mkdirSync(INVOICES_DIR, { recursive: true });
+      }
+
+      // Automatically pull from GitHub if empty or if last pull was > 60s ago or if explicit sync query
+      const isDueForSync = req.query.sync === "true" || (Date.now() - lastGitHubInvoicePullTime > 60000) || fs.readdirSync(INVOICES_DIR).length === 0;
+      if (isDueForSync && GITHUB_TOKEN) {
+        await pullInvoicesFromGitHubServer().catch(e => console.warn("[INVOICE-GET-SYNC]", e.message));
+      }
+
       const files = fs.readdirSync(INVOICES_DIR).filter(f => f.endsWith(".json"));
       const invoices = files.map(file => {
         try {
@@ -3753,6 +4007,14 @@ ${recipientName}`;
           return null;
         }
       }).filter(inv => inv !== null);
+
+      // Sort newest first
+      invoices.sort((a, b) => {
+        const timeA = new Date(a.createdAt || a.date || 0).getTime();
+        const timeB = new Date(b.createdAt || b.date || 0).getTime();
+        return timeB - timeA;
+      });
+
       res.json(invoices);
     } catch (error) {
       console.error("Error reading invoices:", error);
@@ -3787,6 +4049,12 @@ ${recipientName}`;
       
       fs.writeFileSync(filePath, JSON.stringify(invoice, null, 2));
       console.log(`[SAVE] Invoice saved successfully: ${fileName}`);
+
+      // Auto-push to GitHub repository in background
+      pushInvoiceToGitHubServer(invoice).catch(err => {
+        console.warn(`[AUTO-PUSH] Async GitHub push error:`, err);
+      });
+
       res.status(200).json(invoice);
     } catch (error) {
       console.error("Error saving invoice:", error);
@@ -3870,9 +4138,16 @@ ${recipientName}`;
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
         console.log(`[DELETE] Successfully deleted: ${fileName}`);
+
+        // Auto-delete from GitHub repository in background
+        deleteInvoiceFromGitHubServer(id).catch(err => {
+          console.warn(`[AUTO-DELETE] Async GitHub delete error:`, err);
+        });
+
         res.json({ message: "Invoice deleted successfully" });
       } else {
         console.warn(`[DELETE] No file found for ID: ${id}. Returning success for idempotency.`);
+        deleteInvoiceFromGitHubServer(id).catch(() => {});
         res.json({ message: "Invoice already deleted or not found" });
       }
     } catch (error) {

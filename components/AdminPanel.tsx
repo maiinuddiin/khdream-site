@@ -1528,19 +1528,34 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
     );
   };
 
-  const fetchInvoices = async () => {
+  const fetchInvoices = async (forceSync = true) => {
     setIsLoadingInvoices(true);
     try {
       const token = localStorage.getItem('kh_admin_token') || '';
-      // Add cache busting and auth token to ensure we get fresh data from server database
-      const res = await fetch(`/api/invoices?t=${Date.now()}`, { 
+      // Add cache busting and sync query to trigger automatic server-side pull from GitHub
+      const syncQuery = forceSync ? '&sync=true' : '';
+      const res = await fetch(`/api/invoices?t=${Date.now()}${syncQuery}`, { 
         headers: token ? { 'x-admin-token': token } : {},
         credentials: 'include' 
       }).catch(() => null);
+
       if (res && res.ok) {
         const data = await res.json();
-        setInvoices(data);
-        localStorage.setItem('kh_dream_invoices', JSON.stringify(data));
+        if (Array.isArray(data) && data.length > 0) {
+          setInvoices(data);
+          localStorage.setItem('kh_dream_invoices', JSON.stringify(data));
+        } else if (isGitHubConfigured()) {
+          // If server returned empty, fallback to client-side direct GitHub pull
+          const ghRes = await fetchInvoicesFromGitHub().catch(() => ({ invoices: [] }));
+          if (ghRes.invoices && ghRes.invoices.length > 0) {
+            setInvoices(ghRes.invoices);
+            localStorage.setItem('kh_dream_invoices', JSON.stringify(ghRes.invoices));
+          } else {
+            setInvoices(data || []);
+          }
+        } else {
+          setInvoices(data || []);
+        }
       } else {
         const local = localStorage.getItem('kh_dream_invoices');
         let combined: any[] = [];
@@ -1633,7 +1648,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
 
   useEffect(() => {
     if (activeTab === 'invoices') {
-      fetchInvoices();
+      fetchInvoices(true);
+      // Auto-refresh invoices every 45s while on invoices tab to catch external commits
+      const interval = setInterval(() => {
+        fetchInvoices(false);
+      }, 45000);
+      return () => clearInterval(interval);
     }
   }, [activeTab]);
   
@@ -14668,8 +14688,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
 
           {activeTab === 'invoices' && (
             <div className="space-y-6 animate-in slide-in-from-bottom-8">
-              <div className="flex justify-between items-center mb-4">
-                <div />
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <div 
+                    onClick={() => setShowGitHubSyncModal(true)}
+                    className="cursor-pointer group flex items-center gap-2 px-3.5 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/15 transition-all shadow-xs"
+                    title="Invoices automatically push and pull with maiinuddiin/khdream-site repository on GitHub"
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                      GitHub Auto-Sync: Active
+                    </span>
+                    <span className="hidden md:inline text-[9px] font-mono text-emerald-600/80 dark:text-emerald-400/70 font-semibold">
+                      maiinuddiin/khdream-site
+                    </span>
+                  </div>
+                </div>
                 <div className="flex items-center space-x-3">
                   <button 
                     onClick={() => setShowGitHubSyncModal(true)}
@@ -14690,10 +14727,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
                     <Download size={16} />
                   </button>
                   <button 
-                    onClick={fetchInvoices}
+                    onClick={() => fetchInvoices(true)}
                     disabled={isLoadingInvoices}
                     className="p-3 bg-slate-100 dark:bg-zinc-800 text-slate-500 hover:text-primary rounded-xl transition-all"
-                    title="Refresh List"
+                    title="Pull Latest from GitHub & Refresh"
                   >
                     <RotateCcw size={16} className={isLoadingInvoices ? 'animate-spin' : ''} />
                   </button>
