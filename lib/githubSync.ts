@@ -41,6 +41,36 @@ export function getDefaultGitHubConfig(): GitHubConfig {
   };
 }
 
+let serverConfigFetched = false;
+export async function initializeGitHubConfigFromServer(): Promise<GitHubConfig> {
+  if (serverConfigFetched || typeof window === 'undefined') {
+    return getGitHubConfig();
+  }
+  serverConfigFetched = true;
+  try {
+    const res = await fetch('/api/github/config').catch(() => null);
+    if (res && res.ok) {
+      const serverCfg = await res.json().catch(() => null);
+      if (serverCfg && serverCfg.token && serverCfg.owner && serverCfg.repo) {
+        return saveGitHubConfig({
+          owner: serverCfg.owner,
+          repo: serverCfg.repo,
+          branch: serverCfg.branch || 'main',
+          token: serverCfg.token,
+          autoSync: true
+        });
+      }
+    }
+  } catch (e) {
+    // Fallback to local / defaults
+  }
+  return getGitHubConfig();
+}
+
+if (typeof window !== 'undefined') {
+  initializeGitHubConfigFromServer().catch(() => {});
+}
+
 export function getGitHubConfig(): GitHubConfig {
   const defaults = getDefaultGitHubConfig();
   if (typeof window === 'undefined') {
@@ -55,21 +85,23 @@ export function getGitHubConfig(): GitHubConfig {
     const parsed = JSON.parse(raw);
     const rawParsedOwner = (parsed.owner || '').trim();
     const rawParsedRepo = (parsed.repo || '').trim();
+    const rawParsedBranch = (parsed.branch || '').trim();
     const rawParsedToken = (parsed.token || '').trim();
 
-    const isTokenFormat = (str: string) => str.length > 30 && /^[a-zA-Z0-9_-]+$/.test(str);
+    const isTokenFormat = (str: string) => str.length > 20 && (/^gh[pousr]_[a-zA-Z0-9]+$/.test(str) || /^[a-zA-Z0-9_-]{30,}$/.test(str));
 
     const owner = (rawParsedOwner && !isTokenFormat(rawParsedOwner)) ? rawParsedOwner : defaults.owner;
     const repo = (rawParsedRepo && !isTokenFormat(rawParsedRepo)) ? rawParsedRepo : defaults.repo;
+    const branch = (rawParsedBranch && !isTokenFormat(rawParsedBranch)) ? rawParsedBranch : (defaults.branch || 'main');
     const token = (rawParsedToken && isTokenFormat(rawParsedToken)) 
       ? rawParsedToken 
-      : (isTokenFormat(rawParsedOwner) ? rawParsedOwner : defaults.token);
+      : (isTokenFormat(rawParsedOwner) ? rawParsedOwner : (isTokenFormat(rawParsedRepo) ? rawParsedRepo : defaults.token));
 
     return {
       owner,
       repo,
-      branch: (parsed.branch || defaults.branch || 'main').trim(),
-      token,
+      branch,
+      token: token || defaults.token,
       autoSync: parsed.autoSync !== false
     };
   } catch (e) {
@@ -79,13 +111,30 @@ export function getGitHubConfig(): GitHubConfig {
 
 export function saveGitHubConfig(updates: Partial<GitHubConfig>): GitHubConfig {
   const current = getGitHubConfig();
+  const defaults = getDefaultGitHubConfig();
+  const isTokenFormat = (str: string) => str.length > 20 && (/^gh[pousr]_[a-zA-Z0-9]+$/.test(str) || /^[a-zA-Z0-9_-]{30,}$/.test(str));
+
+  const rawOwner = (updates.owner !== undefined ? updates.owner : current.owner).trim();
+  const rawRepo = (updates.repo !== undefined ? updates.repo : current.repo).trim();
+  const rawBranch = (updates.branch !== undefined ? updates.branch : current.branch).trim();
+  const rawToken = (updates.token !== undefined ? updates.token : current.token).trim();
+
+  let token = (rawToken && isTokenFormat(rawToken)) ? rawToken : current.token;
+  if (!token || !isTokenFormat(token)) {
+    if (isTokenFormat(rawOwner)) token = rawOwner;
+    else if (isTokenFormat(rawRepo)) token = rawRepo;
+    else if (isTokenFormat(rawBranch)) token = rawBranch;
+    else token = defaults.token;
+  }
+
   const next: GitHubConfig = {
     ...current,
     ...updates,
-    owner: (updates.owner !== undefined ? updates.owner : current.owner).trim(),
-    repo: (updates.repo !== undefined ? updates.repo : current.repo).trim(),
-    branch: (updates.branch !== undefined ? updates.branch : current.branch).trim() || 'main',
-    token: (updates.token !== undefined ? updates.token : current.token).trim()
+    owner: (rawOwner && !isTokenFormat(rawOwner)) ? rawOwner : (current.owner || defaults.owner),
+    repo: (rawRepo && !isTokenFormat(rawRepo)) ? rawRepo : (current.repo || defaults.repo),
+    branch: (rawBranch && !isTokenFormat(rawBranch)) ? rawBranch : (current.branch || 'main'),
+    token: token || defaults.token,
+    autoSync: updates.autoSync !== undefined ? updates.autoSync : current.autoSync
   };
 
   if (typeof window !== 'undefined') {

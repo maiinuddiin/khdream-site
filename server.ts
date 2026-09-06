@@ -23,6 +23,26 @@ import https from "https";
 // Load environment variables
 dotenv.config();
 
+// Sanitize GitHub configuration environment variables (prevent token pollution in owner/repo/branch)
+const isTokenVal = (val?: string) => Boolean(val && (/^gh[pousr]_[a-zA-Z0-9]+$/.test(val.trim()) || val.trim().length > 25));
+
+const foundToken = [process.env.GITHUB_TOKEN, process.env.GITHUB_OWNER, process.env.GITHUB_REPO, process.env.GITHUB_BRANCH]
+  .find(v => isTokenVal(v));
+
+if (foundToken) {
+  process.env.GITHUB_TOKEN = foundToken.trim();
+}
+
+if (!process.env.GITHUB_OWNER || isTokenVal(process.env.GITHUB_OWNER)) {
+  process.env.GITHUB_OWNER = "maiinuddiin";
+}
+if (!process.env.GITHUB_REPO || isTokenVal(process.env.GITHUB_REPO)) {
+  process.env.GITHUB_REPO = "khdream-site";
+}
+if (!process.env.GITHUB_BRANCH || isTokenVal(process.env.GITHUB_BRANCH)) {
+  process.env.GITHUB_BRANCH = "main";
+}
+
 // In-memory OTP store for secure multi-factor login sessions
 const loginOtps = new Map<string, { otp: string; expiry: number; user: any }>();
 
@@ -1078,6 +1098,8 @@ async function startServer() {
     }
   };
 
+  let onCMSUpdated: ((data: any) => void) | null = null;
+
   const writeCMS = async (data: any): Promise<boolean> => {
     return new Promise((resolve) => {
       const performWrite = () => {
@@ -1098,6 +1120,9 @@ async function startServer() {
           lastCmsMtime = stat.mtimeMs;
           
           isWritingCMS = false;
+          if (typeof onCMSUpdated === "function") {
+            try { onCMSUpdated(data); } catch (err) { console.warn("[CMS-UPDATE-HOOK]", err); }
+          }
           resolve(true);
         } catch (e) {
           console.error("CRITICAL: Failed to write CMS data:", e);
@@ -3732,15 +3757,17 @@ ${recipientName}`;
     }
   });
 
-  // GitHub Sync Configuration for Invoices
+  // GitHub Sync Configuration for Invoices & CMS
   const rawToken = (process.env.GITHUB_TOKEN || "").trim();
   const rawOwner = (process.env.GITHUB_OWNER || "").trim();
   const rawRepo = (process.env.GITHUB_REPO || "").trim();
   const rawBranch = (process.env.GITHUB_BRANCH || "").trim();
 
-  const isLikelyToken = (val: string) => val.length > 20 && /^[a-zA-Z0-9_-]+$/.test(val);
+  const isLikelyToken = (val: string) => val.length > 20 && (/^gh[pousr]_[a-zA-Z0-9]+$/.test(val) || /^[a-zA-Z0-9_-]{30,}$/.test(val));
 
-  const GITHUB_TOKEN = isLikelyToken(rawToken) ? rawToken : "";
+  const GITHUB_TOKEN = isLikelyToken(rawToken) 
+    ? rawToken 
+    : (isLikelyToken(rawOwner) ? rawOwner : (isLikelyToken(rawRepo) ? rawRepo : ""));
   const GITHUB_OWNER = (rawOwner && !isLikelyToken(rawOwner)) ? rawOwner : "maiinuddiin";
   const GITHUB_REPO = (rawRepo && !isLikelyToken(rawRepo)) ? rawRepo : "khdream-site";
   const GITHUB_BRANCH = (rawBranch && !isLikelyToken(rawBranch)) ? rawBranch : "main";
@@ -3940,6 +3967,69 @@ ${recipientName}`;
     }
   }
 
+  async function pushCMSDataToGitHubServer(cmsPayload: any): Promise<{ success: boolean; error?: string }> {
+    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+      return { success: false, error: "GitHub credentials not configured" };
+    }
+    const filePath = "data/cms_data.json";
+    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/${filePath}`;
+
+    try {
+      let sha: string | undefined = undefined;
+      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, {
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        }
+      }).catch(() => null);
+
+      if (checkRes && checkRes.ok) {
+        const fileData: any = await checkRes.json().catch(() => null);
+        if (fileData && fileData.sha) {
+          sha = fileData.sha;
+        }
+      }
+
+      const jsonStr = JSON.stringify(cmsPayload, null, 2);
+      const base64Content = Buffer.from(jsonStr, "utf-8").toString("base64");
+      const nowStr = new Date().toISOString().replace("T", " ").slice(0, 19);
+      const commitMessage = sha 
+        ? `Update CMS data/cms_data.json [auto-sync ${nowStr}]`
+        : `Initialize CMS data/cms_data.json [auto-sync ${nowStr}]`;
+
+      const putRes = await fetch(apiUrl, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        },
+        body: JSON.stringify({
+          message: commitMessage,
+          content: base64Content,
+          branch: GITHUB_BRANCH,
+          ...(sha ? { sha } : {})
+        })
+      });
+
+      if (!putRes.ok) {
+        const errJson: any = await putRes.json().catch(() => ({}));
+        console.error(`[GITHUB-CMS-PUSH] GitHub API rejected CMS update (${putRes.status}):`, errJson);
+        return { success: false, error: errJson.message || `Status ${putRes.status}` };
+      }
+
+      console.log(`[GITHUB-CMS-PUSH] Successfully pushed CMS data to GitHub (${GITHUB_OWNER}/${GITHUB_REPO})`);
+      return { success: true };
+    } catch (err: any) {
+      console.error(`[GITHUB-CMS-PUSH] Error pushing CMS to GitHub:`, err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
   // Initial pull from GitHub on startup
   setTimeout(() => {
     pullInvoicesFromGitHubServer().catch(e => console.warn("[STARTUP-INVOICE-PULL]", e.message));
@@ -3949,6 +4039,13 @@ ${recipientName}`;
   setInterval(() => {
     pullInvoicesFromGitHubServer().catch(e => console.warn("[PERIODIC-INVOICE-PULL]", e.message));
   }, 120000);
+
+  // Connect writeCMS hook to auto-sync CMS changes directly to GitHub
+  onCMSUpdated = (updatedCMSData: any) => {
+    pushCMSDataToGitHubServer(updatedCMSData).catch(err => {
+      console.warn("[AUTO-SYNC-CMS] Error auto-pushing CMS data to GitHub:", err);
+    });
+  };
 
   // GitHub Sync Status Endpoint
   app.get("/api/github/status", (req, res) => {
@@ -3961,6 +4058,18 @@ ${recipientName}`;
       autoSync: true,
       localInvoicesCount: fileCount,
       lastSyncTime: lastGitHubInvoicePullTime ? new Date(lastGitHubInvoicePullTime).toISOString() : null
+    });
+  });
+
+  // Client configuration provider for GitHub credentials (so frontend automatically uses valid server GitHub configuration)
+  app.get("/api/github/config", (req, res) => {
+    res.json({
+      configured: Boolean(GITHUB_TOKEN && GITHUB_OWNER && GITHUB_REPO),
+      owner: GITHUB_OWNER,
+      repo: GITHUB_REPO,
+      branch: GITHUB_BRANCH,
+      token: GITHUB_TOKEN,
+      autoSync: true
     });
   });
 

@@ -31,6 +31,7 @@ import {
   fetchCMSDataFromGitHub,
   downloadCMSDataJsonFile,
   readUploadedJsonFile,
+  initializeGitHubConfigFromServer,
   GitHubConfig 
 } from '../lib/githubSync';
 
@@ -71,11 +72,15 @@ export const GitHubSyncModal: React.FC<GitHubSyncModalProps> = ({
       setStatusMessage(null);
       setPushProgress(null);
       setActiveTab(initialTab);
+      initializeGitHubConfigFromServer().then(cfg => {
+        if (cfg) setConfig(cfg);
+      }).catch(() => {});
     }
   }, [isOpen, initialTab]);
 
   const handleSaveConfig = () => {
-    saveGitHubConfig(config);
+    const saved = saveGitHubConfig(config);
+    setConfig(saved);
     setStatusMessage({ text: 'GitHub repository configuration saved successfully.', type: 'success' });
   };
 
