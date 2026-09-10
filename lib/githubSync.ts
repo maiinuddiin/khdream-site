@@ -139,6 +139,12 @@ export function saveGitHubConfig(updates: Partial<GitHubConfig>): GitHubConfig {
 
   if (typeof window !== 'undefined') {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    // Also notify server to persist and sync
+    fetch('/api/github/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(next)
+    }).catch(() => {});
   }
   return next;
 }
@@ -275,29 +281,37 @@ export async function fetchInvoicesFromGitHub(): Promise<{ invoices: any[]; erro
     const invoiceFiles = items.filter((item: any) => item.name && item.name.startsWith('invoice_') && item.name.endsWith('.json'));
     const invoices: any[] = [];
 
-    // Fetch contents of each invoice file
-    for (const file of invoiceFiles) {
-      try {
-        let contentStr = '';
-        if (file.download_url) {
-          const dlRes = await fetch(file.download_url);
-          if (dlRes.ok) contentStr = await dlRes.text();
-        } else if (file.git_url) {
-          const gitRes = await fetch(file.git_url, { headers });
-          if (gitRes.ok) {
-            const gitJson = await gitRes.json();
-            if (gitJson.content) {
-              contentStr = base64ToUtf8(gitJson.content);
+    // Fetch contents of invoice files concurrently in chunks of 8 for high performance
+    const chunkSize = 8;
+    for (let i = 0; i < invoiceFiles.length; i += chunkSize) {
+      const chunk = invoiceFiles.slice(i, i + chunkSize);
+      await Promise.all(chunk.map(async (file: any) => {
+        try {
+          let contentStr = '';
+          if (file.download_url) {
+            const dlRes = await fetch(file.download_url).catch(() => null);
+            if (dlRes && dlRes.ok) contentStr = await dlRes.text();
+          }
+          if (!contentStr && file.git_url) {
+            const gitRes = await fetch(file.git_url, { headers }).catch(() => null);
+            if (gitRes && gitRes.ok) {
+              const gitJson = await gitRes.json().catch(() => null);
+              if (gitJson && gitJson.content) {
+                contentStr = base64ToUtf8(gitJson.content);
+              }
             }
           }
+          if (contentStr) {
+            const parsed = JSON.parse(contentStr);
+            if (!parsed.id) {
+              parsed.id = file.name.replace('invoice_', '').replace('.json', '');
+            }
+            invoices.push(parsed);
+          }
+        } catch (e) {
+          console.warn('Could not parse invoice file from GitHub:', file.name, e);
         }
-        if (contentStr) {
-          const parsed = JSON.parse(contentStr);
-          invoices.push(parsed);
-        }
-      } catch (e) {
-        console.warn('Could not parse invoice file from GitHub:', file.name, e);
-      }
+      }));
     }
 
     return { invoices };

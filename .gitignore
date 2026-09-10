@@ -13,6 +13,7 @@ lerna-debug.log*
 *.local
 .dev.env.json
 .dev.pid
+data/github_config.json
 
 # Dependencies & Build
 node_modules

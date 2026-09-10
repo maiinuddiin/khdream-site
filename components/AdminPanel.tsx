@@ -1550,21 +1550,28 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
 
       if (res && res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setInvoices(data);
-          localStorage.setItem('kh_dream_invoices', JSON.stringify(data));
-        } else if (isGitHubConfigured()) {
-          // If server returned empty, fallback to client-side direct GitHub pull
-          const ghRes = await fetchInvoicesFromGitHub().catch(() => ({ invoices: [] }));
-          if (ghRes.invoices && ghRes.invoices.length > 0) {
-            setInvoices(ghRes.invoices);
-            localStorage.setItem('kh_dream_invoices', JSON.stringify(ghRes.invoices));
-          } else {
-            setInvoices(data || []);
-          }
-        } else {
-          setInvoices(data || []);
+        let list: any[] = Array.isArray(data) ? data : [];
+        
+        // If forceSync requested or server has fewer invoices, check GitHub directly to ensure complete sync
+        if (forceSync && isGitHubConfigured()) {
+          try {
+            const ghRes = await fetchInvoicesFromGitHub().catch(() => ({ invoices: [] }));
+            if (ghRes.invoices && ghRes.invoices.length > 0) {
+              const map = new Map();
+              list.forEach(i => map.set(String(i.id || i.invoiceNumber), i));
+              ghRes.invoices.forEach((i: any) => {
+                const key = String(i.id || i.invoiceNumber);
+                if (!map.has(key)) {
+                  map.set(key, i);
+                }
+              });
+              list = Array.from(map.values());
+            }
+          } catch (e) {}
         }
+        
+        setInvoices(list);
+        localStorage.setItem('kh_dream_invoices', JSON.stringify(list));
       } else {
         const local = localStorage.getItem('kh_dream_invoices');
         let combined: any[] = [];
@@ -1582,8 +1589,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
             const ghRes = await fetchInvoicesFromGitHub();
             if (ghRes.invoices && ghRes.invoices.length > 0) {
               const map = new Map();
-              combined.forEach(i => map.set(String(i.id), i));
-              ghRes.invoices.forEach((i: any) => map.set(String(i.id), i));
+              combined.forEach(i => map.set(String(i.id || i.invoiceNumber), i));
+              ghRes.invoices.forEach((i: any) => {
+                const key = String(i.id || i.invoiceNumber);
+                map.set(key, i);
+              });
               combined = Array.from(map.values());
               localStorage.setItem('kh_dream_invoices', JSON.stringify(combined));
             }

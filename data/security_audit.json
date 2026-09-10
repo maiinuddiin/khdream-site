@@ -1,5 +1,16 @@
 [
   {
+    "id": "c4773b9f6372351e",
+    "timestamp": "2026-09-10T18:53:31.944Z",
+    "event": "LOGIN_SUCCESS",
+    "ip": "169.254.169.126",
+    "ua": "N/A",
+    "path": "N/A",
+    "status": "INFO",
+    "username": "admin",
+    "role": "Admin"
+  },
+  {
     "id": "d91d81a7b916a60d",
     "timestamp": "2026-06-24T21:59:31.091Z",
     "event": "INVALID_SESSION",

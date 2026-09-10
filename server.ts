@@ -3758,25 +3758,65 @@ ${recipientName}`;
   });
 
   // GitHub Sync Configuration for Invoices & CMS
-  const rawToken = (process.env.GITHUB_TOKEN || "").trim();
-  const rawOwner = (process.env.GITHUB_OWNER || "").trim();
-  const rawRepo = (process.env.GITHUB_REPO || "").trim();
-  const rawBranch = (process.env.GITHUB_BRANCH || "").trim();
+  const GITHUB_CONFIG_PATH = path.join(DATA_DIR, "github_config.json");
+  const DEFAULT_FALLBACK_TOKEN = (process.env.GITHUB_TOKEN || "").trim();
 
-  const isLikelyToken = (val: string) => val.length > 20 && (/^gh[pousr]_[a-zA-Z0-9]+$/.test(val) || /^[a-zA-Z0-9_-]{30,}$/.test(val));
+  const githubConfig = {
+    owner: (process.env.GITHUB_OWNER || "maiinuddiin").trim(),
+    repo: (process.env.GITHUB_REPO || "khdream-site").trim(),
+    branch: (process.env.GITHUB_BRANCH || "main").trim(),
+    token: DEFAULT_FALLBACK_TOKEN,
+    autoSync: true
+  };
 
-  const GITHUB_TOKEN = isLikelyToken(rawToken) 
-    ? rawToken 
-    : (isLikelyToken(rawOwner) ? rawOwner : (isLikelyToken(rawRepo) ? rawRepo : ""));
-  const GITHUB_OWNER = (rawOwner && !isLikelyToken(rawOwner)) ? rawOwner : "maiinuddiin";
-  const GITHUB_REPO = (rawRepo && !isLikelyToken(rawRepo)) ? rawRepo : "khdream-site";
-  const GITHUB_BRANCH = (rawBranch && !isLikelyToken(rawBranch)) ? rawBranch : "main";
+  function loadGitHubConfig() {
+    try {
+      if (fs.existsSync(GITHUB_CONFIG_PATH)) {
+        const fileContent = fs.readFileSync(GITHUB_CONFIG_PATH, "utf-8");
+        const parsed = JSON.parse(fileContent);
+        if (parsed.owner) githubConfig.owner = String(parsed.owner).trim();
+        if (parsed.repo) githubConfig.repo = String(parsed.repo).trim();
+        if (parsed.branch) githubConfig.branch = String(parsed.branch).trim() || "main";
+        if (parsed.token) githubConfig.token = String(parsed.token).trim();
+        if (parsed.autoSync !== undefined) githubConfig.autoSync = Boolean(parsed.autoSync);
+      }
+    } catch (e: any) {
+      console.warn("[GITHUB-CONFIG] Error reading github_config.json:", e.message);
+    }
+
+    const rawToken = (process.env.GITHUB_TOKEN || "").trim();
+    const rawOwner = (process.env.GITHUB_OWNER || "").trim();
+    const rawRepo = (process.env.GITHUB_REPO || "").trim();
+    const rawBranch = (process.env.GITHUB_BRANCH || "").trim();
+
+    const isLikelyToken = (val: string) => val.length > 20 && (/^gh[pousr]_[a-zA-Z0-9]+$/.test(val) || /^[a-zA-Z0-9_-]{30,}$/.test(val));
+
+    if (rawToken && isLikelyToken(rawToken)) githubConfig.token = rawToken;
+    if (rawOwner && !isLikelyToken(rawOwner)) githubConfig.owner = rawOwner;
+    if (rawRepo && !isLikelyToken(rawRepo)) githubConfig.repo = rawRepo;
+    if (rawBranch && !isLikelyToken(rawBranch)) githubConfig.branch = rawBranch;
+
+    if (!githubConfig.token) {
+      githubConfig.token = DEFAULT_FALLBACK_TOKEN;
+    }
+  }
+  loadGitHubConfig();
+
+  const getGithubToken = () => githubConfig.token;
+  const getGithubOwner = () => githubConfig.owner;
+  const getGithubRepo = () => githubConfig.repo;
+  const getGithubBranch = () => githubConfig.branch;
 
   let lastGitHubInvoicePullTime = 0;
   let isGitHubInvoicePulling = false;
 
-  async function pullInvoicesFromGitHubServer(): Promise<{ count: number; error?: string }> {
-    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+  async function pullInvoicesFromGitHubServer(): Promise<{ count: number; pushed?: number; error?: string }> {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
+
+    if (!token || !owner || !repo) {
       return { count: 0, error: "GitHub credentials not configured" };
     }
     if (isGitHubInvoicePulling) return { count: 0 };
@@ -3786,10 +3826,10 @@ ${recipientName}`;
         fs.mkdirSync(INVOICES_DIR, { recursive: true });
       }
 
-      const listUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/data/invoices?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
+      const listUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/data/invoices?ref=${encodeURIComponent(branch)}`;
       const listRes = await fetch(listUrl, {
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
           "X-GitHub-Api-Version": "2022-11-28",
           "User-Agent": "KHDream-Server-Sync"
@@ -3808,16 +3848,18 @@ ${recipientName}`;
       const items = await listRes.json();
       if (!Array.isArray(items)) return { count: 0 };
 
-      const invoiceFiles = items.filter((f: any) => f.name && f.name.startsWith("invoice_") && f.name.endsWith(".json"));
+      const remoteFiles = items.filter((f: any) => f.name && f.name.startsWith("invoice_") && f.name.endsWith(".json"));
+      const remoteFileNames = new Set(remoteFiles.map((f: any) => f.name));
       let pulledCount = 0;
 
-      for (const item of invoiceFiles) {
+      // 1. PULL: Download missing or updated files from GitHub
+      for (const item of remoteFiles) {
         const localPath = path.join(INVOICES_DIR, item.name);
         let needDownload = !fs.existsSync(localPath);
         if (!needDownload && item.size) {
           try {
             const stat = fs.statSync(localPath);
-            if (stat.size === 0) needDownload = true;
+            if (stat.size === 0 || Math.abs(stat.size - item.size) > 5) needDownload = true;
           } catch (e) {
             needDownload = true;
           }
@@ -3837,11 +3879,33 @@ ${recipientName}`;
         }
       }
 
-      lastGitHubInvoicePullTime = Date.now();
-      if (pulledCount > 0) {
-        console.log(`[GITHUB-PULL] Synced: ${pulledCount} new/updated invoices pulled from GitHub (${invoiceFiles.length} total on repo)`);
+      // 2. PUSH: Automatically push any local invoices not yet on GitHub
+      let pushedCount = 0;
+      const localFiles = fs.readdirSync(INVOICES_DIR).filter(f => f.startsWith("invoice_") && f.endsWith(".json"));
+      for (const localName of localFiles) {
+        if (!remoteFileNames.has(localName)) {
+          try {
+            const fullLocal = path.join(INVOICES_DIR, localName);
+            const content = fs.readFileSync(fullLocal, "utf-8");
+            const parsed = JSON.parse(content);
+            if (parsed && (parsed.id || parsed.invoiceNumber)) {
+              console.log(`[GITHUB-AUTO-PUSH] Pushing uncommitted invoice ${localName} to GitHub repository...`);
+              const pushResult = await pushInvoiceToGitHubServer(parsed);
+              if (pushResult.success) {
+                pushedCount++;
+              }
+            }
+          } catch (pushErr: any) {
+            console.warn(`[GITHUB-AUTO-PUSH] Error pushing ${localName}:`, pushErr.message);
+          }
+        }
       }
-      return { count: pulledCount };
+
+      lastGitHubInvoicePullTime = Date.now();
+      if (pulledCount > 0 || pushedCount > 0) {
+        console.log(`[GITHUB-SYNC] Done: Pulled ${pulledCount}, Pushed ${pushedCount} (Local: ${localFiles.length}, Remote: ${remoteFiles.length})`);
+      }
+      return { count: pulledCount, pushed: pushedCount };
     } catch (err: any) {
       console.error("[GITHUB-PULL] Error during invoice sync:", err.message);
       return { count: 0, error: err.message };
@@ -3851,7 +3915,12 @@ ${recipientName}`;
   }
 
   async function pushInvoiceToGitHubServer(invoice: any): Promise<{ success: boolean; error?: string }> {
-    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
+
+    if (!token || !owner || !repo) {
       return { success: false, error: "GitHub credentials not configured" };
     }
     const invoiceId = invoice.id || invoice.invoiceNumber;
@@ -3859,13 +3928,13 @@ ${recipientName}`;
 
     const safeId = String(invoiceId).replace(/[^a-zA-Z0-9_-]/g, "_");
     const filePath = `data/invoices/invoice_${safeId}.json`;
-    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/${filePath}`;
+    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
 
     try {
       let sha: string | undefined = undefined;
-      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, {
+      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
           "X-GitHub-Api-Version": "2022-11-28",
           "User-Agent": "KHDream-Server-Sync"
@@ -3888,7 +3957,7 @@ ${recipientName}`;
       const putRes = await fetch(apiUrl, {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
           "Content-Type": "application/json",
           "X-GitHub-Api-Version": "2022-11-28",
@@ -3897,7 +3966,7 @@ ${recipientName}`;
         body: JSON.stringify({
           message: commitMessage,
           content: base64Content,
-          branch: GITHUB_BRANCH,
+          branch: branch,
           ...(sha ? { sha } : {})
         })
       });
@@ -3908,7 +3977,7 @@ ${recipientName}`;
         return { success: false, error: errJson.message || `Status ${putRes.status}` };
       }
 
-      console.log(`[GITHUB-PUSH] Successfully pushed invoice ${safeId} to GitHub (${GITHUB_OWNER}/${GITHUB_REPO})`);
+      console.log(`[GITHUB-PUSH] Successfully pushed invoice ${safeId} to GitHub (${owner}/${repo})`);
       return { success: true };
     } catch (err: any) {
       console.error(`[GITHUB-PUSH] Error pushing invoice ${safeId}:`, err.message);
@@ -3917,17 +3986,22 @@ ${recipientName}`;
   }
 
   async function deleteInvoiceFromGitHubServer(invoiceId: string): Promise<{ success: boolean; error?: string }> {
-    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
+
+    if (!token || !owner || !repo) {
       return { success: false, error: "GitHub credentials not configured" };
     }
     const safeId = String(invoiceId).replace(/[^a-zA-Z0-9_-]/g, "_");
     const filePath = `data/invoices/invoice_${safeId}.json`;
-    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/${filePath}`;
+    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
 
     try {
-      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, {
+      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
           "X-GitHub-Api-Version": "2022-11-28",
           "User-Agent": "KHDream-Server-Sync"
@@ -3946,7 +4020,7 @@ ${recipientName}`;
       const delRes = await fetch(apiUrl, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
           "Content-Type": "application/json",
           "X-GitHub-Api-Version": "2022-11-28",
@@ -3955,7 +4029,7 @@ ${recipientName}`;
         body: JSON.stringify({
           message: `Delete invoice ${safeId} from data/invoices/ [auto-sync]`,
           sha: fileData.sha,
-          branch: GITHUB_BRANCH
+          branch: branch
         })
       });
 
@@ -3968,17 +4042,22 @@ ${recipientName}`;
   }
 
   async function pushCMSDataToGitHubServer(cmsPayload: any): Promise<{ success: boolean; error?: string }> {
-    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
+
+    if (!token || !owner || !repo) {
       return { success: false, error: "GitHub credentials not configured" };
     }
     const filePath = "data/cms_data.json";
-    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/${filePath}`;
+    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
 
     try {
       let sha: string | undefined = undefined;
-      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(GITHUB_BRANCH)}`, {
+      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
           "X-GitHub-Api-Version": "2022-11-28",
           "User-Agent": "KHDream-Server-Sync"
@@ -4002,7 +4081,7 @@ ${recipientName}`;
       const putRes = await fetch(apiUrl, {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${GITHUB_TOKEN}`,
+          "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
           "Content-Type": "application/json",
           "X-GitHub-Api-Version": "2022-11-28",
@@ -4011,7 +4090,7 @@ ${recipientName}`;
         body: JSON.stringify({
           message: commitMessage,
           content: base64Content,
-          branch: GITHUB_BRANCH,
+          branch: branch,
           ...(sha ? { sha } : {})
         })
       });
@@ -4022,7 +4101,7 @@ ${recipientName}`;
         return { success: false, error: errJson.message || `Status ${putRes.status}` };
       }
 
-      console.log(`[GITHUB-CMS-PUSH] Successfully pushed CMS data to GitHub (${GITHUB_OWNER}/${GITHUB_REPO})`);
+      console.log(`[GITHUB-CMS-PUSH] Successfully pushed CMS data to GitHub (${owner}/${repo})`);
       return { success: true };
     } catch (err: any) {
       console.error(`[GITHUB-CMS-PUSH] Error pushing CMS to GitHub:`, err.message);
@@ -4035,10 +4114,10 @@ ${recipientName}`;
     pullInvoicesFromGitHubServer().catch(e => console.warn("[STARTUP-INVOICE-PULL]", e.message));
   }, 1000);
 
-  // Periodic auto-pull every 2 minutes
+  // Periodic auto-sync every 60 seconds
   setInterval(() => {
     pullInvoicesFromGitHubServer().catch(e => console.warn("[PERIODIC-INVOICE-PULL]", e.message));
-  }, 120000);
+  }, 60000);
 
   // Connect writeCMS hook to auto-sync CMS changes directly to GitHub
   onCMSUpdated = (updatedCMSData: any) => {
@@ -4049,12 +4128,16 @@ ${recipientName}`;
 
   // GitHub Sync Status Endpoint
   app.get("/api/github/status", (req, res) => {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
     const fileCount = fs.existsSync(INVOICES_DIR) ? fs.readdirSync(INVOICES_DIR).filter(f => f.endsWith(".json")).length : 0;
     res.json({
-      configured: Boolean(GITHUB_TOKEN && GITHUB_OWNER && GITHUB_REPO),
-      owner: GITHUB_OWNER,
-      repo: GITHUB_REPO,
-      branch: GITHUB_BRANCH,
+      configured: Boolean(token && owner && repo),
+      owner: owner,
+      repo: repo,
+      branch: branch,
       autoSync: true,
       localInvoicesCount: fileCount,
       lastSyncTime: lastGitHubInvoicePullTime ? new Date(lastGitHubInvoicePullTime).toISOString() : null
@@ -4063,14 +4146,40 @@ ${recipientName}`;
 
   // Client configuration provider for GitHub credentials (so frontend automatically uses valid server GitHub configuration)
   app.get("/api/github/config", (req, res) => {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
     res.json({
-      configured: Boolean(GITHUB_TOKEN && GITHUB_OWNER && GITHUB_REPO),
-      owner: GITHUB_OWNER,
-      repo: GITHUB_REPO,
-      branch: GITHUB_BRANCH,
-      token: GITHUB_TOKEN,
+      configured: Boolean(token && owner && repo),
+      owner: owner,
+      repo: repo,
+      branch: branch,
+      token: token,
       autoSync: true
     });
+  });
+
+  // Update GitHub config on server
+  app.post("/api/github/config", (req, res) => {
+    try {
+      const { owner, repo, branch, token, autoSync } = req.body || {};
+      if (owner) githubConfig.owner = String(owner).trim();
+      if (repo) githubConfig.repo = String(repo).trim();
+      if (branch) githubConfig.branch = String(branch).trim() || "main";
+      if (token) githubConfig.token = String(token).trim();
+      if (autoSync !== undefined) githubConfig.autoSync = Boolean(autoSync);
+
+      fs.writeFileSync(GITHUB_CONFIG_PATH, JSON.stringify(githubConfig, null, 2));
+      console.log(`[GITHUB-CONFIG] Saved configuration for ${githubConfig.owner}/${githubConfig.repo}`);
+
+      // Trigger immediate pull/push
+      pullInvoicesFromGitHubServer().catch(err => console.warn("[GITHUB-CONFIG-SYNC]", err.message));
+
+      res.json({ success: true, config: { ...githubConfig, token: githubConfig.token ? "********" : "" } });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to save GitHub config" });
+    }
   });
 
   // Manual trigger for bidirectional sync
@@ -4081,6 +4190,7 @@ ${recipientName}`;
       res.json({
         success: true,
         pulled: pullResult.count,
+        pushed: pullResult.pushed || 0,
         totalLocal: files.length,
         error: pullResult.error
       });
@@ -4096,9 +4206,9 @@ ${recipientName}`;
         fs.mkdirSync(INVOICES_DIR, { recursive: true });
       }
 
-      // Automatically pull from GitHub if empty or if last pull was > 60s ago or if explicit sync query
-      const isDueForSync = req.query.sync === "true" || (Date.now() - lastGitHubInvoicePullTime > 60000) || fs.readdirSync(INVOICES_DIR).length === 0;
-      if (isDueForSync && GITHUB_TOKEN) {
+      // Automatically pull from GitHub if empty or if last pull was > 45s ago or if explicit sync query
+      const isDueForSync = req.query.sync === "true" || (Date.now() - lastGitHubInvoicePullTime > 45000) || fs.readdirSync(INVOICES_DIR).length === 0;
+      if (isDueForSync && getGithubToken()) {
         await pullInvoicesFromGitHubServer().catch(e => console.warn("[INVOICE-GET-SYNC]", e.message));
       }
 
