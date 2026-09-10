@@ -4,9 +4,8 @@ import Barcode from 'react-barcode';
 import { QRCodeSVG } from 'qrcode.react';
 import { Printer, Plus, Trash2, Download, ArrowLeft, ShieldCheck, FileText, CheckCircle2, Loader2, Building2, ChevronDown, FileDown, User, MapPin, Hash, Percent, Coins, Receipt, Calendar, Phone } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
-import jsPDF from 'jspdf';
-import { toPng } from 'html-to-image';
 import { saveInvoiceToGitHub, downloadInvoiceJsonFile, isGitHubConfigured, getGitHubConfig } from '../lib/githubSync';
+import { downloadElementAsPDF } from '../lib/pdfExport';
 
 interface InvoiceItem {
   id: string;
@@ -141,34 +140,15 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
     
     setIsSaving(true);
     try {
-      const element = componentRef.current;
-      
-      // Render as premium pixel-perfect PNG natively via browser engine
-      const imgData = await toPng(element, {
-        pixelRatio: 3, // Excellent resolution for Crisp output
-        backgroundColor: '#ffffff',
-        style: {
-          transform: 'none',
-          boxShadow: 'none',
-          margin: '0',
-        }
-      });
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
+      await downloadElementAsPDF(componentRef.current, {
+        filename: `Invoice_${invoiceNumber}.pdf`,
+        isSadad: false,
         format: 'a4',
-        compress: true
       });
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-      pdf.save(`Invoice_${invoiceNumber}.pdf`);
     } catch (err) {
       console.error("PDF Generation Error:", err);
-      alert("Failed to generate PDF. Please try Print/Save as PDF option.");
+      // Fallback to print/save as PDF
+      handlePrint();
     } finally {
       setIsSaving(false);
     }

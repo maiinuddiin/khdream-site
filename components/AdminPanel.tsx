@@ -545,7 +545,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
   const [resetSuccess, setResetSuccess] = useState(false);
   const [visitorStats, setVisitorStats] = useState<{ totalVisits: number, uniqueCount: number, repeatPercentage: number, devices: { desktop: number, mobile: number, tablet: number }, lastUpdate?: string } | null>(null);
   const [isLoadingVisitors, setIsLoadingVisitors] = useState(false);
-  const [invoices, setInvoices] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<any[]>(() => {
+    try {
+      const cached = localStorage.getItem('kh_dream_invoices');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  });
   const [isLoadingInvoices, setIsLoadingInvoices] = useState(false);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
   const [showGitHubSyncModal, setShowGitHubSyncModal] = useState(false);
@@ -1647,6 +1656,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
   };
 
   useEffect(() => {
+    // Initial fetch on mount to sync and populate local invoices immediately
+    fetchInvoices(false);
+  }, []);
+
+  useEffect(() => {
     if (activeTab === 'invoices') {
       fetchInvoices(true);
       // Auto-refresh invoices every 45s while on invoices tab to catch external commits
@@ -1982,6 +1996,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
                   >
                     <FileText size={16} />
                     <span>Invoices</span>
+                    {invoices.length > 0 && (
+                      <span className={`ml-auto px-1.5 py-0.5 rounded-full text-[8px] font-mono font-bold ${
+                        activeTab === 'invoices' ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'
+                      }`}>
+                        {invoices.length}
+                      </span>
+                    )}
                   </button>
                 )}
                  {(currentUser?.permissions?.includes('sadad-invoices') || currentUser?.role === 'Admin' || currentUser?.username === 'admin') && (

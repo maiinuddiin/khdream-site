@@ -228,6 +228,23 @@ will-change-transform"
 
         {/* Right: Actions */}
         <div className="flex-none flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={() => {
+              window.history.pushState({}, '', '/invoice');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
+            className={cn(
+              "hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10.5px] font-black tracking-widest transition-all duration-200 uppercase cursor-pointer",
+              isSolid 
+                ? "bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-700/80 text-slate-700 dark:text-zinc-200 border border-slate-200/80 dark:border-zinc-700/80" 
+                : "bg-white/10 text-white border border-white/20 hover:bg-white hover:text-slate-900 backdrop-blur-md"
+            )}
+            title="Search & Verify Invoices"
+          >
+            <FileText size={13} className="text-primary" />
+            <span>Invoices</span>
+          </button>
+
           {currentUser ? (
             <button 
               onClick={onAdminClick}
@@ -453,7 +470,24 @@ will-change-transform"
                 </motion.div>
               </div>
 
-              <div className="pt-6">
+              <div className="pt-6 space-y-3">
+                <button 
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    window.history.pushState({}, '', '/invoice');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className="w-full flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-white font-bold"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                      <FileText size={16} />
+                    </div>
+                    <span className="text-xs tracking-[0.2em] uppercase font-black">Search & Verify Invoices</span>
+                  </div>
+                  <ChevronRight size={14} className="text-slate-400" />
+                </button>
+
                 <button 
                   onClick={() => {
                     setIsMobileMenuOpen(false);

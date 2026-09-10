@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { ShieldCheck, Loader2, AlertCircle, Download, Printer, FileDown } from 'lucide-react';
-import jsPDF from 'jspdf';
-import { toPng } from 'html-to-image';
+import { ShieldCheck, Loader2, AlertCircle, Download, Printer, FileDown, ArrowLeft } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 import { getGitHubConfig } from '../lib/githubSync';
+import { downloadElementAsPDF } from '../lib/pdfExport';
 
 interface InvoiceData {
   id: string;
@@ -31,7 +30,12 @@ interface InvoiceData {
   isSadad?: boolean;
 }
 
-const PublicInvoiceView: React.FC<{ invoiceId: string }> = ({ invoiceId }) => {
+interface PublicInvoiceViewProps {
+  invoiceId: string;
+  onBack?: () => void;
+}
+
+const PublicInvoiceView: React.FC<PublicInvoiceViewProps> = ({ invoiceId, onBack }) => {
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,37 +55,15 @@ const PublicInvoiceView: React.FC<{ invoiceId: string }> = ({ invoiceId }) => {
     if (!componentRef.current || !invoice) return;
     setIsDownloading(true);
     try {
-      const element = componentRef.current;
-      
-      const imgData = await toPng(element, {
-        pixelRatio: 3,
-        backgroundColor: '#ffffff',
-        style: {
-          transform: 'none',
-          boxShadow: 'none',
-          margin: '0',
-          ...(invoice.isSadad ? {
-            width: '80mm',
-            padding: '10mm',
-          } : {})
-        }
+      await downloadElementAsPDF(componentRef.current, {
+        filename: `${invoice.isSadad ? 'Receipt' : 'Invoice'}_${invoice.invoiceNumber}.pdf`,
+        isSadad: invoice.isSadad,
+        format: invoice.isSadad ? [80, 160] : 'a4',
       });
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: invoice.isSadad ? [80, 150] : 'a4',
-        compress: true
-      });
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-      pdf.save(`${invoice.isSadad ? 'Receipt' : 'Invoice'}_${invoice.invoiceNumber}.pdf`);
     } catch (err) {
       console.error("PDF Generation Error:", err);
-      alert("Failed to generate PDF. Please try the Print option.");
+      // If direct PDF generation fails, trigger browser print/save as PDF as fallback
+      handlePrint();
     } finally {
       setIsDownloading(false);
     }
@@ -96,12 +78,32 @@ const PublicInvoiceView: React.FC<{ invoiceId: string }> = ({ invoiceId }) => {
           setInvoice(data);
           return;
         }
+
+        // Secondary fallback: fetch all invoices list and find match
+        const listRes = await fetch(`/api/invoices`).catch(() => null);
+        if (listRes && listRes.ok) {
+          const all = await listRes.json();
+          if (Array.isArray(all)) {
+            const foundInList = all.find((i: any) => 
+              String(i.id).toLowerCase() === String(invoiceId).toLowerCase() || 
+              String(i.invoiceNumber).toLowerCase() === String(invoiceId).toLowerCase() ||
+              (i.customerPhone && String(i.customerPhone).replace(/\D/g, '') === String(invoiceId).replace(/\D/g, ''))
+            );
+            if (foundInList) {
+              setInvoice(foundInList);
+              return;
+            }
+          }
+        }
         
         // Fallback to local storage
         const local = localStorage.getItem('kh_dream_invoices');
         if (local) {
           const list = JSON.parse(local);
-          const found = list.find((i: any) => String(i.id) === String(invoiceId) || String(i.invoiceNumber) === String(invoiceId));
+          const found = list.find((i: any) => 
+            String(i.id).toLowerCase() === String(invoiceId).toLowerCase() || 
+            String(i.invoiceNumber).toLowerCase() === String(invoiceId).toLowerCase()
+          );
           if (found) {
             setInvoice(found);
             return;
@@ -173,25 +175,47 @@ const PublicInvoiceView: React.FC<{ invoiceId: string }> = ({ invoiceId }) => {
   );
 
   if (error || !invoice) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-950 p-6 text-center">
       <AlertCircle className="text-red-500 mb-4" size={64} />
-      <h2 className="text-2xl font-black uppercase tracking-tighter mb-2">Validation Failed</h2>
-      <p className="text-slate-500 text-center max-w-md">The requested document could not be verified. It may have been revoked or the link is invalid.</p>
+      <h2 className="text-2xl font-black uppercase tracking-tighter mb-2 text-slate-900 dark:text-white">Validation Failed</h2>
+      <p className="text-slate-500 dark:text-zinc-400 text-center max-w-md mb-6">
+        The requested document could not be found or verified ({invoiceId}). It may have been renamed or the link is invalid.
+      </p>
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm hover:opacity-90 transition-all"
+        >
+          <ArrowLeft size={16} />
+          <span>Return to Invoices Directory</span>
+        </button>
+      )}
     </div>
   );
 
   if (invoice.isSadad) {
     return (
       <div className="min-h-screen bg-slate-50 py-12 px-4 flex flex-col items-center">
-        <div className="max-w-4xl w-full mb-6 flex justify-center space-x-4">
-          <button onClick={handleDownloadPDF} disabled={isDownloading} className="bg-emerald-600 text-white px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-            {isDownloading ? <Loader2 className="animate-spin" size={16} /> : <FileDown size={16} />}
-            <span>Download</span>
-          </button>
-          <button onClick={() => handlePrint()} className="bg-red-600 text-white px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-            <Printer size={16} />
-            <span>Print</span>
-          </button>
+        <div className="max-w-4xl w-full mb-6 flex justify-between items-center">
+          {onBack ? (
+            <button 
+              onClick={onBack}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-black uppercase tracking-wider transition-all"
+            >
+              <ArrowLeft size={14} />
+              <span>Back</span>
+            </button>
+          ) : <div />}
+          <div className="flex space-x-4">
+            <button onClick={handleDownloadPDF} disabled={isDownloading} className="bg-emerald-600 text-white px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+              {isDownloading ? <Loader2 className="animate-spin" size={16} /> : <FileDown size={16} />}
+              <span>Download</span>
+            </button>
+            <button onClick={() => handlePrint()} className="bg-red-600 text-white px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+              <Printer size={16} />
+              <span>Print</span>
+            </button>
+          </div>
         </div>
 
         <div ref={componentRef} className="public-invoice-container bg-white text-black p-8 shadow-2xl w-[80mm] min-h-[120mm] font-mono text-[10px] border border-slate-100">
@@ -241,22 +265,33 @@ const PublicInvoiceView: React.FC<{ invoiceId: string }> = ({ invoiceId }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto mb-6 flex justify-end space-x-4">
-        <button 
-          onClick={handleDownloadPDF}
-          disabled={isDownloading}
-          className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20"
-        >
-          {isDownloading ? <Loader2 className="animate-spin" size={16} /> : <FileDown size={16} />}
-          <span>Download PDF</span>
-        </button>
-        <button 
-          onClick={() => handlePrint()}
-          className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-600/20"
-        >
-          <Printer size={16} />
-          <span>Print Document</span>
-        </button>
+      <div className="max-w-4xl mx-auto mb-6 flex justify-between items-center">
+        {onBack ? (
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 text-[10px] font-black uppercase tracking-wider transition-all"
+          >
+            <ArrowLeft size={14} />
+            <span>Back to Invoices</span>
+          </button>
+        ) : <div />}
+        <div className="flex space-x-3 sm:space-x-4">
+          <button 
+            onClick={handleDownloadPDF}
+            disabled={isDownloading}
+            className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 sm:px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20"
+          >
+            {isDownloading ? <Loader2 className="animate-spin" size={16} /> : <FileDown size={16} />}
+            <span>Download PDF</span>
+          </button>
+          <button 
+            onClick={() => handlePrint()}
+            className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-5 sm:px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-red-600/20"
+          >
+            <Printer size={16} />
+            <span>Print Document</span>
+          </button>
+        </div>
       </div>
 
       <div className="max-w-4xl mx-auto bg-white rounded-xl overflow-hidden border border-slate-200 shadow-2xl">

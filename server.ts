@@ -4198,6 +4198,28 @@ ${recipientName}`;
           filePath = path.join(INVOICES_DIR, fileName);
         }
       }
+
+      // Deep fallback: Scan files by parsed id, invoiceNumber, or phone
+      if (!fs.existsSync(filePath)) {
+        const normalized = String(id).trim().toLowerCase();
+        const jsonFiles = files.filter(f => f.endsWith(".json"));
+        for (const f of jsonFiles) {
+          try {
+            const p = path.join(INVOICES_DIR, f);
+            const content = fs.readFileSync(p, "utf-8");
+            const parsed = JSON.parse(content);
+            const matchId = parsed.id && String(parsed.id).toLowerCase() === normalized;
+            const matchNum = parsed.invoiceNumber && String(parsed.invoiceNumber).toLowerCase() === normalized;
+            const matchPhone = parsed.customerPhone && String(parsed.customerPhone).replace(/\D/g, '') === normalized.replace(/\D/g, '');
+            if (matchId || matchNum || matchPhone) {
+              filePath = p;
+              break;
+            }
+          } catch (e) {
+            // Ignore parse errors on individual files
+          }
+        }
+      }
       
       if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, "utf-8");

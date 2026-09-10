@@ -44,6 +44,7 @@ const AdminPanel = lazy(() => import('./components/AdminPanel'));
 const BlogPage = lazy(() => import('./components/BlogPage'));
 const InvoiceSystem = lazy(() => import('./components/InvoiceSystem'));
 const PublicInvoiceView = lazy(() => import('./components/PublicInvoiceView'));
+const PublicInvoicePortal = lazy(() => import('./components/PublicInvoicePortal'));
 const DestinationsCatalogue = lazy(() => import('./components/DestinationsCatalogue'));
 const HotDealsPage = lazy(() => import('./components/HotDealsPage'));
 const LoginPage = lazy(() => import('./components/LoginPage'));
@@ -259,6 +260,8 @@ const AppContent: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     
     if (params.get('inv')) return 'public-invoice';
+    const invInPath = rawPath.startsWith('/invoice/') ? rawPath.replace('/invoice/', '').trim() : '';
+    if (invInPath) return 'public-invoice';
     if (currentHostname.startsWith('admin.') || currentHostname.includes('.admin.')) return 'admin';
     
     const resolveViewFromPath = (p: string) => {
@@ -266,7 +269,8 @@ const AppContent: React.FC = () => {
       if (p === '/blog' || p.startsWith('/blog/')) return 'blog';
       if (p === '/destinations' || p.startsWith('/destinations/')) return 'destinations';
       if (p === '/hot-deals' || p.startsWith('/hot-deals/')) return 'hot-deals';
-      if (p === '/invoice' || p.startsWith('/invoice/')) return 'invoice';
+      if (p.startsWith('/invoice/') && p.replace('/invoice/', '').trim()) return 'public-invoice';
+      if (p === '/invoice' || p === '/invoices' || p === '/invoice-lookup') return 'invoice';
       if (p === '/iqama-inquiry' || p.startsWith('/iqama-inquiry/')) return 'iqama';
       if (p === '/bio' || p === '/profile' || p === '/hub' || p === '/help') return 'bio';
       if (p === '/company-profile') return 'company-profile';
@@ -320,7 +324,11 @@ const AppContent: React.FC = () => {
     else if (path === '/blog' || path.startsWith('/blog/')) setView('blog');
     else if (path === '/destinations' || path.startsWith('/destinations/')) setView('destinations');
     else if (path === '/hot-deals' || path.startsWith('/hot-deals/')) setView('hot-deals');
-    else if (path === '/invoice' || path.startsWith('/invoice/')) setView('invoice');
+    else if (path.startsWith('/invoice/') && path.replace('/invoice/', '').trim()) {
+      setPublicInvoiceId(path.replace('/invoice/', '').trim());
+      setView('public-invoice');
+    }
+    else if (path === '/invoice' || path === '/invoices' || path === '/invoice-lookup') setView('invoice');
     else if (path === '/iqama-inquiry' || path.startsWith('/iqama-inquiry/')) setView('iqama');
     else if (path === '/bio' || path === '/profile' || path === '/hub' || path === '/help') setView('bio');
     else if (path === '/company-profile') setView('company-profile');
@@ -950,10 +958,13 @@ const AppContent: React.FC = () => {
     const path = window.location.pathname;
     
     // Check for invoice
-    const inv = params.get('inv');
+    const invInPath = path.startsWith('/invoice/') ? path.replace('/invoice/', '').trim() : null;
+    const inv = invInPath || params.get('inv');
     if (inv) {
       setPublicInvoiceId(inv);
       setView('public-invoice');
+    } else if (path === '/invoice' || path === '/invoices' || path === '/invoice-lookup') {
+      setView('invoice');
     }
 
     // Check for destination in path or params
@@ -1430,7 +1441,15 @@ const AppContent: React.FC = () => {
       {view === 'public-invoice' && publicInvoiceId ? (
         <div className="min-h-screen flex flex-col bg-white dark:bg-zinc-950">
           <Suspense fallback={<ComponentLoader />}>
-            <PublicInvoiceView invoiceId={publicInvoiceId} />
+            <PublicInvoiceView 
+              invoiceId={publicInvoiceId} 
+              onBack={() => {
+                window.history.pushState({}, '', '/invoice');
+                setPathname('/invoice');
+                setView('invoice');
+                setPublicInvoiceId(null);
+              }}
+            />
           </Suspense>
           <div className="flex-grow" />
         </div>
@@ -1532,6 +1551,25 @@ const AppContent: React.FC = () => {
             <div className="flex-grow w-full relative overflow-hidden">
               <Suspense fallback={<ComponentLoader />}>
                 <CompanyProfilePage onBack={() => { setView('landing'); setPathname('/'); window.history.pushState({}, '', '/'); }} />
+              </Suspense>
+            </div>
+          ) : view === 'invoice' ? (
+            <div className="flex-grow w-full relative overflow-hidden pt-16">
+              <Suspense fallback={<ComponentLoader />}>
+                <PublicInvoicePortal 
+                  initialInvoiceId={publicInvoiceId}
+                  onSelectInvoice={(invId) => {
+                    window.history.pushState({}, '', `/invoice/${encodeURIComponent(invId)}`);
+                    setPathname(`/invoice/${encodeURIComponent(invId)}`);
+                    setPublicInvoiceId(invId);
+                    setView('public-invoice');
+                  }}
+                  onBack={() => {
+                    window.history.pushState({}, '', '/');
+                    setPathname('/');
+                    setView('landing');
+                  }}
+                />
               </Suspense>
             </div>
           ) : landingPage && (landingPage.isPublished || isAdmin) && view === 'landing' ? (

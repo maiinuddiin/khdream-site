@@ -3,8 +3,7 @@ import { useReactToPrint } from 'react-to-print';
 import { QRCodeSVG } from 'qrcode.react';
 import { Printer, ArrowLeft, Calculator, FileDown, Loader2, Landmark, Coins, FileCheck, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
-import { toPng } from 'html-to-image';
-import { jsPDF } from 'jspdf';
+import { downloadElementAsPDF } from '../lib/pdfExport';
 
 const SadadInvoice: React.FC<{ onBack: () => void; t: (path: string) => string }> = ({ onBack, t }) => {
   const { data, currentUser } = useCMS();
@@ -88,34 +87,14 @@ const SadadInvoice: React.FC<{ onBack: () => void; t: (path: string) => string }
     if (!pdfRef.current) return;
     setIsDownloading(true);
     try {
-      const element = pdfRef.current;
-      
-      const imgData = await toPng(element, {
-        pixelRatio: 3,
-        backgroundColor: '#ffffff',
-        style: {
-          transform: 'none',
-          boxShadow: 'none',
-          margin: '0',
-          width: '210mm',
-        }
+      await downloadElementAsPDF(pdfRef.current, {
+        filename: `Receipt_${invoiceNumber}.pdf`,
+        isSadad: true,
+        format: [80, 160],
       });
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true
-      });
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-      pdf.save(`Receipt_${invoiceNumber}.pdf`);
     } catch (error) {
       console.error('PDF Generation Error:', error);
-      alert("Failed to generate PDF receipt.");
+      handlePrint();
     } finally {
       setIsDownloading(false);
     }

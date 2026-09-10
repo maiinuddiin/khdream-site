@@ -205,6 +205,18 @@ export const Footer: React.FC<{ t: (path: string) => string }> = ({ t }) => {
           <div className="text-center md:text-left">
             <h4 className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-700 mb-4 md:mb-5">Explore</h4>
             <ul className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-2">
+              <li>
+                <button
+                  onClick={() => {
+                    window.history.pushState({}, '', '/invoice');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="text-primary hover:text-white transition-colors text-[10px] md:text-[11px] font-bold uppercase tracking-tight flex items-center justify-center md:justify-start gap-1"
+                >
+                  <span>Verify Invoices</span>
+                </button>
+              </li>
               {(data.general.footerPopups ? Object.keys(data.general.footerPopups) : ['about', 'services', 'contact', 'privacy']).map((key, i) => (
                 <li key={i}>
                   <button 
