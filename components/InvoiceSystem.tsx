@@ -4,7 +4,7 @@ import Barcode from 'react-barcode';
 import { QRCodeSVG } from 'qrcode.react';
 import { Printer, Plus, Trash2, Download, ArrowLeft, ShieldCheck, FileText, CheckCircle2, Loader2, Building2, ChevronDown, FileDown, User, MapPin, Hash, Percent, Coins, Receipt, Calendar, Phone } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
-import { saveInvoiceToGitHub, downloadInvoiceJsonFile, isGitHubConfigured, getGitHubConfig } from '../lib/githubSync';
+import { saveInvoiceToGitHub, downloadInvoiceJsonFile, isGitHubConfigured, getGitHubConfig, loadAllInvoicesUniversal } from '../lib/githubSync';
 import { downloadElementAsPDF } from '../lib/pdfExport';
 
 interface InvoiceItem {
@@ -82,22 +82,7 @@ const InvoiceSystem: React.FC<{ onBack: () => void; t: (path: string) => string;
     const getNextInvoiceNumber = async () => {
       if (!selectedBusiness) return;
       try {
-        const token = localStorage.getItem('kh_admin_token');
-        const res = await fetch('/api/invoices', { 
-          headers: token ? { 'x-admin-token': token } : {},
-          credentials: 'include' 
-        }).catch(() => null);
-
-        let allInvoices: any[] = [];
-        if (res && res.ok) {
-          allInvoices = await res.json();
-        } else {
-          const local = localStorage.getItem('kh_dream_invoices');
-          if (local) {
-            try { allInvoices = JSON.parse(local); } catch (e) {}
-          }
-        }
-
+        const allInvoices = await loadAllInvoicesUniversal();
         const businessInvoices = allInvoices.filter((inv: any) => inv?.invoiceNumber?.startsWith(selectedBusiness.invoicePrefix));
         if (businessInvoices.length > 0) {
           // Extract numbers and find max

@@ -3905,6 +3905,7 @@ ${recipientName}`;
       if (pulledCount > 0 || pushedCount > 0) {
         console.log(`[GITHUB-SYNC] Done: Pulled ${pulledCount}, Pushed ${pushedCount} (Local: ${localFiles.length}, Remote: ${remoteFiles.length})`);
       }
+      syncInvoicesJsonBundle().catch(() => null);
       return { count: pulledCount, pushed: pushedCount };
     } catch (err: any) {
       console.error("[GITHUB-PULL] Error during invoice sync:", err.message);
@@ -4034,10 +4035,81 @@ ${recipientName}`;
       });
 
       console.log(`[GITHUB-DELETE] Deleted invoice ${safeId} from GitHub repository (${delRes.ok})`);
+      syncInvoicesJsonBundle().catch(() => null);
       return { success: delRes.ok };
     } catch (err: any) {
       console.error(`[GITHUB-DELETE] Error deleting invoice ${safeId} from GitHub:`, err.message);
       return { success: false, error: err.message };
+    }
+  }
+
+  async function syncInvoicesJsonBundle(): Promise<void> {
+    try {
+      if (!fs.existsSync(INVOICES_DIR)) return;
+      const files = fs.readdirSync(INVOICES_DIR).filter(f => f.startsWith("invoice_") && f.endsWith(".json"));
+      const list: any[] = [];
+      for (const f of files) {
+        try {
+          const raw = fs.readFileSync(path.join(INVOICES_DIR, f), "utf-8");
+          const parsed = JSON.parse(raw);
+          if (parsed) {
+            if (!parsed.id) parsed.id = f.replace("invoice_", "").replace(".json", "");
+            list.push(parsed);
+          }
+        } catch (e) {}
+      }
+      list.sort((a, b) => {
+        const timeA = new Date(a.createdAt || a.date || 0).getTime();
+        const timeB = new Date(b.createdAt || b.date || 0).getTime();
+        return timeB - timeA;
+      });
+      const str = JSON.stringify(list, null, 2);
+      fs.writeFileSync(path.join(DATA_DIR, "invoices.json"), str);
+      const distData = path.join(process.cwd(), "dist", "data");
+      if (fs.existsSync(distData)) {
+        fs.writeFileSync(path.join(distData, "invoices.json"), str);
+      }
+
+      // Auto-push the compiled invoices.json bundle to GitHub repository
+      const token = getGithubToken();
+      const owner = getGithubOwner();
+      const repo = getGithubRepo();
+      const branch = getGithubBranch();
+      if (token && owner && repo) {
+        const filePath = "data/invoices.json";
+        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
+        let sha: string | undefined = undefined;
+        const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "KHDream-Server-Sync"
+          }
+        }).catch(() => null);
+        if (checkRes && checkRes.ok) {
+          const d: any = await checkRes.json().catch(() => null);
+          if (d && d.sha) sha = d.sha;
+        }
+        await fetch(apiUrl, {
+          method: "PUT",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "KHDream-Server-Sync"
+          },
+          body: JSON.stringify({
+            message: `Update data/invoices.json compiled bundle (${list.length} invoices) [auto-sync]`,
+            content: Buffer.from(str, "utf-8").toString("base64"),
+            sha: sha,
+            branch: branch
+          })
+        }).catch(() => null);
+      }
+    } catch (err: any) {
+      console.warn("[SYNC-INVOICES-JSON]", err.message);
     }
   }
 
@@ -4268,6 +4340,9 @@ ${recipientName}`;
       
       fs.writeFileSync(filePath, JSON.stringify(invoice, null, 2));
       console.log(`[SAVE] Invoice saved successfully: ${fileName}`);
+
+      // Update data/invoices.json compiled bundle and auto-push
+      syncInvoicesJsonBundle().catch(() => null);
 
       // Auto-push to GitHub repository in background
       pushInvoiceToGitHubServer(invoice).catch(err => {

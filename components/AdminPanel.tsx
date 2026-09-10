@@ -25,7 +25,8 @@ import {
   getGitHubConfig,
   downloadCMSDataJsonFile,
   saveCMSDataToGitHub,
-  fetchCMSDataFromGitHub 
+  fetchCMSDataFromGitHub,
+  loadAllInvoicesUniversal
 } from '../lib/githubSync';
 import { Github, CloudUpload } from 'lucide-react';
 import { getYouTubeId, getVimeoId } from '../lib/utils';
@@ -1540,67 +1541,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack, t, theme, setTheme }) =
   const fetchInvoices = async (forceSync = true) => {
     setIsLoadingInvoices(true);
     try {
-      const token = localStorage.getItem('kh_admin_token') || '';
-      // Add cache busting and sync query to trigger automatic server-side pull from GitHub
-      const syncQuery = forceSync ? '&sync=true' : '';
-      const res = await fetch(`/api/invoices?t=${Date.now()}${syncQuery}`, { 
-        headers: token ? { 'x-admin-token': token } : {},
-        credentials: 'include' 
-      }).catch(() => null);
-
-      if (res && res.ok) {
-        const data = await res.json();
-        let list: any[] = Array.isArray(data) ? data : [];
-        
-        // If forceSync requested or server has fewer invoices, check GitHub directly to ensure complete sync
-        if (forceSync && isGitHubConfigured()) {
-          try {
-            const ghRes = await fetchInvoicesFromGitHub().catch(() => ({ invoices: [] }));
-            if (ghRes.invoices && ghRes.invoices.length > 0) {
-              const map = new Map();
-              list.forEach(i => map.set(String(i.id || i.invoiceNumber), i));
-              ghRes.invoices.forEach((i: any) => {
-                const key = String(i.id || i.invoiceNumber);
-                if (!map.has(key)) {
-                  map.set(key, i);
-                }
-              });
-              list = Array.from(map.values());
-            }
-          } catch (e) {}
-        }
-        
-        setInvoices(list);
-        localStorage.setItem('kh_dream_invoices', JSON.stringify(list));
-      } else {
-        const local = localStorage.getItem('kh_dream_invoices');
-        let combined: any[] = [];
-        if (local) {
-          try {
-            combined = JSON.parse(local);
-          } catch (e) {
-            combined = [];
-          }
-        }
-        
-        // Also check if GitHub repository sync is enabled to load from data/invoices/ on GitHub
-        if (isGitHubConfigured()) {
-          try {
-            const ghRes = await fetchInvoicesFromGitHub();
-            if (ghRes.invoices && ghRes.invoices.length > 0) {
-              const map = new Map();
-              combined.forEach(i => map.set(String(i.id || i.invoiceNumber), i));
-              ghRes.invoices.forEach((i: any) => {
-                const key = String(i.id || i.invoiceNumber);
-                map.set(key, i);
-              });
-              combined = Array.from(map.values());
-              localStorage.setItem('kh_dream_invoices', JSON.stringify(combined));
-            }
-          } catch (e) {}
-        }
-        setInvoices(combined);
-      }
+      const list = await loadAllInvoicesUniversal({ forceSync });
+      setInvoices(list);
     } catch (err) {
       console.error("Failed to fetch invoices:", err);
       const local = localStorage.getItem('kh_dream_invoices');

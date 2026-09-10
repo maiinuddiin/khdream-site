@@ -21,6 +21,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import PublicInvoiceView from './PublicInvoiceView';
+import { loadAllInvoicesUniversal } from '../lib/githubSync';
 
 interface InvoiceSummary {
   id: string;
@@ -70,18 +71,13 @@ export default function PublicInvoicePortal({ onSelectInvoice, onBack, initialIn
     setLoading(true);
     if (forceSync) setIsSyncing(true);
     try {
-      const syncQuery = forceSync ? '&sync=true' : '';
-      const res = await fetch(`/api/invoices?t=${Date.now()}${syncQuery}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setInvoices(data);
-          localStorage.setItem('kh_dream_invoices', JSON.stringify(data));
-          setLastSyncTime(new Date());
-        }
+      const data = await loadAllInvoicesUniversal({ forceSync });
+      if (Array.isArray(data)) {
+        setInvoices(data);
+        setLastSyncTime(new Date());
       }
     } catch (err) {
-      console.warn('Failed to load invoices from API, using cached data if available:', err);
+      console.warn('Failed to load invoices:', err);
     } finally {
       setLoading(false);
       setIsSyncing(false);

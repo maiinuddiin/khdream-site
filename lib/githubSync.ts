@@ -155,6 +155,233 @@ export function isGitHubConfigured(): boolean {
 }
 
 /**
+ * Check if GitHub repository is configured for public reading (owner and repo present)
+ */
+export function canReadFromGitHub(): boolean {
+  const cfg = getGitHubConfig();
+  return Boolean(cfg.owner && cfg.repo);
+}
+
+/**
+ * Universal invoice loader that works seamlessly in:
+ * 1. Node.js Express server / AI Studio Preview environment (/api/invoices)
+ * 2. Static GitHub Pages live website (./data/invoices.json bundle or raw GitHub CDN)
+ * 3. Offline / localStorage cached state
+ */
+export async function loadAllInvoicesUniversal(options: { forceSync?: boolean } = {}): Promise<any[]> {
+  const { forceSync = false } = options;
+  const token = typeof window !== 'undefined' ? (localStorage.getItem('kh_admin_token') || '') : '';
+  const syncQuery = forceSync ? '&sync=true' : '';
+
+  // 1. Try server endpoint first (works in AI Studio preview & Node server)
+  try {
+    const res = await fetch(`/api/invoices?t=${Date.now()}${syncQuery}`, {
+      headers: token ? { 'x-admin-token': token } : {},
+      credentials: 'include'
+    }).catch(() => null);
+
+    if (res && res.ok) {
+      const data = await res.json().catch(() => null);
+      if (Array.isArray(data) && data.length > 0) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('kh_dream_invoices', JSON.stringify(data));
+        }
+        return data;
+      }
+    }
+  } catch (err) {
+    // Expected on static GitHub Pages
+  }
+
+  // 2. Static host fallback (GitHub Pages live website):
+  // Fetch the pre-compiled static invoices bundle
+  let staticInvoices: any[] = [];
+  const candidateUrls: string[] = [
+    './data/invoices.json',
+    'data/invoices.json'
+  ];
+
+  if (typeof window !== 'undefined') {
+    const pathname = window.location.pathname.replace(/\/+$/, '');
+    if (pathname) {
+      candidateUrls.push(`${pathname}/data/invoices.json`);
+    }
+    candidateUrls.push(`${window.location.origin}/data/invoices.json`);
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    if (segments.length > 0) {
+      candidateUrls.push(`/${segments[0]}/data/invoices.json`);
+    }
+  }
+
+  for (const url of candidateUrls) {
+    try {
+      const res = await fetch(`${url}?t=${Date.now()}`).catch(() => null);
+      if (res && res.ok) {
+        const parsed = await res.json().catch(() => null);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          staticInvoices = parsed;
+          console.log(`[INVOICE-SYNC] Loaded ${parsed.length} invoices from static bundle: ${url}`);
+          break;
+        }
+      }
+    } catch (e) {
+      // Continue to next candidate
+    }
+  }
+
+  // 3. GitHub Raw CDN fallback (fetches live compiled invoices.json directly from public GitHub repository)
+  const cfg = getGitHubConfig();
+  const owner = cfg.owner || DEFAULT_GITHUB_OWNER;
+  const repo = cfg.repo || DEFAULT_GITHUB_REPO;
+  const branch = cfg.branch || DEFAULT_GITHUB_BRANCH;
+
+  if (staticInvoices.length === 0 && owner && repo) {
+    try {
+      const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/data/invoices.json?t=${Date.now()}`;
+      const rawRes = await fetch(rawUrl).catch(() => null);
+      if (rawRes && rawRes.ok) {
+        const rawData = await rawRes.json().catch(() => null);
+        if (Array.isArray(rawData) && rawData.length > 0) {
+          staticInvoices = rawData;
+          console.log(`[INVOICE-SYNC] Loaded ${rawData.length} invoices from GitHub Raw CDN`);
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 4. Merge with local storage cached invoices
+  let localInvoices: any[] = [];
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('kh_dream_invoices');
+      if (raw) localInvoices = JSON.parse(raw);
+    } catch (e) {}
+  }
+
+  const invoiceMap = new Map<string, any>();
+  staticInvoices.forEach(inv => {
+    const key = String(inv.id || inv.invoiceNumber);
+    if (key) invoiceMap.set(key, inv);
+  });
+  localInvoices.forEach(inv => {
+    const key = String(inv.id || inv.invoiceNumber);
+    if (key && !invoiceMap.has(key)) {
+      invoiceMap.set(key, inv);
+    }
+  });
+
+  // 5. If forceSync or if invoices are still empty, fetch live from GitHub Contents API
+  if ((forceSync || invoiceMap.size === 0) && owner && repo) {
+    try {
+      const ghRes = await fetchInvoicesFromGitHub().catch(() => ({ invoices: [] }));
+      if (ghRes.invoices && ghRes.invoices.length > 0) {
+        ghRes.invoices.forEach(inv => {
+          const key = String(inv.id || inv.invoiceNumber);
+          if (key) invoiceMap.set(key, inv);
+        });
+      }
+    } catch (e) {}
+  }
+
+  const result = Array.from(invoiceMap.values());
+  result.sort((a, b) => {
+    const timeA = new Date(a.createdAt || a.date || 0).getTime();
+    const timeB = new Date(b.createdAt || b.date || 0).getTime();
+    return timeB - timeA;
+  });
+
+  if (typeof window !== 'undefined' && result.length > 0) {
+    localStorage.setItem('kh_dream_invoices', JSON.stringify(result));
+  }
+
+  return result;
+}
+
+/**
+ * Universal single invoice loader for viewing or printing any invoice by ID or Number
+ */
+export async function loadInvoiceByIdUniversal(invoiceId: string): Promise<any | null> {
+  if (!invoiceId) return null;
+  const safeId = String(invoiceId).trim();
+  const normalized = safeId.toLowerCase();
+
+  // 1. Check localStorage first
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('kh_dream_invoices');
+      if (raw) {
+        const list = JSON.parse(raw);
+        if (Array.isArray(list)) {
+          const found = list.find((i: any) => 
+            String(i.id || '').toLowerCase() === normalized || 
+            String(i.invoiceNumber || '').toLowerCase() === normalized
+          );
+          if (found) return found;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 2. Try server endpoint
+  try {
+    const res = await fetch(`/api/invoices/${encodeURIComponent(safeId)}`).catch(() => null);
+    if (res && res.ok) {
+      const data = await res.json().catch(() => null);
+      if (data && (data.id || data.invoiceNumber)) return data;
+    }
+  } catch (e) {}
+
+  // 3. Try static file in dist/data/invoices/
+  const candidateStaticUrls = [
+    `./data/invoices/invoice_${encodeURIComponent(safeId)}.json`,
+    `data/invoices/invoice_${encodeURIComponent(safeId)}.json`
+  ];
+  if (typeof window !== 'undefined') {
+    const pathname = window.location.pathname.replace(/\/+$/, '');
+    if (pathname) candidateStaticUrls.push(`${pathname}/data/invoices/invoice_${encodeURIComponent(safeId)}.json`);
+  }
+
+  for (const staticUrl of candidateStaticUrls) {
+    try {
+      const staticRes = await fetch(staticUrl).catch(() => null);
+      if (staticRes && staticRes.ok) {
+        const data = await staticRes.json().catch(() => null);
+        if (data) return data;
+      }
+    } catch (e) {}
+  }
+
+  // 4. Try loading the full bundle and search
+  try {
+    const all = await loadAllInvoicesUniversal();
+    const found = all.find((i: any) => 
+      String(i.id || '').toLowerCase() === normalized || 
+      String(i.invoiceNumber || '').toLowerCase() === normalized ||
+      (i.customerPhone && String(i.customerPhone).replace(/\D/g, '') === safeId.replace(/\D/g, ''))
+    );
+    if (found) return found;
+  } catch (e) {}
+
+  // 5. Try GitHub Raw URL
+  const cfg = getGitHubConfig();
+  const owner = cfg.owner || DEFAULT_GITHUB_OWNER;
+  const repo = cfg.repo || DEFAULT_GITHUB_REPO;
+  const branch = cfg.branch || DEFAULT_GITHUB_BRANCH;
+  if (owner && repo) {
+    try {
+      const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/data/invoices/invoice_${encodeURIComponent(safeId)}.json`;
+      const ghRes = await fetch(rawUrl).catch(() => null);
+      if (ghRes && ghRes.ok) {
+        const data = await ghRes.json().catch(() => null);
+        if (data) return data;
+      }
+    } catch (e) {}
+  }
+
+  return null;
+}
+
+/**
  * Helper to encode UTF-8 string to base64 for GitHub Contents API
  */
 function utf8ToBase64(str: string): string {

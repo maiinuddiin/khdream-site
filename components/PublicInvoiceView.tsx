@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { ShieldCheck, Loader2, AlertCircle, Download, Printer, FileDown, ArrowLeft } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
-import { getGitHubConfig } from '../lib/githubSync';
+import { getGitHubConfig, loadInvoiceByIdUniversal } from '../lib/githubSync';
 import { downloadElementAsPDF } from '../lib/pdfExport';
 
 interface InvoiceData {
@@ -72,66 +72,10 @@ const PublicInvoiceView: React.FC<PublicInvoiceViewProps> = ({ invoiceId, onBack
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        const response = await fetch(`/api/invoices/${encodeURIComponent(invoiceId)}`).catch(() => null);
-        if (response && response.ok) {
-          const data = await response.json();
+        const data = await loadInvoiceByIdUniversal(invoiceId);
+        if (data) {
           setInvoice(data);
           return;
-        }
-
-        // Secondary fallback: fetch all invoices list and find match
-        const listRes = await fetch(`/api/invoices`).catch(() => null);
-        if (listRes && listRes.ok) {
-          const all = await listRes.json();
-          if (Array.isArray(all)) {
-            const foundInList = all.find((i: any) => 
-              String(i.id).toLowerCase() === String(invoiceId).toLowerCase() || 
-              String(i.invoiceNumber).toLowerCase() === String(invoiceId).toLowerCase() ||
-              (i.customerPhone && String(i.customerPhone).replace(/\D/g, '') === String(invoiceId).replace(/\D/g, ''))
-            );
-            if (foundInList) {
-              setInvoice(foundInList);
-              return;
-            }
-          }
-        }
-        
-        // Fallback to local storage
-        const local = localStorage.getItem('kh_dream_invoices');
-        if (local) {
-          const list = JSON.parse(local);
-          const found = list.find((i: any) => 
-            String(i.id).toLowerCase() === String(invoiceId).toLowerCase() || 
-            String(i.invoiceNumber).toLowerCase() === String(invoiceId).toLowerCase()
-          );
-          if (found) {
-            setInvoice(found);
-            return;
-          }
-        }
-
-        // Static host fallback: check bundled dist/data/invoices/
-        const staticRes = await fetch(`./data/invoices/invoice_${encodeURIComponent(invoiceId)}.json`).catch(() => null);
-        if (staticRes && staticRes.ok) {
-          const staticData = await staticRes.json().catch(() => null);
-          if (staticData) {
-            setInvoice(staticData);
-            return;
-          }
-        }
-
-        // GitHub Repository raw fetch fallback (allows viewing committed invoices even on GitHub Pages)
-        const ghCfg = getGitHubConfig();
-        if (ghCfg.owner && ghCfg.repo) {
-          const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(ghCfg.owner)}/${encodeURIComponent(ghCfg.repo)}/${encodeURIComponent(ghCfg.branch || 'main')}/data/invoices/invoice_${encodeURIComponent(invoiceId)}.json`;
-          const ghRes = await fetch(rawUrl).catch(() => null);
-          if (ghRes && ghRes.ok) {
-            const ghData = await ghRes.json().catch(() => null);
-            if (ghData) {
-              setInvoice(ghData);
-              return;
-            }
-          }
         }
 
         throw new Error('Invoice not found');
