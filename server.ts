@@ -3904,8 +3904,8 @@ ${recipientName}`;
       lastGitHubInvoicePullTime = Date.now();
       if (pulledCount > 0 || pushedCount > 0) {
         console.log(`[GITHUB-SYNC] Done: Pulled ${pulledCount}, Pushed ${pushedCount} (Local: ${localFiles.length}, Remote: ${remoteFiles.length})`);
+        syncInvoicesJsonBundle().catch(() => null);
       }
-      syncInvoicesJsonBundle().catch(() => null);
       return { count: pulledCount, pushed: pushedCount };
     } catch (err: any) {
       console.error("[GITHUB-PULL] Error during invoice sync:", err.message);
@@ -3932,6 +3932,8 @@ ${recipientName}`;
     const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
 
     try {
+      const payloadStr = JSON.stringify(invoice, null, 2);
+      const base64Content = Buffer.from(payloadStr, "utf-8").toString("base64");
       let sha: string | undefined = undefined;
       const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
         headers: {
@@ -3944,16 +3946,21 @@ ${recipientName}`;
 
       if (checkRes && checkRes.ok) {
         const fileData: any = await checkRes.json().catch(() => null);
-        if (fileData && fileData.sha) {
-          sha = fileData.sha;
+        if (fileData) {
+          if (fileData.sha) sha = fileData.sha;
+          if (fileData.content) {
+            const cleanRemote = String(fileData.content).replace(/\s/g, "");
+            const cleanLocal = base64Content.replace(/\s/g, "");
+            if (cleanRemote === cleanLocal) {
+              return { success: true };
+            }
+          }
         }
       }
 
-      const payloadStr = JSON.stringify(invoice, null, 2);
-      const base64Content = Buffer.from(payloadStr, "utf-8").toString("base64");
       const commitMessage = sha
-        ? `Update invoice ${invoice.invoiceNumber || safeId} in data/invoices/ [auto-sync]`
-        : `Add invoice ${invoice.invoiceNumber || safeId} to data/invoices/ [auto-sync]`;
+        ? `Update invoice ${invoice.invoiceNumber || safeId} in data/invoices/ [auto-sync] [skip ci]`
+        : `Add invoice ${invoice.invoiceNumber || safeId} to data/invoices/ [auto-sync] [skip ci]`;
 
       const putRes = await fetch(apiUrl, {
         method: "PUT",
@@ -4089,7 +4096,17 @@ ${recipientName}`;
         }).catch(() => null);
         if (checkRes && checkRes.ok) {
           const d: any = await checkRes.json().catch(() => null);
-          if (d && d.sha) sha = d.sha;
+          if (d) {
+            if (d.sha) sha = d.sha;
+            if (d.content) {
+              const cleanRemote = String(d.content).replace(/\s/g, "");
+              const cleanLocal = Buffer.from(str, "utf-8").toString("base64").replace(/\s/g, "");
+              if (cleanRemote === cleanLocal) {
+                // Content on GitHub is already identical
+                return;
+              }
+            }
+          }
         }
         await fetch(apiUrl, {
           method: "PUT",
@@ -4101,7 +4118,7 @@ ${recipientName}`;
             "User-Agent": "KHDream-Server-Sync"
           },
           body: JSON.stringify({
-            message: `Update data/invoices.json compiled bundle (${list.length} invoices) [auto-sync]`,
+            message: `Update data/invoices.json compiled bundle (${list.length} invoices) [auto-sync] [skip ci]`,
             content: Buffer.from(str, "utf-8").toString("base64"),
             sha: sha,
             branch: branch
@@ -4126,6 +4143,8 @@ ${recipientName}`;
     const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
 
     try {
+      const jsonStr = JSON.stringify(cmsPayload, null, 2);
+      const base64Content = Buffer.from(jsonStr, "utf-8").toString("base64");
       let sha: string | undefined = undefined;
       const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
         headers: {
@@ -4138,17 +4157,22 @@ ${recipientName}`;
 
       if (checkRes && checkRes.ok) {
         const fileData: any = await checkRes.json().catch(() => null);
-        if (fileData && fileData.sha) {
-          sha = fileData.sha;
+        if (fileData) {
+          if (fileData.sha) sha = fileData.sha;
+          if (fileData.content) {
+            const cleanRemote = String(fileData.content).replace(/\s/g, "");
+            const cleanLocal = base64Content.replace(/\s/g, "");
+            if (cleanRemote === cleanLocal) {
+              return { success: true };
+            }
+          }
         }
       }
 
-      const jsonStr = JSON.stringify(cmsPayload, null, 2);
-      const base64Content = Buffer.from(jsonStr, "utf-8").toString("base64");
       const nowStr = new Date().toISOString().replace("T", " ").slice(0, 19);
       const commitMessage = sha 
-        ? `Update CMS data/cms_data.json [auto-sync ${nowStr}]`
-        : `Initialize CMS data/cms_data.json [auto-sync ${nowStr}]`;
+        ? `Update CMS data/cms_data.json [auto-sync ${nowStr}] [skip ci]`
+        : `Initialize CMS data/cms_data.json [auto-sync ${nowStr}] [skip ci]`;
 
       const putRes = await fetch(apiUrl, {
         method: "PUT",

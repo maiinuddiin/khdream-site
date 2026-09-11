@@ -62,6 +62,11 @@ try {
 
     console.log(`[BUILD] Successfully compiled ${allInvoices.length} invoices into static data/invoices.json and dist/data/invoices.json`);
   }
+  // Ensure .nojekyll is present in dist
+  const distRoot = path.resolve(process.cwd(), 'dist');
+  if (fs.existsSync(distRoot)) {
+    fs.writeFileSync(path.join(distRoot, '.nojekyll'), '');
+  }
 } catch (compileErr) {
   console.warn('[BUILD] Warning: Could not compile invoices.json:', compileErr);
 }
