@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Lock, User as UserIcon, ArrowRight, Loader2, Eye, EyeOff, Sun, Moon, ArrowLeft } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
+import AnimatedLoginBackground from './AnimatedLoginBackground';
 
 interface LoginPageProps {
-  onBack: () => void;
+  onBack?: () => void;
   theme?: 'light' | 'dark';
   setTheme?: React.Dispatch<React.SetStateAction<'light' | 'dark'>>;
 }
@@ -190,40 +191,47 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack, theme: propTheme, setThem
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-zinc-950 transition-colors duration-300 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 relative overflow-hidden">
+      {/* Dynamic Animated Background */}
+      <AnimatedLoginBackground theme={currentTheme} />
+
       {/* Top Floating Controls */}
-      <div className="absolute top-4 right-4 flex items-center space-x-2">
+      <div className="absolute top-4 right-4 z-20 flex items-center space-x-2">
         <button
           type="button"
           onClick={toggleTheme}
-          className="p-2.5 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 shadow-sm transition-all"
+          className="p-2.5 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/80 text-slate-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800 shadow-sm transition-all"
           title={currentTheme === 'dark' ? "Switch to Light Mode" : "Dark Mode"}
         >
           {currentTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-bold text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 shadow-sm transition-all"
-        >
-          <ArrowLeft size={14} />
-          <span>Exit</span>
-        </button>
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/80 text-xs font-bold text-slate-600 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-800 shadow-sm transition-all"
+          >
+            <ArrowLeft size={14} />
+            <span>Exit</span>
+          </button>
+        )}
       </div>
 
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl overflow-hidden p-8 md:p-10 space-y-6 transition-all duration-300">
+      <div className="w-full max-w-md bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border border-slate-200/80 dark:border-zinc-800/80 rounded-2xl shadow-2xl overflow-hidden p-8 md:p-10 space-y-6 transition-all duration-300 relative z-10">
         {/* Brand Logo & Header */}
         <div className="text-center space-y-3">
           {data?.general?.logoUrl ? (
-            <img 
-              src={data.general.logoUrl} 
-              alt="KH Dream Logo" 
-              className="h-12 mx-auto object-contain dark:brightness-110" 
-              referrerPolicy="no-referrer"
-            />
+            <div className="py-1">
+              <img 
+                src={data.general.logoUrl} 
+                alt="Site Logo" 
+                className="h-14 max-w-[220px] mx-auto object-contain dark:brightness-110 drop-shadow-sm transition-transform duration-300 hover:scale-105" 
+                referrerPolicy="no-referrer"
+              />
+            </div>
           ) : (
-            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto text-lg font-black tracking-widest uppercase">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-blue-600 text-white flex items-center justify-center mx-auto text-xl font-black tracking-widest uppercase shadow-lg shadow-primary/25">
               KH
             </div>
           )}

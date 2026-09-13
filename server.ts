@@ -3226,7 +3226,13 @@ ${recipientName}`;
 
       const success = await writeCMS(newData);
       if (success) {
-        console.log("CMS data saved successfully");
+        console.log("CMS data saved successfully locally");
+        // Push directly to GitHub server as well
+        pushCMSDataToGitHubServer(newData).then(ghRes => {
+          console.log(`[API-CMS-SAVE] GitHub auto-push result:`, ghRes.success);
+        }).catch(err => {
+          console.warn(`[API-CMS-SAVE] GitHub auto-push error:`, err.message);
+        });
         res.json({ message: "CMS data saved successfully" });
       } else {
         console.error("Failed to write CMS data to file");
@@ -3802,10 +3808,64 @@ ${recipientName}`;
   }
   loadGitHubConfig();
 
-  const getGithubToken = () => githubConfig.token;
-  const getGithubOwner = () => githubConfig.owner;
-  const getGithubRepo = () => githubConfig.repo;
-  const getGithubBranch = () => githubConfig.branch;
+  const getGithubToken = () => {
+    if (!githubConfig.token) loadGitHubConfig();
+    return githubConfig.token;
+  };
+  const getGithubOwner = () => {
+    if (!githubConfig.owner) loadGitHubConfig();
+    return githubConfig.owner;
+  };
+  const getGithubRepo = () => {
+    if (!githubConfig.repo) loadGitHubConfig();
+    return githubConfig.repo;
+  };
+  const getGithubBranch = () => githubConfig.branch || "main";
+
+  // Persistent tombstone storage for deleted invoices to prevent zombie re-downloads from GitHub
+  const DELETED_INVOICES_PATH = path.join(DATA_DIR, "deleted_invoices.json");
+
+  function getDeletedInvoiceIds(): Set<string> {
+    try {
+      if (fs.existsSync(DELETED_INVOICES_PATH)) {
+        const fileContent = fs.readFileSync(DELETED_INVOICES_PATH, "utf-8");
+        const parsed = JSON.parse(fileContent);
+        if (Array.isArray(parsed)) {
+          return new Set(parsed.map(s => String(s).trim()).filter(Boolean));
+        }
+      }
+    } catch (e) {}
+    return new Set<string>();
+  }
+
+  function addDeletedInvoiceId(idOrNum: string) {
+    if (!idOrNum) return;
+    try {
+      const set = getDeletedInvoiceIds();
+      const clean = String(idOrNum).trim();
+      const safe = clean.replace(/[^a-zA-Z0-9_-]/g, "_");
+      set.add(clean);
+      set.add(safe);
+      if (clean.startsWith("INV-")) {
+        set.add(clean.replace(/^INV-/, ""));
+      }
+      fs.writeFileSync(DELETED_INVOICES_PATH, JSON.stringify(Array.from(set), null, 2));
+    } catch (e) {}
+  }
+
+  function removeDeletedInvoiceId(idOrNum: string) {
+    if (!idOrNum) return;
+    try {
+      const set = getDeletedInvoiceIds();
+      const clean = String(idOrNum).trim();
+      set.delete(clean);
+      set.delete(clean.replace(/[^a-zA-Z0-9_-]/g, "_"));
+      if (clean.startsWith("INV-")) {
+        set.delete(clean.replace(/^INV-/, ""));
+      }
+      fs.writeFileSync(DELETED_INVOICES_PATH, JSON.stringify(Array.from(set), null, 2));
+    } catch (e) {}
+  }
 
   let lastGitHubInvoicePullTime = 0;
   let isGitHubInvoicePulling = false;
@@ -3850,10 +3910,24 @@ ${recipientName}`;
 
       const remoteFiles = items.filter((f: any) => f.name && f.name.startsWith("invoice_") && f.name.endsWith(".json"));
       const remoteFileNames = new Set(remoteFiles.map((f: any) => f.name));
+      const deletedSet = getDeletedInvoiceIds();
       let pulledCount = 0;
 
-      // 1. PULL: Download missing or updated files from GitHub
+      // 1. PULL: Download missing or updated files from GitHub (skipping tombstones)
       for (const item of remoteFiles) {
+        const pureName = item.name.replace("invoice_", "").replace(".json", "");
+        const isDeleted = deletedSet.has(pureName) || Array.from(deletedSet).some(delKey => item.name.includes(delKey));
+
+        if (isDeleted) {
+          console.log(`[GITHUB-PULL] Purging previously deleted invoice on GitHub: ${item.name}...`);
+          deleteInvoiceFromGitHubServer(pureName).catch(() => {});
+          const localPath = path.join(INVOICES_DIR, item.name);
+          if (fs.existsSync(localPath)) {
+            try { fs.unlinkSync(localPath); } catch (e) {}
+          }
+          continue;
+        }
+
         const localPath = path.join(INVOICES_DIR, item.name);
         let needDownload = !fs.existsSync(localPath);
         if (!needDownload && item.size) {
@@ -3870,6 +3944,12 @@ ${recipientName}`;
             const dlRes = await fetch(item.download_url);
             if (dlRes.ok) {
               const text = await dlRes.text();
+              try {
+                const parsed = JSON.parse(text);
+                if (parsed.id && (deletedSet.has(String(parsed.id)) || (parsed.invoiceNumber && deletedSet.has(String(parsed.invoiceNumber))))) {
+                  continue;
+                }
+              } catch (e) {}
               fs.writeFileSync(localPath, text);
               pulledCount++;
             }
@@ -3879,16 +3959,25 @@ ${recipientName}`;
         }
       }
 
-      // 2. PUSH: Automatically push any local invoices not yet on GitHub
+      // 2. PUSH: Automatically push any local invoices not yet on GitHub (skipping tombstones)
       let pushedCount = 0;
       const localFiles = fs.readdirSync(INVOICES_DIR).filter(f => f.startsWith("invoice_") && f.endsWith(".json"));
       for (const localName of localFiles) {
+        const pureName = localName.replace("invoice_", "").replace(".json", "");
+        if (deletedSet.has(pureName) || Array.from(deletedSet).some(delKey => localName.includes(delKey))) {
+          try { fs.unlinkSync(path.join(INVOICES_DIR, localName)); } catch (e) {}
+          continue;
+        }
+
         if (!remoteFileNames.has(localName)) {
           try {
             const fullLocal = path.join(INVOICES_DIR, localName);
             const content = fs.readFileSync(fullLocal, "utf-8");
             const parsed = JSON.parse(content);
             if (parsed && (parsed.id || parsed.invoiceNumber)) {
+              if (deletedSet.has(String(parsed.id)) || (parsed.invoiceNumber && deletedSet.has(String(parsed.invoiceNumber)))) {
+                continue;
+              }
               console.log(`[GITHUB-AUTO-PUSH] Pushing uncommitted invoice ${localName} to GitHub repository...`);
               const pushResult = await pushInvoiceToGitHubServer(parsed);
               if (pushResult.success) {
@@ -3915,7 +4004,7 @@ ${recipientName}`;
     }
   }
 
-  async function pushInvoiceToGitHubServer(invoice: any): Promise<{ success: boolean; error?: string }> {
+  async function pushInvoiceToGitHubServer(invoice: any, retryCount = 0): Promise<{ success: boolean; error?: string }> {
     const token = getGithubToken();
     const owner = getGithubOwner();
     const repo = getGithubRepo();
@@ -3926,6 +4015,10 @@ ${recipientName}`;
     }
     const invoiceId = invoice.id || invoice.invoiceNumber;
     if (!invoiceId) return { success: false, error: "Missing invoice ID" };
+
+    // Active invoice: ensure removed from deleted tombstones
+    if (invoice.id) removeDeletedInvoiceId(invoice.id);
+    if (invoice.invoiceNumber) removeDeletedInvoiceId(invoice.invoiceNumber);
 
     const safeId = String(invoiceId).replace(/[^a-zA-Z0-9_-]/g, "_");
     const filePath = `data/invoices/invoice_${safeId}.json`;
@@ -3980,12 +4073,18 @@ ${recipientName}`;
       });
 
       if (!putRes.ok) {
+        if ((putRes.status === 409 || putRes.status === 422) && retryCount < 3) {
+          console.warn(`[GITHUB-PUSH] Conflict ${putRes.status} for ${safeId}, retrying (attempt ${retryCount + 1})...`);
+          await new Promise(r => setTimeout(r, 400));
+          return pushInvoiceToGitHubServer(invoice, retryCount + 1);
+        }
         const errJson: any = await putRes.json().catch(() => ({}));
         console.error(`[GITHUB-PUSH] GitHub API rejected invoice ${safeId} (${putRes.status}):`, errJson);
         return { success: false, error: errJson.message || `Status ${putRes.status}` };
       }
 
       console.log(`[GITHUB-PUSH] Successfully pushed invoice ${safeId} to GitHub (${owner}/${repo})`);
+      syncInvoicesJsonBundle().catch(() => null);
       return { success: true };
     } catch (err: any) {
       console.error(`[GITHUB-PUSH] Error pushing invoice ${safeId}:`, err.message);
@@ -3993,7 +4092,7 @@ ${recipientName}`;
     }
   }
 
-  async function deleteInvoiceFromGitHubServer(invoiceId: string): Promise<{ success: boolean; error?: string }> {
+  async function deleteInvoiceFromGitHubServer(invoiceId: string, invoiceNumber?: string): Promise<{ success: boolean; error?: string }> {
     const token = getGithubToken();
     const owner = getGithubOwner();
     const repo = getGithubRepo();
@@ -4002,12 +4101,75 @@ ${recipientName}`;
     if (!token || !owner || !repo) {
       return { success: false, error: "GitHub credentials not configured" };
     }
-    const safeId = String(invoiceId).replace(/[^a-zA-Z0-9_-]/g, "_");
-    const filePath = `data/invoices/invoice_${safeId}.json`;
-    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
 
+    // Persist tombstone immediately
+    addDeletedInvoiceId(invoiceId);
+    if (invoiceNumber) addDeletedInvoiceId(invoiceNumber);
+
+    const rawId = String(invoiceId).trim();
+    const safeId = rawId.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const idWithoutInv = rawId.replace(/^INV-/, "");
+    const safeNum = invoiceNumber ? String(invoiceNumber).trim().replace(/[^a-zA-Z0-9_-]/g, "_") : "";
+
+    const candidatePaths = new Set<string>([
+      `data/invoices/invoice_${rawId}.json`,
+      `data/invoices/invoice_${safeId}.json`,
+      `data/invoices/invoice_${idWithoutInv}.json`,
+      `data/invoices/invoice_INV-${idWithoutInv}.json`
+    ]);
+    if (safeNum) {
+      candidatePaths.add(`data/invoices/invoice_${safeNum}.json`);
+      candidatePaths.add(`data/invoices/invoice_${invoiceNumber}.json`);
+    }
+
+    let anyDeleted = false;
+
+    // 1. Try direct candidate paths
+    for (const filePath of candidatePaths) {
+      try {
+        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
+        const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "KHDream-Server-Sync"
+          }
+        }).catch(() => null);
+
+        if (checkRes && checkRes.ok) {
+          const fileData: any = await checkRes.json().catch(() => null);
+          if (fileData && fileData.sha) {
+            const delRes = await fetch(apiUrl, {
+              method: "DELETE",
+              headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/vnd.github+json",
+                "Content-Type": "application/json",
+                "X-GitHub-Api-Version": "2022-11-28",
+                "User-Agent": "KHDream-Server-Sync"
+              },
+              body: JSON.stringify({
+                message: `Delete invoice ${filePath} from data/invoices/ [auto-sync] [skip ci]`,
+                sha: fileData.sha,
+                branch: branch
+              })
+            });
+            if (delRes.ok) {
+              console.log(`[GITHUB-DELETE] Deleted direct path ${filePath} from GitHub repository`);
+              anyDeleted = true;
+            }
+          }
+        }
+      } catch (err: any) {
+        console.warn(`[GITHUB-DELETE] Direct delete error for ${filePath}:`, err.message);
+      }
+    }
+
+    // 2. Query directory contents on GitHub to find any file matching the invoice ID or number
     try {
-      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
+      const listUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/data/invoices?ref=${encodeURIComponent(branch)}`;
+      const listRes = await fetch(listUrl, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
@@ -4016,51 +4178,74 @@ ${recipientName}`;
         }
       }).catch(() => null);
 
-      if (!checkRes || !checkRes.ok) {
-        return { success: true };
+      if (listRes && listRes.ok) {
+        const items: any[] = await listRes.json().catch(() => []);
+        if (Array.isArray(items)) {
+          const matchingFiles = items.filter(f => {
+            if (!f.name || !f.name.endsWith(".json")) return false;
+            if (f.name === `invoice_${rawId}.json`) return true;
+            if (f.name === `invoice_${safeId}.json`) return true;
+            if (idWithoutInv.length > 5 && f.name.includes(idWithoutInv)) return true;
+            if (safeNum && f.name.includes(safeNum)) return true;
+            return false;
+          });
+
+          for (const mf of matchingFiles) {
+            if (mf.sha && mf.path) {
+              const delApiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${mf.path}`;
+              const delRes = await fetch(delApiUrl, {
+                method: "DELETE",
+                headers: {
+                  "Authorization": `Bearer ${token}`,
+                  "Accept": "application/vnd.github+json",
+                  "Content-Type": "application/json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                  "User-Agent": "KHDream-Server-Sync"
+                },
+                body: JSON.stringify({
+                  message: `Delete invoice ${mf.name} from data/invoices/ [auto-sync] [skip ci]`,
+                  sha: mf.sha,
+                  branch: branch
+                })
+              });
+              if (delRes.ok) {
+                console.log(`[GITHUB-DELETE] Purged directory match ${mf.name} from GitHub repository`);
+                anyDeleted = true;
+              }
+            }
+          }
+        }
       }
-
-      const fileData: any = await checkRes.json().catch(() => null);
-      if (!fileData || !fileData.sha) {
-        return { success: false, error: "Could not retrieve file SHA" };
-      }
-
-      const delRes = await fetch(apiUrl, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/vnd.github+json",
-          "Content-Type": "application/json",
-          "X-GitHub-Api-Version": "2022-11-28",
-          "User-Agent": "KHDream-Server-Sync"
-        },
-        body: JSON.stringify({
-          message: `Delete invoice ${safeId} from data/invoices/ [auto-sync]`,
-          sha: fileData.sha,
-          branch: branch
-        })
-      });
-
-      console.log(`[GITHUB-DELETE] Deleted invoice ${safeId} from GitHub repository (${delRes.ok})`);
-      syncInvoicesJsonBundle().catch(() => null);
-      return { success: delRes.ok };
-    } catch (err: any) {
-      console.error(`[GITHUB-DELETE] Error deleting invoice ${safeId} from GitHub:`, err.message);
-      return { success: false, error: err.message };
+    } catch (dirErr: any) {
+      console.warn("[GITHUB-DELETE] Directory search delete error:", dirErr.message);
     }
+
+    // 3. Always synchronize and push the updated compiled data/invoices.json bundle
+    await syncInvoicesJsonBundle().catch(() => null);
+
+    return { success: true };
   }
 
-  async function syncInvoicesJsonBundle(): Promise<void> {
+  async function syncInvoicesJsonBundle(retryCount = 0): Promise<void> {
     try {
       if (!fs.existsSync(INVOICES_DIR)) return;
       const files = fs.readdirSync(INVOICES_DIR).filter(f => f.startsWith("invoice_") && f.endsWith(".json"));
+      const deletedSet = getDeletedInvoiceIds();
       const list: any[] = [];
+
       for (const f of files) {
         try {
+          const pureName = f.replace("invoice_", "").replace(".json", "");
+          if (deletedSet.has(pureName) || Array.from(deletedSet).some(d => f.includes(d))) {
+            continue;
+          }
           const raw = fs.readFileSync(path.join(INVOICES_DIR, f), "utf-8");
           const parsed = JSON.parse(raw);
           if (parsed) {
-            if (!parsed.id) parsed.id = f.replace("invoice_", "").replace(".json", "");
+            if (!parsed.id) parsed.id = pureName;
+            if (deletedSet.has(String(parsed.id)) || (parsed.invoiceNumber && deletedSet.has(String(parsed.invoiceNumber)))) {
+              continue;
+            }
             list.push(parsed);
           }
         } catch (e) {}
@@ -4102,13 +4287,12 @@ ${recipientName}`;
               const cleanRemote = String(d.content).replace(/\s/g, "");
               const cleanLocal = Buffer.from(str, "utf-8").toString("base64").replace(/\s/g, "");
               if (cleanRemote === cleanLocal) {
-                // Content on GitHub is already identical
                 return;
               }
             }
           }
         }
-        await fetch(apiUrl, {
+        const putRes = await fetch(apiUrl, {
           method: "PUT",
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -4120,17 +4304,22 @@ ${recipientName}`;
           body: JSON.stringify({
             message: `Update data/invoices.json compiled bundle (${list.length} invoices) [auto-sync] [skip ci]`,
             content: Buffer.from(str, "utf-8").toString("base64"),
-            sha: sha,
+            ...(sha ? { sha } : {}),
             branch: branch
           })
         }).catch(() => null);
+
+        if (putRes && !putRes.ok && (putRes.status === 409 || putRes.status === 422) && retryCount < 3) {
+          await new Promise(r => setTimeout(r, 400));
+          return syncInvoicesJsonBundle(retryCount + 1);
+        }
       }
     } catch (err: any) {
       console.warn("[SYNC-INVOICES-JSON]", err.message);
     }
   }
 
-  async function pushCMSDataToGitHubServer(cmsPayload: any): Promise<{ success: boolean; error?: string }> {
+  async function pushCMSDataToGitHubServer(cmsPayload: any, retryCount = 0): Promise<{ success: boolean; error?: string }> {
     const token = getGithubToken();
     const owner = getGithubOwner();
     const repo = getGithubRepo();
@@ -4192,6 +4381,11 @@ ${recipientName}`;
       });
 
       if (!putRes.ok) {
+        if ((putRes.status === 409 || putRes.status === 422) && retryCount < 3) {
+          console.warn(`[GITHUB-CMS-PUSH] Conflict ${putRes.status}, re-fetching SHA and retrying (attempt ${retryCount + 1})...`);
+          await new Promise(r => setTimeout(r, 400));
+          return pushCMSDataToGitHubServer(cmsPayload, retryCount + 1);
+        }
         const errJson: any = await putRes.json().catch(() => ({}));
         console.error(`[GITHUB-CMS-PUSH] GitHub API rejected CMS update (${putRes.status}):`, errJson);
         return { success: false, error: errJson.message || `Status ${putRes.status}` };
@@ -4292,6 +4486,71 @@ ${recipientName}`;
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message || "Failed to sync invoices" });
+    }
+  });
+
+  // Comprehensive manual "Update to GitHub Server" endpoint (pushes CMS settings, active invoices, purges deleted invoices)
+  app.post("/api/github/push-all", isInvoiceAuthorized, async (req, res) => {
+    try {
+      const token = getGithubToken();
+      const owner = getGithubOwner();
+      const repo = getGithubRepo();
+      const branch = getGithubBranch();
+
+      if (!token || !owner || !repo) {
+        return res.status(400).json({ error: "GitHub credentials not configured on server" });
+      }
+
+      console.log(`[GITHUB-PUSH-ALL] Full sync initiated by user for ${owner}/${repo}...`);
+
+      // 1. Push CMS settings (data/cms_data.json)
+      const currentCms = readCMS();
+      const cmsResult = await pushCMSDataToGitHubServer(currentCms);
+
+      // 2. Clean any deleted tombstones from GitHub
+      const deletedSet = getDeletedInvoiceIds();
+      let purgedCount = 0;
+      for (const delId of Array.from(deletedSet)) {
+        await deleteInvoiceFromGitHubServer(delId).catch(() => {});
+        purgedCount++;
+      }
+
+      // 3. Push all active local invoices to GitHub
+      let invoicesPushed = 0;
+      if (fs.existsSync(INVOICES_DIR)) {
+        const localFiles = fs.readdirSync(INVOICES_DIR).filter(f => f.startsWith("invoice_") && f.endsWith(".json"));
+        for (const f of localFiles) {
+          try {
+            const pureName = f.replace("invoice_", "").replace(".json", "");
+            if (deletedSet.has(pureName) || Array.from(deletedSet).some(d => f.includes(d))) {
+              try { fs.unlinkSync(path.join(INVOICES_DIR, f)); } catch (e) {}
+              continue;
+            }
+            const raw = fs.readFileSync(path.join(INVOICES_DIR, f), "utf-8");
+            const parsed = JSON.parse(raw);
+            if (parsed && (parsed.id || parsed.invoiceNumber)) {
+              const pushRes = await pushInvoiceToGitHubServer(parsed);
+              if (pushRes.success) invoicesPushed++;
+            }
+          } catch (e: any) {
+            console.warn(`[GITHUB-PUSH-ALL] Error pushing ${f}:`, e.message);
+          }
+        }
+      }
+
+      // 4. Compile and push data/invoices.json bundle
+      await syncInvoicesJsonBundle();
+
+      res.json({
+        success: true,
+        message: "Successfully synchronized all data to GitHub server",
+        cmsUpdated: cmsResult.success,
+        invoicesPushed: invoicesPushed,
+        purgedDeleted: purgedCount
+      });
+    } catch (error: any) {
+      console.error("[GITHUB-PUSH-ALL] Error during push-all:", error);
+      res.status(500).json({ error: error.message || "Failed to update GitHub server" });
     }
   });
 
@@ -4445,7 +4704,7 @@ ${recipientName}`;
     }
   });
 
-  app.delete("/api/invoices/:id", isAdmin, (req, res) => {
+  app.delete("/api/invoices/:id", isAdmin, async (req, res) => {
     const id = req.params.id;
 
     // Security: Prevent path traversal
@@ -4455,44 +4714,54 @@ ${recipientName}`;
 
     console.log(`[DELETE] Attempting to delete invoice: ${id}`);
     try {
-      if (!fs.existsSync(INVOICES_DIR)) {
-        return res.json({ message: "Invoices directory not found, nothing to delete" });
-      }
-      
-      const files = fs.readdirSync(INVOICES_DIR);
-      
-      // Try exact filename first
-      let fileName = `invoice_${id}.json`;
-      let filePath = path.join(INVOICES_DIR, fileName);
-      
-      if (!fs.existsSync(filePath)) {
-        console.log(`[DELETE] Exact match not found for ${fileName}, searching...`);
-        // Fallback: search for file containing ID
-        const foundFile = files.find(f => f.includes(id) && f.endsWith(".json"));
-        if (foundFile) {
-          fileName = foundFile;
-          filePath = path.join(INVOICES_DIR, fileName);
+      let invoiceNumber: string | undefined = undefined;
+      let actualInvoiceId = id;
+
+      // Add to tombstones immediately
+      addDeletedInvoiceId(id);
+
+      if (fs.existsSync(INVOICES_DIR)) {
+        const files = fs.readdirSync(INVOICES_DIR);
+        let fileName = `invoice_${id}.json`;
+        let filePath = path.join(INVOICES_DIR, fileName);
+
+        if (!fs.existsSync(filePath)) {
+          const clean = id.replace(/[^a-zA-Z0-9_-]/g, "_");
+          const foundFile = files.find(f => (f === `invoice_${clean}.json` || f.includes(id) || (id.startsWith("INV-") && f.includes(id.replace(/^INV-/, "")))) && f.endsWith(".json"));
+          if (foundFile) {
+            fileName = foundFile;
+            filePath = path.join(INVOICES_DIR, fileName);
+          }
+        }
+
+        if (fs.existsSync(filePath)) {
+          try {
+            const raw = fs.readFileSync(filePath, "utf-8");
+            const parsed = JSON.parse(raw);
+            if (parsed.invoiceNumber) {
+              invoiceNumber = parsed.invoiceNumber;
+              addDeletedInvoiceId(invoiceNumber);
+            }
+            if (parsed.id) {
+              actualInvoiceId = parsed.id;
+              addDeletedInvoiceId(actualInvoiceId);
+            }
+          } catch (e) {}
+
+          fs.unlinkSync(filePath);
+          console.log(`[DELETE] Successfully deleted local invoice file: ${fileName}`);
         }
       }
-      
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log(`[DELETE] Successfully deleted: ${fileName}`);
 
-        // Auto-delete from GitHub repository in background
-        deleteInvoiceFromGitHubServer(id).catch(err => {
-          console.warn(`[AUTO-DELETE] Async GitHub delete error:`, err);
-        });
+      // Perform synchronous GitHub delete and update bundle
+      await deleteInvoiceFromGitHubServer(actualInvoiceId, invoiceNumber).catch(err => {
+        console.warn(`[DELETE] Error in deleteInvoiceFromGitHubServer:`, err.message);
+      });
 
-        res.json({ message: "Invoice deleted successfully" });
-      } else {
-        console.warn(`[DELETE] No file found for ID: ${id}. Returning success for idempotency.`);
-        deleteInvoiceFromGitHubServer(id).catch(() => {});
-        res.json({ message: "Invoice already deleted or not found" });
-      }
-    } catch (error) {
+      res.json({ success: true, message: "Invoice deleted successfully from server and GitHub" });
+    } catch (error: any) {
       console.error(`[DELETE] Error deleting invoice ${id}:`, error);
-      res.status(500).json({ error: "Failed to delete invoice" });
+      res.status(500).json({ error: "Failed to delete invoice: " + (error?.message || "Internal error") });
     }
   });
 

@@ -1167,10 +1167,10 @@ export const DEFAULT_DATA: CMSData = {
     officesIconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
     bgUrl: "",
     footerBgColor: "#09090b",
-    companyName: "KH Dream Services Limited",
-    phone: "+966 053 768 1618",
-    email: "info@khdreamservices.com",
-    siteName: "KH Dream Services",
+    companyName: "KH DREAM SERVICES LTD.",
+    phone: "+966 57 303 0940",
+    email: "Support@khdreamservices.com",
+    siteName: "KH DREAM SERVICES LTD.",
     sectionBackgrounds: {},
     security: {
       maintenanceMode: false,
@@ -1187,8 +1187,8 @@ export const DEFAULT_DATA: CMSData = {
     sectionSubtitle: "Our Global Presence"
   },
   footer: {
-    aboutText: "KH Dream Services Limited is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors.",
-    copyright: "© 2026 KH Dream Services Limited. All rights reserved.",
+    aboutText: "KH DREAM SERVICES LTD. is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors.",
+    copyright: "© 2026 KH DREAM SERVICES LTD. All rights reserved.",
     links: [
       { label: "About Us", url: "#" },
       { label: "Services", url: "#" },
@@ -1290,13 +1290,21 @@ export const DEFAULT_DATA: CMSData = {
     { id: '1', name: 'S.M. Rakibul Hasan', role: 'Chief Executive Officer', image: '' },
   ],
   offices: [
-    { id: '1', name: "KH Dream Services", city: "Riyadh", address: "King Fahd Road, Al Olaya District", phone: "+966 11 000 0000", hours: "9 AM - 6 PM", mapUrl: "https://maps.app.goo.gl/2n82PcGfgrWYU45d8" },
-    { id: '2', name: "Sky Search Travels", city: "Jeddah", address: "Prince Sultan Road, Al Rawdah", phone: "+966 12 000 0000", hours: "9 AM - 6 PM", mapUrl: "https://maps.app.goo.gl/2n82PcGfgrWYU45d8" }
+    { id: '1', name: "KH DREAM SERVICES LTD.", city: "Riyadh", address: "2551 Mousa Complex, Al Olaya, Riyadh 12211, Saudi Arabia", phone: "+966 57 303 0940", hours: "9 AM - 6 PM", mapUrl: "https://maps.app.goo.gl/2n82PcGfgrWYU45d8" }
   ],
   businessProfiles: [
-    { id: '1', name: 'KH Dream Services', arabicName: 'كي اتش دريم للخدمات', logoUrl: 'https://i.ibb.co/pjjqSnRF/Logo-23D.png', address: 'King Fahd Road, Al Olaya District, Riyadh, KSA', vatId: '300000000000003', invoicePrefix: 'KHD', nextInvoiceNumber: 1001 },
-    { id: '2', name: 'Sky Search Travels', arabicName: 'سكاي سيرش للسياحة', logoUrl: 'https://i.ibb.co/pjjqSnRF/Logo-23D.png', address: 'Prince Sultan Road, Al Rawdah, Jeddah, KSA', vatId: '300000000000004', invoicePrefix: 'SST', nextInvoiceNumber: 1001 },
-    { id: '3', name: 'KH Dream Services Limited', arabicName: 'كي اتش دريم للخدمات المحدودة', logoUrl: 'https://i.ibb.co/pjjqSnRF/Logo-23D.png', address: 'Al Olaya District, Riyadh, KSA', vatId: '300000000000005', invoicePrefix: 'KHD', nextInvoiceNumber: 1001 }
+    { 
+      id: '1', 
+      name: 'KH DREAM SERVICES LTD.', 
+      arabicName: 'شركة كي إتش دريم للخدمات إل تي دي.', 
+      logoUrl: '/uploads/1789066621856-142402625.png', 
+      address: '2551 Mousa Complex, Al Olaya, Riyadh 12211, Saudi Arabia', 
+      phone: '+966 57 303 0940',
+      email: 'Support@khdreamservices.com',
+      vatId: '300000000000003', 
+      invoicePrefix: 'KHD', 
+      nextInvoiceNumber: 1003 
+    }
   ],
   users: [
     { id: '1', username: 'admin', fullName: 'System Administrator', email: 'admin@khdreamservices.com', password: '●●●●●●●●', role: 'Admin', profilePic: '', permissions: AVAILABLE_PERMISSIONS.map(p => p.key) },

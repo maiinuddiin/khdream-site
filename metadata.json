@@ -1,6 +1,6 @@
 {
   "name": "KH Dream Services Limited",
-  "description": "Premium travel and tourism platform with a powerful, resizable landing page builder, custom home screen sections, and comprehensive admin controls.",
+  "description": "Enterprise management portal focusing on Invoices, Receipts, Internal Mailbox, and User Management.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

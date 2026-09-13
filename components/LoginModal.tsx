@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { X, Lock, User as UserIcon, Loader2, Eye, EyeOff, Sun, Moon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { X, Lock, User as UserIcon, Loader2, Eye, EyeOff, Sun, Moon, ShieldCheck } from 'lucide-react';
 import { useCMS } from '../context/CMSContext';
 
 interface LoginModalProps {
@@ -241,12 +242,123 @@ const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm transition-opacity" onClick={onClose} />
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 overflow-hidden">
+      {/* Base Dim Backdrop */}
+      <div 
+        className="absolute inset-0 bg-slate-950/75 dark:bg-black/85 backdrop-blur-md transition-opacity" 
+        onClick={onClose} 
+      />
+
+      {/* Animated Background Atmosphere */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        {/* Subtle dynamic grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.035] dark:opacity-[0.07]" 
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+            backgroundSize: '32px 32px'
+          }}
+        />
+
+        {/* Animated Glowing Orb 1 - Emerald/Teal (Top-Left) */}
+        <motion.div
+          animate={{
+            x: [0, 60, -30, 0],
+            y: [0, -50, 40, 0],
+            scale: [1, 1.25, 0.9, 1],
+            opacity: [0.35, 0.55, 0.3, 0.35]
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-gradient-to-tr from-emerald-500/30 via-teal-500/20 to-cyan-500/10 blur-3xl filter"
+        />
+
+        {/* Animated Glowing Orb 2 - Royal Indigo/Sapphire (Bottom-Right) */}
+        <motion.div
+          animate={{
+            x: [0, -70, 40, 0],
+            y: [0, 60, -50, 0],
+            scale: [1, 1.3, 0.85, 1],
+            opacity: [0.3, 0.6, 0.35, 0.3]
+          }}
+          transition={{
+            duration: 22,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute -bottom-36 -right-36 w-[30rem] h-[30rem] rounded-full bg-gradient-to-br from-blue-600/25 via-indigo-600/20 to-emerald-500/15 blur-3xl filter"
+        />
+
+        {/* Animated Glowing Orb 3 - Cyan Accent (Center-Top Breathing) */}
+        <motion.div
+          animate={{
+            x: [0, 40, -40, 0],
+            y: [0, 30, -30, 0],
+            scale: [0.9, 1.15, 0.9],
+            opacity: [0.2, 0.45, 0.2]
+          }}
+          transition={{
+            duration: 14,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-gradient-to-r from-emerald-400/20 to-teal-400/20 blur-3xl filter"
+        />
+
+        {/* Floating Ambient Spark Particles */}
+        <motion.div
+          animate={{
+            y: [0, -120, -240],
+            opacity: [0, 0.7, 0]
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "linear",
+            delay: 1
+          }}
+          className="absolute left-[25%] bottom-[15%] w-2 h-2 rounded-full bg-emerald-400/60 blur-[1px]"
+        />
+        <motion.div
+          animate={{
+            y: [0, -150, -300],
+            opacity: [0, 0.8, 0]
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "linear",
+            delay: 3
+          }}
+          className="absolute right-[28%] bottom-[25%] w-2.5 h-2.5 rounded-full bg-cyan-400/60 blur-[1px]"
+        />
+        <motion.div
+          animate={{
+            y: [0, -100, -200],
+            opacity: [0, 0.6, 0]
+          }}
+          transition={{
+            duration: 7,
+            repeat: Infinity,
+            ease: "linear",
+            delay: 4.5
+          }}
+          className="absolute left-[65%] bottom-[20%] w-1.5 h-1.5 rounded-full bg-emerald-300/50 blur-[1px]"
+        />
+      </div>
       
-      {/* Card */}
-      <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800 p-8 space-y-6 animate-in zoom-in-95 duration-200">
+      {/* Login Card with animated glow backdrop */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.94, y: 14 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="relative w-full max-w-md bg-white/95 dark:bg-zinc-900/90 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl shadow-emerald-950/20 border border-slate-200/80 dark:border-zinc-800/90 p-8 space-y-6 z-10"
+      >
+        {/* Subtle top card glow line */}
+        <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
         
         {/* Header toolbar */}
         <div className="absolute top-4 right-4 flex items-center space-x-2">
@@ -268,11 +380,20 @@ const LoginModal: React.FC<LoginModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="text-center space-y-2 mt-2">
+        <div className="text-center space-y-2.5 mt-2">
           {data?.general?.logoUrl ? (
-            <img src={data.general.logoUrl} alt="KH Dream" className="h-10 mx-auto object-contain" referrerPolicy="no-referrer" />
+            <div className="p-2 inline-block rounded-xl bg-slate-50/80 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800 shadow-sm">
+              <img 
+                src={data.general.logoUrl} 
+                alt="Site Logo" 
+                className="h-11 max-w-[200px] mx-auto object-contain dark:brightness-105 transition-transform hover:scale-105" 
+                referrerPolicy="no-referrer" 
+              />
+            </div>
           ) : (
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto text-base font-black uppercase">KH</div>
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center mx-auto text-base font-black uppercase shadow-md shadow-emerald-600/30">
+              KH
+            </div>
           )}
 
           <div className="space-y-1">
@@ -464,7 +585,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
         >
           Cancel access
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 };

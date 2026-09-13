@@ -550,49 +550,61 @@ export async function fetchInvoicesFromGitHub(): Promise<{ invoices: any[]; erro
 /**
  * Delete invoice file from data/invoices/ in GitHub repository
  */
-export async function deleteInvoiceFromGitHub(invoiceId: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteInvoiceFromGitHub(invoiceId: string, invoiceNumber?: string): Promise<{ success: boolean; error?: string }> {
   const cfg = getGitHubConfig();
   if (!cfg.owner || !cfg.repo || !cfg.token) {
     return { success: false, error: 'GitHub repository or token missing.' };
   }
 
-  const filePath = `data/invoices/invoice_${invoiceId}.json`;
-  const apiUrl = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${filePath}`;
+  const rawId = String(invoiceId).trim();
+  const safeId = rawId.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const idWithoutInv = rawId.replace(/^INV-/, "");
+  const safeNum = invoiceNumber ? String(invoiceNumber).trim().replace(/[^a-zA-Z0-9_-]/g, "_") : "";
+
+  const candidatePaths = new Set<string>([
+    `data/invoices/invoice_${rawId}.json`,
+    `data/invoices/invoice_${safeId}.json`,
+    `data/invoices/invoice_${idWithoutInv}.json`,
+    `data/invoices/invoice_INV-${idWithoutInv}.json`
+  ]);
+  if (safeNum) {
+    candidatePaths.add(`data/invoices/invoice_${safeNum}.json`);
+    candidatePaths.add(`data/invoices/invoice_${invoiceNumber}.json`);
+  }
 
   try {
-    const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(cfg.branch)}`, {
-      headers: {
-        'Authorization': `Bearer ${cfg.token}`,
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28'
+    for (const path of candidatePaths) {
+      const apiUrl = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${path}`;
+      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(cfg.branch)}`, {
+        headers: {
+          'Authorization': `Bearer ${cfg.token}`,
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      }).catch(() => null);
+
+      if (checkRes && checkRes.ok) {
+        const data = await checkRes.json().catch(() => null);
+        if (data && data.sha) {
+          await fetch(apiUrl, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${cfg.token}`,
+              'Accept': 'application/vnd.github+json',
+              'Content-Type': 'application/json',
+              'X-GitHub-Api-Version': '2022-11-28'
+            },
+            body: JSON.stringify({
+              message: `Delete invoice ${path} from data/invoices/ [skip ci]`,
+              sha: data.sha,
+              branch: cfg.branch
+            })
+          }).catch(() => null);
+        }
       }
-    });
-
-    if (!checkRes.ok) {
-      return { success: true }; // Already deleted or doesn't exist
     }
 
-    const data = await checkRes.json();
-    if (!data.sha) {
-      return { success: false, error: 'Could not get file SHA from GitHub' };
-    }
-
-    const delRes = await fetch(apiUrl, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${cfg.token}`,
-        'Accept': 'application/vnd.github+json',
-        'Content-Type': 'application/json',
-        'X-GitHub-Api-Version': '2022-11-28'
-      },
-      body: JSON.stringify({
-        message: `Delete invoice ${invoiceId} from data/invoices/`,
-        sha: data.sha,
-        branch: cfg.branch
-      })
-    });
-
-    return { success: delRes.ok };
+    return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
   }
@@ -633,7 +645,7 @@ export function downloadAllInvoicesBackup(invoices: any[]): void {
 /**
  * Save / commit entire CMS data directly to data/cms_data.json in GitHub repository
  */
-export async function saveCMSDataToGitHub(cmsData: any): Promise<{ success: boolean; commitUrl?: string; error?: string }> {
+export async function saveCMSDataToGitHub(cmsData: any, retryCount = 0): Promise<{ success: boolean; commitUrl?: string; error?: string }> {
   const cfg = getGitHubConfig();
   if (!cfg.owner || !cfg.repo || !cfg.token) {
     return { 
@@ -689,6 +701,11 @@ export async function saveCMSDataToGitHub(cmsData: any): Promise<{ success: bool
     });
 
     if (!putRes.ok) {
+      if ((putRes.status === 409 || putRes.status === 422) && retryCount < 3) {
+        console.warn(`[GITHUB-CMS-PUSH] Conflict ${putRes.status}, retrying...`);
+        await new Promise(r => setTimeout(r, 400));
+        return saveCMSDataToGitHub(cmsData, retryCount + 1);
+      }
       const errBody = await putRes.json().catch(() => ({}));
       const msg = errBody.message || `GitHub API error (${putRes.status})`;
       return { success: false, error: msg };
@@ -701,6 +718,27 @@ export async function saveCMSDataToGitHub(cmsData: any): Promise<{ success: bool
     };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to connect to GitHub API' };
+  }
+}
+
+/**
+ * Trigger full server update to GitHub (CMS settings, invoices, deletion cleanup)
+ */
+export async function triggerGitHubServerUpdate(): Promise<{ success: boolean; message?: string; error?: string; [key: string]: any }> {
+  try {
+    const res = await fetch('/api/github/push-all', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Server error updating GitHub');
+    }
+    return data;
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Network error updating GitHub server' };
   }
 }
 
