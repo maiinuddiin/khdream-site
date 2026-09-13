@@ -212,9 +212,9 @@
       }
     ],
     "footerPopups": {
-      "about": "KH Dream Services Limited is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors. Our mission is to bridge the gap between global ambitions and local opportunities.",
+      "about": "KH DREAM SERVICES LTD. is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors. Our mission is to bridge the gap between global ambitions and local opportunities.",
       "services": "We offer a comprehensive suite of services including: \n- Global Hotel Bookings\n- Visa Concierge Services\n- Business Setup & Legal Consultancy\n- Luxury Travel Management\n- Corporate Travel Solutions",
-      "contact": "Get in touch with us:\nEmail: info@khdreamservices.com\nPhone: +966 053 768 1618\nAddress: King Fahd Road, Al Olaya District, Riyadh, KSA",
+      "contact": "Get in touch with us:\nEmail: Support@khdreamservices.com\nPhone: +966 57 303 0940\nAddress: 2551 Mousa Complex, Al Olaya, Riyadh 12211, Saudi Arabia",
       "privacy": "Your privacy is important to us. We collect and use your data only to provide and improve our services. We do not share your personal information with third parties except as required by law or to fulfill your requests."
     },
     "fonts": {
@@ -250,10 +250,10 @@
     "officesIconUrl": "https://cdn-icons-png.flaticon.com/512/684/684908.png",
     "bgUrl": "",
     "footerBgColor": "#09090b",
-    "companyName": "KH Dream Services Limited",
-    "phone": "+966 053 768 1618",
-    "email": "info@khdreamservices.com",
-    "siteName": "KH Dream Services",
+    "companyName": "KH DREAM SERVICES LTD.",
+    "phone": "+966 57 303 0940",
+    "email": "Support@khdreamservices.com",
+    "siteName": "KH DREAM SERVICES LTD.",
     "sectionBackgrounds": {
       "services": {
         "type": "image",
@@ -313,8 +313,8 @@
     "backgroundLogoRight": 40
   },
   "footer": {
-    "aboutText": "KH Dream Services Limited is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors.",
-    "copyright": "© 2026 KH Dream Services Limited. All rights reserved.",
+    "aboutText": "KH DREAM SERVICES LTD. is Saudi Arabia's premier travel and business consultancy, dedicated to providing seamless experiences for global travelers and investors.",
+    "copyright": "© 2026 KH DREAM SERVICES LTD. All rights reserved.",
     "links": [
       {
         "label": "About Us",
@@ -421,19 +421,10 @@
   "offices": [
     {
       "id": "1",
-      "name": "KH Dream Services",
+      "name": "KH DREAM SERVICES LTD.",
       "city": "Riyadh",
-      "address": "King Fahd Road, Al Olaya District",
-      "phone": "+966 11 000 0000",
-      "hours": "9 AM - 6 PM",
-      "mapUrl": "https://maps.app.goo.gl/2n82PcGfgrWYU45d8"
-    },
-    {
-      "id": "2",
-      "name": "Sky Search Travels",
-      "city": "Jeddah",
-      "address": "Prince Sultan Road, Al Rawdah",
-      "phone": "+966 12 000 0000",
+      "address": "2551 Mousa Complex, Al Olaya, Riyadh 12211, Saudi Arabia",
+      "phone": "+966 57 303 0940",
       "hours": "9 AM - 6 PM",
       "mapUrl": "https://maps.app.goo.gl/2n82PcGfgrWYU45d8"
     }
@@ -441,33 +432,15 @@
   "businessProfiles": [
     {
       "id": "1",
-      "name": "KH Dream Services",
-      "arabicName": "كي اتش دريم للخدمات",
+      "name": "KH DREAM SERVICES LTD.",
+      "arabicName": "شركة كي إتش دريم للخدمات إل تي دي.",
       "logoUrl": "/uploads/1789066621856-142402625.png",
-      "address": "King Fahd Road, Al Olaya District, Riyadh, KSA",
+      "address": "2551 Mousa Complex, Al Olaya, Riyadh 12211, Saudi Arabia",
+      "phone": "+966 57 303 0940",
+      "email": "Support@khdreamservices.com",
       "vatId": "300000000000003",
       "invoicePrefix": "KHD",
       "nextInvoiceNumber": 1003
-    },
-    {
-      "id": "2",
-      "name": "Sky Search Travels",
-      "arabicName": "سكاي سيرش للسياحة",
-      "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
-      "address": "Prince Sultan Road, Al Rawdah, Jeddah, KSA",
-      "vatId": "300000000000004",
-      "invoicePrefix": "SST",
-      "nextInvoiceNumber": 1001
-    },
-    {
-      "id": "3",
-      "name": "KH Dream Services Limited",
-      "arabicName": "كي اتش دريم للخدمات المحدودة",
-      "logoUrl": "https://i.ibb.co/pjjqSnRF/Logo-23D.png",
-      "address": "Al Olaya District, Riyadh, KSA",
-      "vatId": "300000000000005",
-      "invoicePrefix": "KHD",
-      "nextInvoiceNumber": 1001
     }
   ],
   "users": [
