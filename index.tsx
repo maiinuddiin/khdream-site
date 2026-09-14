@@ -14,9 +14,10 @@ interface State {
 }
 
 class RootErrorBoundary extends Component<Props, State> {
+  state: State = { hasError: false, error: null };
+
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error: Error): State {

@@ -1930,7 +1930,13 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return;
         }
 
-        const serverData = await response.json();
+        const contentType = response.headers?.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          if (active) setIsLoaded(true);
+          return;
+        }
+
+        const serverData = await response.json().catch(() => null);
         if (serverData && !serverData.error) {
           if (!active) return;
           
@@ -2020,14 +2026,17 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             credentials: 'include'
           });
           if (response.ok) {
-            const serverData = await response.json();
-            if (serverData) {
-               setData(prev => ({
-                 ...prev,
-                 ...serverData,
-                 general: { ...(prev.general || {}), ...(serverData.general || {}) },
-                 users: serverData.users || prev.users || []
-               }));
+            const contentType = response.headers?.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+              const serverData = await response.json().catch(() => null);
+              if (serverData) {
+                 setData(prev => ({
+                   ...prev,
+                   ...serverData,
+                   general: { ...(prev.general || {}), ...(serverData.general || {}) },
+                   users: serverData.users || prev.users || []
+                 }));
+              }
             }
           }
         } catch (e) { console.error("CMSContext: Post-login sync failed", e); }
@@ -2156,8 +2165,24 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         credentials: 'include'
       }).catch(() => null);
 
-      if (response && response.ok) {
-        const resData = await response.json();
+      if (!response) {
+        // Network timeout / offline fallback
+        return true;
+      }
+
+      // Static environments (e.g. GitHub Pages or proxy returning 404/405)
+      if (response.status === 404 || response.status === 405) {
+        return true;
+      }
+
+      const contentType = response.headers?.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        // Returned HTML (e.g. 404 or single page fallback), treat as static host
+        return true;
+      }
+
+      if (response.ok) {
+        const resData = await response.json().catch(() => null);
         if (resData && resData.valid) {
           // Sync current user if roles/permissions changed
           if (resData.user && (!currentUser || currentUser.id !== resData.user.id || currentUser.role !== resData.user.role)) {
@@ -2169,15 +2194,21 @@ export const CMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           handleSetCurrentUser(null);
           return false;
         }
-      } else if (!response || response.status === 404) {
-        // Static environment (e.g. GitHub Pages) - trust local token/session
-        return true;
       } else {
-        // Safe fallback in case of absolute connection timeout, but behave conservatively
+        // If server explicitly returned 401/403 with JSON
+        try {
+          const errData = await response.json().catch(() => null);
+          if (errData && errData.valid === false) {
+            handleSetCurrentUser(null);
+            return false;
+          }
+        } catch {
+          // Non-json response
+        }
         return true;
       }
     } catch (e) {
-      console.error("Error verifying active session:", e);
+      console.warn("Could not verify active session against backend (using local session):", e);
       return true;
     }
   };
