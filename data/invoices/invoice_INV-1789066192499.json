@@ -6,7 +6,7 @@
   "customerAddress": "JUBAIL, SAUDI ARABIA",
   "customerEmail": "",
   "customerTaxId": "",
-  "issuedBy": "MAHFUZ RAHMAN",
+  "issuedBy": "",
   "items": [
     {
       "id": "1",
@@ -30,6 +30,6 @@
   "businessAddress": "Exit - 22, Manfuha, Riyadh",
   "businessVatId": "",
   "businessLogoUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWl4wVv08fsYzVLN2MSLPjJ5wLmlPOijI7nehChMyhEt-iZS4Q9H4jmQZ5twn3fPDfBHG394Jv8QzjISeJkfkoq4r_cVNYNaxp5_1Rcj-GZN9jOB5W4tLDpdrZwe_jgdpCIajb1HrA=s680-w680-h510-rw",
-  "updatedAt": "2026-09-15T12:30:03.091Z",
-  "createdAt": "2026-09-15T12:30:03.091Z"
+  "updatedAt": "2026-09-15T12:30:26.787Z",
+  "createdAt": "2026-09-15T12:30:26.787Z"
 }
