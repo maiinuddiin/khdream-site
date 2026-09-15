@@ -441,6 +441,19 @@
       "vatId": "300000000000003",
       "invoicePrefix": "KHD",
       "nextInvoiceNumber": 1003
+    },
+    {
+      "id": "entity_1789473702282",
+      "name": "SONA ALHELM EST.",
+      "arabicName": "وكالة صناع الحلم للسفر والسياحة",
+      "logoUrl": "/uploads/1789473915788-553906738.webp",
+      "address": "Exit - 22, Manfuha, Riyadh",
+      "location": "",
+      "phone": "+966 05546774659",
+      "email": "badriahtravels@gmail.com",
+      "vatId": "",
+      "invoicePrefix": "INV",
+      "nextInvoiceNumber": 1
     }
   ],
   "users": [
@@ -1482,5 +1495,32 @@
     "footerNote": "All corporate credentials are legally verified under the active laws of Saudi Arabia."
   },
   "homeSettings": {},
-  "deletedMessageIds": []
+  "deletedMessageIds": [],
+  "identifiedUser": {
+    "id": "1",
+    "username": "admin",
+    "fullName": "System Administrator",
+    "email": "admin@khdreamservices.com",
+    "role": "Admin",
+    "profilePic": "",
+    "permissions": [
+      "wall",
+      "invoices",
+      "sadad-invoices",
+      "catalogue",
+      "reviews",
+      "promo",
+      "hero",
+      "service-cards",
+      "subscribers",
+      "general",
+      "services",
+      "footer-popups",
+      "team",
+      "users",
+      "landing-pages",
+      "navbar"
+    ]
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwicGVybWlzc2lvbnMiOlsid2FsbCIsImludm9pY2VzIiwic2FkYWQtaW52b2ljZXMiLCJjYXRhbG9ndWUiLCJyZXZpZXdzIiwicHJvbW8iLCJoZXJvIiwic2VydmljZS1jYXJkcyIsInN1YnNjcmliZXJzIiwiZ2VuZXJhbCIsInNlcnZpY2VzIiwiZm9vdGVyLXBvcHVwcyIsInRlYW0iLCJ1c2VycyIsImxhbmRpbmctcGFnZXMiLCJuYXZiYXIiXSwiaWF0IjoxNzg5NDczNzYyLCJleHAiOjE3ODk1MTY3OTl9.eNgiexM9ABFyfe8om5EQEsz9pBA6bg0nCxS9gTyrMEg"
 }
