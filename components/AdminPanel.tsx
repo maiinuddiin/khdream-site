@@ -153,8 +153,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ theme, setTheme }) => {
     try {
       const res = await triggerGitHubServerUpdate();
       if (res.success) {
+        const extraAssetsMsg = res.uploadsPushed ? `, ${res.uploadsPushed} assets synced` : '';
         setGitHubUpdateStatus({ 
-          message: `GitHub Server Updated Successfully! (${res.invoicesPushed || 0} active invoices pushed, settings saved, deleted items cleared)`,
+          message: `GitHub Server Updated Successfully! (${res.invoicesPushed || 0} invoices pushed, settings & entities saved${extraAssetsMsg}, deleted items cleared)`,
           type: 'success' 
         });
         setTimeout(() => setGitHubUpdateStatus(null), 5000);

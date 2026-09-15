@@ -836,6 +836,47 @@ async function startServer() {
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
   }
+
+  // Dynamic /uploads handler: serves local file or fetches directly from GitHub repository if local container was recreated
+  app.get("/uploads/:filename", async (req, res, next) => {
+    const filename = path.basename(req.params.filename);
+    const localFile = path.join(uploadsDir, filename);
+
+    if (fs.existsSync(localFile) && fs.statSync(localFile).size > 0) {
+      return res.sendFile(localFile);
+    }
+
+    // Attempt to dynamically fetch and cache from GitHub repository
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
+    const token = getGithubToken();
+
+    if (owner && repo) {
+      try {
+        const rawGitHubUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/public/uploads/${encodeURIComponent(filename)}`;
+        const headers: Record<string, string> = {
+          "User-Agent": "KHDream-Upload-Proxy"
+        };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const ghRes = await fetch(rawGitHubUrl, { headers }).catch(() => null);
+        if (ghRes && ghRes.ok) {
+          const buffer = Buffer.from(await ghRes.arrayBuffer());
+          // Cache locally
+          fs.writeFileSync(localFile, buffer);
+          const contentType = ghRes.headers.get("content-type");
+          if (contentType) res.setHeader("Content-Type", contentType);
+          return res.send(buffer);
+        }
+      } catch (e: any) {
+        console.warn(`[UPLOAD-PROXY] Error retrieving ${filename} from GitHub:`, e.message);
+      }
+    }
+
+    next();
+  });
+
   app.use(express.static(PUBLIC_DIR));
   const DATA_DIR = path.join(process.cwd(), "data");
   const INVOICES_DIR = path.join(DATA_DIR, "invoices");
@@ -4399,8 +4440,220 @@ ${recipientName}`;
     }
   }
 
-  // Initial pull from GitHub on startup
+  // Push uploaded file to GitHub repository so assets persist across container restarts
+  async function pushFileToGitHubServer(filePathInRepo: string, fileBuffer: Buffer, commitMessage?: string): Promise<{ success: boolean; error?: string }> {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
+
+    if (!token || !owner || !repo) {
+      return { success: false, error: "GitHub credentials not configured" };
+    }
+
+    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePathInRepo}`;
+
+    try {
+      let sha: string | undefined = undefined;
+      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        }
+      }).catch(() => null);
+
+      if (checkRes && checkRes.ok) {
+        const fileData: any = await checkRes.json().catch(() => null);
+        if (fileData && fileData.sha) {
+          sha = fileData.sha;
+        }
+      }
+
+      const putRes = await fetch(apiUrl, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        },
+        body: JSON.stringify({
+          message: commitMessage || `Upload ${path.basename(filePathInRepo)} [skip ci]`,
+          content: fileBuffer.toString("base64"),
+          ...(sha ? { sha } : {}),
+          branch: branch
+        })
+      });
+
+      if (!putRes.ok) {
+        const errJson: any = await putRes.json().catch(() => ({}));
+        console.warn(`[GITHUB-FILE-PUSH] GitHub rejected file upload (${putRes.status}):`, errJson.message || putRes.statusText);
+        return { success: false, error: errJson.message || `Status ${putRes.status}` };
+      }
+
+      console.log(`[GITHUB-FILE-PUSH] Successfully pushed ${filePathInRepo} to GitHub (${owner}/${repo})`);
+      return { success: true };
+    } catch (err: any) {
+      console.warn(`[GITHUB-FILE-PUSH] Error uploading file to GitHub:`, err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
+  // Delete uploaded file from GitHub repository
+  async function deleteFileFromGitHubServer(filePathInRepo: string): Promise<{ success: boolean; error?: string }> {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
+
+    if (!token || !owner || !repo) {
+      return { success: false, error: "GitHub credentials not configured" };
+    }
+
+    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePathInRepo}`;
+
+    try {
+      const checkRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        }
+      }).catch(() => null);
+
+      if (!checkRes || !checkRes.ok) {
+        return { success: true }; // File already absent
+      }
+
+      const fileData: any = await checkRes.json().catch(() => null);
+      if (!fileData || !fileData.sha) {
+        return { success: true };
+      }
+
+      const delRes = await fetch(apiUrl, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "KHDream-Server-Sync"
+        },
+        body: JSON.stringify({
+          message: `Delete ${path.basename(filePathInRepo)} [skip ci]`,
+          sha: fileData.sha,
+          branch: branch
+        })
+      });
+
+      return { success: delRes.ok };
+    } catch (err: any) {
+      console.warn(`[GITHUB-FILE-DELETE] Error removing ${filePathInRepo} from GitHub:`, err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
+  // Pull CMS settings from GitHub repository to ensure latest content survives container restarts
+  async function pullCMSDataFromGitHubServer(): Promise<{ success: boolean; data?: any }> {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
+
+    if (!owner || !repo) return { success: false };
+
+    try {
+      const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/data/cms_data.json?ref=${encodeURIComponent(branch)}`;
+      const headers: Record<string, string> = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "KHDream-Server-Sync"
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch(apiUrl, { headers }).catch(() => null);
+      if (res && res.ok) {
+        const file = await res.json().catch(() => null);
+        if (file && file.content) {
+          const rawText = Buffer.from(file.content, "base64").toString("utf-8");
+          const parsed = JSON.parse(rawText);
+          if (parsed && typeof parsed === "object") {
+            writeCMS(parsed);
+            console.log(`[STARTUP-CMS-PULL] Successfully pulled latest CMS settings from GitHub (${owner}/${repo})`);
+            return { success: true, data: parsed };
+          }
+        }
+      }
+    } catch (e: any) {
+      console.warn("[STARTUP-CMS-PULL] Warning pulling CMS from GitHub:", e.message);
+    }
+    return { success: false };
+  }
+
+  // Pull uploaded assets from GitHub repository to local public/uploads directory on startup
+  async function pullUploadsFromGitHubServer(): Promise<{ success: boolean; count?: number }> {
+    const token = getGithubToken();
+    const owner = getGithubOwner();
+    const repo = getGithubRepo();
+    const branch = getGithubBranch();
+
+    if (!owner || !repo) return { success: false };
+
+    const uploadsDir = path.join(process.cwd(), "public", "uploads");
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    try {
+      const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/public/uploads?ref=${encodeURIComponent(branch)}`;
+      const headers: Record<string, string> = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "KHDream-Server-Sync"
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch(apiUrl, { headers }).catch(() => null);
+      if (res && res.ok) {
+        const files = await res.json().catch(() => null);
+        if (Array.isArray(files)) {
+          let count = 0;
+          for (const item of files) {
+            if (item.type === "file" && item.name) {
+              const localPath = path.join(uploadsDir, item.name);
+              // If file does not exist locally or is empty, fetch and write it
+              if (!fs.existsSync(localPath) || fs.statSync(localPath).size === 0) {
+                if (item.download_url) {
+                  const downRes = await fetch(item.download_url).catch(() => null);
+                  if (downRes && downRes.ok) {
+                    const arrayBuf = await downRes.arrayBuffer();
+                    fs.writeFileSync(localPath, Buffer.from(arrayBuf));
+                    count++;
+                  }
+                }
+              }
+            }
+          }
+          if (count > 0) {
+            console.log(`[STARTUP-UPLOADS-PULL] Successfully restored ${count} uploaded files from GitHub repository`);
+          }
+          return { success: true, count };
+        }
+      }
+    } catch (e: any) {
+      console.warn("[STARTUP-UPLOADS-PULL] Warning restoring uploads from GitHub:", e.message);
+    }
+    return { success: false };
+  }
+
+  // Initial pull from GitHub on startup (CMS settings, uploaded assets, and invoices)
   setTimeout(() => {
+    pullCMSDataFromGitHubServer().catch(e => console.warn("[STARTUP-CMS-PULL]", e.message));
+    pullUploadsFromGitHubServer().catch(e => console.warn("[STARTUP-UPLOADS-PULL]", e.message));
     pullInvoicesFromGitHubServer().catch(e => console.warn("[STARTUP-INVOICE-PULL]", e.message));
   }, 1000);
 
@@ -4541,11 +4794,32 @@ ${recipientName}`;
       // 4. Compile and push data/invoices.json bundle
       await syncInvoicesJsonBundle();
 
+      // 5. Push all local public/uploads files to GitHub repository
+      let uploadsPushed = 0;
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      if (fs.existsSync(uploadsDir)) {
+        const uploadFiles = fs.readdirSync(uploadsDir).filter(f => !f.startsWith("."));
+        for (const uf of uploadFiles) {
+          try {
+            const upPath = path.join(uploadsDir, uf);
+            const stats = fs.statSync(upPath);
+            if (stats.isFile() && stats.size < 20 * 1024 * 1024) { // Under 20MB
+              const buffer = fs.readFileSync(upPath);
+              const upRes = await pushFileToGitHubServer(`public/uploads/${uf}`, buffer, `Sync asset ${uf} [skip ci]`);
+              if (upRes.success) uploadsPushed++;
+            }
+          } catch (e: any) {
+            console.warn(`[GITHUB-PUSH-ALL] Error pushing upload ${uf}:`, e.message);
+          }
+        }
+      }
+
       res.json({
         success: true,
         message: "Successfully synchronized all data to GitHub server",
         cmsUpdated: cmsResult.success,
         invoicesPushed: invoicesPushed,
+        uploadsPushed: uploadsPushed,
         purgedDeleted: purgedCount
       });
     } catch (error: any) {
@@ -4769,18 +5043,35 @@ ${recipientName}`;
   app.post("/api/upload", isAdmin, (req, res, next) => {
     console.log(`[UPLOAD] Request received: ${req.method} ${req.url}`);
     next();
-  }, upload.single("file"), (req, res) => {
+  }, upload.single("file"), async (req, res) => {
     console.log(`[UPLOAD] Multer processed file: ${req.file?.originalname}`);
     if (!req.file) {
       console.error("[UPLOAD] No file received after multer processing");
       return res.status(400).json({ error: "No file uploaded" });
     }
     const fileUrl = `/uploads/${req.file.filename}`;
-    console.log(`[UPLOAD] File uploaded successfully: ${fileUrl}`);
-    res.json({ url: fileUrl });
+    console.log(`[UPLOAD] File uploaded locally: ${fileUrl}`);
+
+    // Commit asset to GitHub repository in public/uploads/ so it persists across ephemeral Cloud Run restarts
+    let githubUploaded = false;
+    try {
+      const filePathOnDisk = path.join(process.cwd(), 'public', 'uploads', req.file.filename);
+      if (fs.existsSync(filePathOnDisk)) {
+        const fileBuffer = fs.readFileSync(filePathOnDisk);
+        const ghResult = await pushFileToGitHubServer(`public/uploads/${req.file.filename}`, fileBuffer);
+        if (ghResult.success) {
+          githubUploaded = true;
+          console.log(`[UPLOAD] Successfully committed ${req.file.filename} to GitHub repository!`);
+        }
+      }
+    } catch (e: any) {
+      console.warn(`[UPLOAD] Background sync to GitHub encountered warning:`, e.message);
+    }
+
+    res.json({ url: fileUrl, githubUploaded });
   });
 
-  app.post("/api/delete-file", isAdmin, (req, res) => {
+  app.post("/api/delete-file", isAdmin, async (req, res) => {
     try {
       const { url } = req.body;
       if (!url || typeof url !== 'string' || !url.startsWith('/uploads/')) {
@@ -4797,6 +5088,9 @@ ${recipientName}`;
         logSecurityEvent('TRAVERSAL_ATTEMPT', { ip: req.ip, path: url, status: 'DENIED' });
         return res.status(403).json({ error: "Security Breach Attempt: Root traversal detected." });
       }
+
+      // Delete from GitHub repository
+      deleteFileFromGitHubServer(`public/uploads/${fileName}`).catch(() => {});
 
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
