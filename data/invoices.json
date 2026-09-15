@@ -25,14 +25,14 @@
     "paymentStatus": "partial",
     "amountPaid": 5000,
     "showSeal": true,
-    "businessId": "1",
-    "businessName": "KH Dream Services",
-    "businessArabicName": "كي اتش دريم للخدمات",
-    "businessAddress": "King Fahd Road, Al Olaya District, Riyadh, KSA",
-    "businessVatId": "300000000000003",
-    "businessLogoUrl": "/uploads/1788282542740-453338856.png",
-    "createdAt": "2026-09-10T18:50:00.000Z",
-    "updatedAt": "2026-09-10T18:50:00.000Z"
+    "businessId": "entity_1789473702282",
+    "businessName": "SONA ALHELM EST.",
+    "businessArabicName": "وكالة صناع الحلم للسفر والسياحة",
+    "businessAddress": "Exit - 22, Manfuha, Riyadh",
+    "businessVatId": "",
+    "businessLogoUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWl4wVv08fsYzVLN2MSLPjJ5wLmlPOijI7nehChMyhEt-iZS4Q9H4jmQZ5twn3fPDfBHG394Jv8QzjISeJkfkoq4r_cVNYNaxp5_1Rcj-GZN9jOB5W4tLDpdrZwe_jgdpCIajb1HrA=s680-w680-h510-rw",
+    "updatedAt": "2026-09-15T12:30:03.091Z",
+    "createdAt": "2026-09-15T12:30:03.091Z"
   },
   {
     "id": "INV-1786975489789",
