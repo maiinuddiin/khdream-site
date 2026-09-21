@@ -1,0 +1,35 @@
+{
+  "id": "INV-1790017945728",
+  "invoiceNumber": "KHD-1118",
+  "customerName": "ZAHID ABBAS",
+  "customerPhone": "",
+  "customerAddress": "JUBAIL",
+  "customerEmail": "",
+  "customerTaxId": "",
+  "issuedBy": "JUBAIL BRANCH OPERATIONS",
+  "items": [
+    {
+      "id": "1",
+      "description": "INVESTMENT LICENSE FEES",
+      "quantity": 1,
+      "price": 24000
+    }
+  ],
+  "date": "2026-09-21",
+  "total": 24000,
+  "subtotal": 24000,
+  "tax": 0,
+  "taxRate": 15,
+  "taxType": "inclusive",
+  "paymentStatus": "partial",
+  "amountPaid": 10000,
+  "showSeal": true,
+  "businessId": "1",
+  "businessName": "KH DREAM SERVICES LTD.",
+  "businessArabicName": "شركة كي إتش دريم للخدمات إل تي دي.",
+  "businessAddress": "2551 Mousa Complex, Al Olaya, Riyadh 12211, Saudi Arabia",
+  "businessVatId": "300000000000003",
+  "businessLogoUrl": "/uploads/1789066621856-142402625.png",
+  "updatedAt": "2026-09-21T19:13:48.388Z",
+  "createdAt": "2026-09-21T19:13:48.388Z"
+}
