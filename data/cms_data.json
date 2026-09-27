@@ -434,7 +434,7 @@
       "id": "1",
       "name": "KH DREAM SERVICES LTD.",
       "arabicName": "شركة كي إتش دريم للخدمات إل تي دي.",
-      "logoUrl": "/uploads/1789066621856-142402625.png",
+      "logoUrl": "https://i.ibb.co/mCXJY0bQ/Brand-Guidlines-KH-Dream-Logo-PNG.png",
       "address": "2551 Mousa Complex, Al Olaya, Riyadh 12211, Saudi Arabia",
       "phone": "+966 57 303 0940",
       "email": "Support@khdreamservices.com",
@@ -453,7 +453,8 @@
       "email": "badriahtravels@gmail.com",
       "vatId": "",
       "invoicePrefix": "INV",
-      "nextInvoiceNumber": 1
+      "nextInvoiceNumber": 1,
+      "licenseNumber": "7034846522"
     }
   ],
   "users": [
@@ -1522,5 +1523,5 @@
       "navbar"
     ]
   },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwicGVybWlzc2lvbnMiOlsid2FsbCIsImludm9pY2VzIiwic2FkYWQtaW52b2ljZXMiLCJjYXRhbG9ndWUiLCJyZXZpZXdzIiwicHJvbW8iLCJoZXJvIiwic2VydmljZS1jYXJkcyIsInN1YnNjcmliZXJzIiwiZ2VuZXJhbCIsInNlcnZpY2VzIiwiZm9vdGVyLXBvcHVwcyIsInRlYW0iLCJ1c2VycyIsImxhbmRpbmctcGFnZXMiLCJuYXZiYXIiXSwiaWF0IjoxNzg5NDczNzYyLCJleHAiOjE3ODk1MTY3OTl9.eNgiexM9ABFyfe8om5EQEsz9pBA6bg0nCxS9gTyrMEg"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwicGVybWlzc2lvbnMiOlsid2FsbCIsImludm9pY2VzIiwic2FkYWQtaW52b2ljZXMiLCJjYXRhbG9ndWUiLCJyZXZpZXdzIiwicHJvbW8iLCJoZXJvIiwic2VydmljZS1jYXJkcyIsInN1YnNjcmliZXJzIiwiZ2VuZXJhbCIsInNlcnZpY2VzIiwiZm9vdGVyLXBvcHVwcyIsInRlYW0iLCJ1c2VycyIsImxhbmRpbmctcGFnZXMiLCJuYXZiYXIiXSwiaWF0IjoxNzkwNTAxMjU1LCJleHAiOjE3OTA1NTM1OTl9.eHYPL5ADG_NorxP6P-OVNsWC8fAcmo6iKJjZQ3akANU"
 }
